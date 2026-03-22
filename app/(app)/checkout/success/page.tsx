@@ -5,7 +5,7 @@ import { getCheckoutSession } from "@/lib/actions/checkout";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Order Confirmed | Furniture Shop",
+  title: "Order Confirmed | Gadget Store",
   description: "Your order has been placed successfully",
 };
 

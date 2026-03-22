@@ -13,7 +13,7 @@
 
 # 🛋️ AI-Powered E-commerce Platform with Real-time Content
 
-> Build a modern furniture e-commerce store with an AI shopping assistant, real-time inventory updates, and a powerful admin dashboard — all powered by cutting-edge technologies.
+> Build a modern gadgets e-commerce store with an AI shopping assistant, real-time inventory updates, and a powerful admin dashboard — all powered by cutting-edge technologies.
 
 <div align="center">
 
@@ -41,11 +41,11 @@ Use THESE links to set up your accounts (It's a special affiliate link which let
 
 ## 🤔 What Is This App?
 
-**Think of it as a furniture store with a brain.**
+**Think of it as a gadget store with a brain.**
 
 This is a full-featured e-commerce platform where customers can:
 
-- 🛒 **Browse & Buy** — Shop premium furniture with real-time stock updates
+- 🛒 **Browse & Buy** — Shop premium gadget with real-time stock updates
 - 🤖 **Chat with AI** — Ask the AI assistant to find products, check prices, or track orders
 - 📦 **Track Orders** — View order history and delivery status (when signed in)
 
@@ -325,7 +325,7 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
 # Generate TypeScript types from Sanity schema
 pnpm typegen
 
-# Import sample furniture data
+# Import sample gadgets data
 npx sanity dataset import sample-data.ndjson
 ```
 
@@ -473,7 +473,7 @@ export function createShoppingAgent({ userId }: { userId: string | null }) {
 ```typescript
 // lib/ai/tools/search-products.ts
 export const searchProductsTool = tool({
-  description: "Search for products in the furniture store",
+  description: "Search for products in the gadget store",
   inputSchema: z.object({
     query: z.string().optional(),
     category: z.string().optional(),

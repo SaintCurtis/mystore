@@ -10,7 +10,7 @@ import { getOrderStatus } from "@/lib/constants/orderStatus";
 import { formatPrice, formatDate } from "@/lib/utils";
 
 export const metadata = {
-  title: "Order Details | Furniture Shop",
+  title: "Order Details | Gadget Store",
   description: "View your order details",
 };
 

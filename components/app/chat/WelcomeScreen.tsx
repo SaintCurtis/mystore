@@ -31,8 +31,8 @@ export function WelcomeScreen({
       </h3>
       <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400 max-w-xs">
         {isSignedIn
-          ? "I can help you find furniture, check your orders, and track deliveries."
-          : "I can help you find furniture by style, material, color, or price. Just ask!"}
+          ? "I can help you find gadgets, check your orders, and track deliveries."
+          : "I can help you find gadgets by style, material, color, or price. Just ask!"}
       </p>
 
       {/* Product suggestions */}
