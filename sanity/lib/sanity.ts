@@ -15,7 +15,3 @@ export const writeClient = createClient({
   useCdn: false,
   token: process.env.SANITY_API_WRITE_TOKEN,
 });
-
-git add /c:/Users/iamsa/OneDrive/Desktop/ecomm/sanity/lib/client.ts
-git commit -m "Add Sanity client configuration"
-git push
