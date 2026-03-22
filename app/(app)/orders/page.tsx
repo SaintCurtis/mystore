@@ -120,6 +120,4 @@ export default async function OrdersPage() {
       </div>
     </div>
   );
-git add .
-git commit -m "Add new changes"
-git push
+}
