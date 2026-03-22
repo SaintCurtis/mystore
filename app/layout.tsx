@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "E-Commerce AI App",
-  description: "E-Commerce AI App",
+  title: "The Saint's Technet - AI-Powered Tech Store",
+  description: "The Saint's Technet - AI-Powered Tech Store",
 };
 
 export default function RootLayout({
