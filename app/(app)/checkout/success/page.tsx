@@ -2,24 +2,27 @@ import { redirect } from "next/navigation";
 import { SuccessClient } from "./SuccessClient";
 import { getCheckoutSession } from "@/lib/actions/checkout";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Order Confirmed | Furniture Shop",
   description: "Your order has been placed successfully",
 };
 
 interface SuccessPageProps {
-  searchParams: Promise<{ session_id?: string }>;
+  // Paystack redirects with ?reference=xxx (not session_id)
+  searchParams: Promise<{ reference?: string }>;
 }
 
 export default async function SuccessPage({ searchParams }: SuccessPageProps) {
   const params = await searchParams;
-  const sessionId = params.session_id;
+  const reference = params.reference;
 
-  if (!sessionId) {
+  if (!reference) {
     redirect("/");
   }
 
-  const result = await getCheckoutSession(sessionId);
+  const result = await getCheckoutSession(reference);
 
   if (!result.success || !result.session) {
     redirect("/");

@@ -12,7 +12,7 @@ interface SuccessClientProps {
     id: string;
     customerEmail?: string | null;
     customerName?: string | null;
-    amountTotal?: number | null;
+    amountTotal?: number | null; // in kobo
     paymentStatus: string;
     shippingAddress?: {
       line1?: string | null;
@@ -25,7 +25,7 @@ interface SuccessClientProps {
     lineItems?: {
       name?: string | null;
       quantity?: number | null;
-      amount: number;
+      amount: number; // in kobo
     }[];
   };
 }
@@ -48,8 +48,13 @@ export function SuccessClient({ session }: SuccessClientProps) {
           Order Confirmed!
         </h1>
         <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-          Thank you for your purchase. We&apos;ve sent a confirmation to{" "}
-          <span className="font-medium">{session.customerEmail}</span>
+          Thank you for your purchase
+          {session.customerEmail && (
+            <>
+              . We&apos;ve sent a confirmation to{" "}
+              <span className="font-medium">{session.customerEmail}</span>
+            </>
+          )}
         </p>
       </div>
 
@@ -62,7 +67,7 @@ export function SuccessClient({ session }: SuccessClientProps) {
         </div>
 
         <div className="px-6 py-4">
-          {/* Items */}
+          {/* Line items — only shown if available */}
           {session.lineItems && session.lineItems.length > 0 && (
             <div className="space-y-3">
               {session.lineItems.map((item) => (
@@ -92,7 +97,7 @@ export function SuccessClient({ session }: SuccessClientProps) {
           </div>
         </div>
 
-        {/* Shipping Address */}
+        {/* Shipping Address — shown if collected */}
         {address && (
           <div className="border-t border-zinc-200 px-6 py-4 dark:border-zinc-800">
             <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">

@@ -8,11 +8,21 @@ import { Button } from "@/components/ui/button";
 import { useCartItems } from "@/lib/store/cart-store-provider";
 import { createCheckoutSession } from "@/lib/actions/checkout";
 
-interface CheckoutButtonProps {
-  disabled?: boolean;
+interface ShippingAddress {
+  name: string;
+  line1: string;
+  line2: string;
+  city: string;
+  postcode: string;
+  country: string;
 }
 
-export function CheckoutButton({ disabled }: CheckoutButtonProps) {
+interface CheckoutButtonProps {
+  disabled?: boolean;
+  shippingAddress: ShippingAddress;
+}
+
+export function CheckoutButton({ disabled, shippingAddress }: CheckoutButtonProps) {
   const router = useRouter();
   const items = useCartItems();
   const [isPending, startTransition] = useTransition();
@@ -22,10 +32,10 @@ export function CheckoutButton({ disabled }: CheckoutButtonProps) {
     setError(null);
 
     startTransition(async () => {
-      const result = await createCheckoutSession(items);
+      const result = await createCheckoutSession(items, shippingAddress);
 
       if (result.success && result.url) {
-        // Redirect to Stripe Checkout
+        // Redirect to Paystack hosted checkout page
         router.push(result.url);
       } else {
         setError(result.error ?? "Checkout failed");
@@ -52,12 +62,12 @@ export function CheckoutButton({ disabled }: CheckoutButtonProps) {
         ) : (
           <>
             <CreditCard className="mr-2 h-5 w-5" />
-            Pay with Stripe
+            Pay with Paystack
           </>
         )}
       </Button>
       {error && (
-        <p className="text-sm text-red-600 dark:text-red-400 text-center">
+        <p className="text-center text-sm text-red-600 dark:text-red-400">
           {error}
         </p>
       )}

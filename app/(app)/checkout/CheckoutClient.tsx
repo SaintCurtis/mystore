@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, ShoppingBag, AlertTriangle, Loader2 } from "lucide-react";
@@ -13,11 +14,36 @@ import {
 } from "@/lib/store/cart-store-provider";
 import { useCartStock } from "@/lib/hooks/useCartStock";
 
+interface ShippingAddress {
+  name: string;
+  line1: string;
+  line2: string;
+  city: string;
+  postcode: string;
+  country: string;
+}
+
 export function CheckoutClient() {
   const items = useCartItems();
   const totalPrice = useTotalPrice();
   const totalItems = useTotalItems();
   const { stockMap, isLoading, hasStockIssues } = useCartStock(items);
+
+  const [address, setAddress] = useState<ShippingAddress>({
+    name: "",
+    line1: "",
+    line2: "",
+    city: "",
+    postcode: "",
+    country: "Nigeria",
+  });
+
+  const isAddressComplete =
+    address.name.trim() !== "" &&
+    address.line1.trim() !== "" &&
+    address.city.trim() !== "" &&
+    address.postcode.trim() !== "" &&
+    address.country.trim() !== "";
 
   if (items.length === 0) {
     return (
@@ -55,8 +81,9 @@ export function CheckoutClient() {
       </div>
 
       <div className="grid gap-8 lg:grid-cols-5">
-        {/* Cart Items */}
-        <div className="lg:col-span-3">
+        {/* Left: Cart Items + Shipping Address */}
+        <div className="space-y-6 lg:col-span-3">
+          {/* Cart Items */}
           <div className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
             <div className="border-b border-zinc-200 px-6 py-4 dark:border-zinc-800">
               <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">
@@ -64,7 +91,6 @@ export function CheckoutClient() {
               </h2>
             </div>
 
-            {/* Stock Issues Warning */}
             {hasStockIssues && !isLoading && (
               <div className="mx-6 mt-4 flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-200">
                 <AlertTriangle className="h-5 w-5 shrink-0" />
@@ -75,7 +101,6 @@ export function CheckoutClient() {
               </div>
             )}
 
-            {/* Loading State */}
             {isLoading && (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-zinc-400" />
@@ -85,7 +110,6 @@ export function CheckoutClient() {
               </div>
             )}
 
-            {/* Items List */}
             <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
               {items.map((item) => {
                 const stockInfo = stockMap.get(item.productId);
@@ -99,7 +123,6 @@ export function CheckoutClient() {
                       hasIssue ? "bg-red-50 dark:bg-red-950/20" : ""
                     }`}
                   >
-                    {/* Image */}
                     <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md bg-zinc-100 dark:bg-zinc-800">
                       {item.image ? (
                         <Image
@@ -116,7 +139,6 @@ export function CheckoutClient() {
                       )}
                     </div>
 
-                    {/* Details */}
                     <div className="flex flex-1 flex-col justify-between">
                       <div>
                         <h3 className="font-medium text-zinc-900 dark:text-zinc-100">
@@ -138,7 +160,6 @@ export function CheckoutClient() {
                       </div>
                     </div>
 
-                    {/* Price */}
                     <div className="text-right">
                       <p className="font-medium text-zinc-900 dark:text-zinc-100">
                         {formatPrice(item.price * item.quantity)}
@@ -154,9 +175,111 @@ export function CheckoutClient() {
               })}
             </div>
           </div>
+
+          {/* Shipping Address Form */}
+          <div className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+            <div className="border-b border-zinc-200 px-6 py-4 dark:border-zinc-800">
+              <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">
+                Shipping Address
+              </h2>
+            </div>
+            <div className="space-y-4 px-6 py-4">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  Full Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={address.name}
+                  onChange={(e) =>
+                    setAddress((a) => ({ ...a, name: e.target.value }))
+                  }
+                  placeholder="John Doe"
+                  className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  Address Line 1 <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={address.line1}
+                  onChange={(e) =>
+                    setAddress((a) => ({ ...a, line1: e.target.value }))
+                  }
+                  placeholder="12 Lagos Street"
+                  className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  Address Line 2{" "}
+                  <span className="text-zinc-400">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={address.line2}
+                  onChange={(e) =>
+                    setAddress((a) => ({ ...a, line2: e.target.value }))
+                  }
+                  placeholder="Apartment, suite, etc."
+                  className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    City <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={address.city}
+                    onChange={(e) =>
+                      setAddress((a) => ({ ...a, city: e.target.value }))
+                    }
+                    placeholder="Lagos"
+                    className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    Postcode <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={address.postcode}
+                    onChange={(e) =>
+                      setAddress((a) => ({ ...a, postcode: e.target.value }))
+                    }
+                    placeholder="100001"
+                    className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  Country <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={address.country}
+                  onChange={(e) =>
+                    setAddress((a) => ({ ...a, country: e.target.value }))
+                  }
+                  placeholder="Nigeria"
+                  className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Order Total & Checkout */}
+        {/* Right: Payment Summary */}
         <div className="lg:col-span-2">
           <div className="sticky top-24 rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
             <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">
@@ -193,11 +316,20 @@ export function CheckoutClient() {
             </div>
 
             <div className="mt-6">
-              <CheckoutButton disabled={hasStockIssues || isLoading} />
+              <CheckoutButton
+                disabled={hasStockIssues || isLoading || !isAddressComplete}
+                shippingAddress={address}
+              />
             </div>
 
+            {!isAddressComplete && (
+              <p className="mt-2 text-center text-xs text-amber-600 dark:text-amber-400">
+                Please fill in your shipping address to continue.
+              </p>
+            )}
+
             <p className="mt-4 text-center text-xs text-zinc-500 dark:text-zinc-400">
-              You&apos;ll be redirected to Stripe&apos;s secure checkout
+              You&apos;ll be redirected to Paystack&apos;s secure checkout
             </p>
           </div>
         </div>

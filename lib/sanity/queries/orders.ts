@@ -56,7 +56,7 @@ export const ORDER_BY_ID_QUERY = defineQuery(`*[
     postcode,
     country
   },
-  stripePaymentId,
+  paystackReference,
   createdAt
 }`);
 
@@ -75,11 +75,10 @@ export const RECENT_ORDERS_QUERY = defineQuery(`*[
 }`);
 
 /**
- * Check if order exists by Stripe payment ID
+ * Check if order exists by Paystack reference
  * Used for webhook idempotency check
  */
-export const ORDER_BY_STRIPE_PAYMENT_ID_QUERY = defineQuery(`*[
+export const ORDER_BY_PAYSTACK_REFERENCE_QUERY = defineQuery(`*[
   _type == "order"
-  && stripePaymentId == $stripePaymentId
+  && paystackReference == $paystackReference
 ][0]{ _id }`);
-
