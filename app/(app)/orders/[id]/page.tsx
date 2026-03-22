@@ -245,6 +245,4 @@ export default async function OrderDetailPage({ params }: OrderPageProps) {
       </div>
     </div>
   );
-git add app/\(app\)/orders/\[id\]/page.tsx
-git commit -m "Update order details page"
-git push
+}
