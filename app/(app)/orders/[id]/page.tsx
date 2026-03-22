@@ -14,6 +14,45 @@ export const metadata = {
   description: "View your order details",
 };
 
+// ── Types ──────────────────────────────────────────────────────────────────
+
+interface OrderItem {
+  _key: string;
+  quantity?: number;
+  priceAtPurchase?: number;
+  product?: {
+    name?: string;
+    slug?: string;
+    image?: {
+      asset?: {
+        url?: string;
+      };
+    };
+  };
+}
+
+interface OrderAddress {
+  name?: string;
+  line1?: string;
+  line2?: string;
+  city?: string;
+  postcode?: string;
+  country?: string;
+}
+
+interface Order {
+  orderNumber: string;
+  clerkUserId: string;
+  createdAt: string;
+  status: string;
+  total: number;
+  email?: string;
+  items?: OrderItem[];
+  address?: OrderAddress;
+}
+
+// ── Page ───────────────────────────────────────────────────────────────────
+
 interface OrderPageProps {
   params: Promise<{ id: string }>;
 }
@@ -22,10 +61,10 @@ export default async function OrderDetailPage({ params }: OrderPageProps) {
   const { id } = await params;
   const { userId } = await auth();
 
-  const { data: order } = await sanityFetch({
+  const { data: order } = (await sanityFetch({
     query: ORDER_BY_ID_QUERY,
     params: { id },
-  });
+  })) as { data: Order | null };
 
   // Verify order exists and belongs to current user
   if (!order || order.clerkUserId !== userId) {
@@ -72,7 +111,7 @@ export default async function OrderDetailPage({ params }: OrderPageProps) {
               </h2>
             </div>
             <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
-              {order.items?.map((item) => (
+              {order.items?.map((item: OrderItem) => (
                 <div key={item._key} className="flex gap-4 px-6 py-4">
                   {/* Image */}
                   <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md bg-zinc-100 dark:bg-zinc-800">
@@ -115,7 +154,7 @@ export default async function OrderDetailPage({ params }: OrderPageProps) {
                     </p>
                     {(item.quantity ?? 1) > 1 && (
                       <p className="text-sm text-zinc-500">
-                        {formatPrice(item.priceAtPurchase)} each
+                        {formatPrice(item.priceAtPurchase ?? 0)} each
                       </p>
                     )}
                   </div>
@@ -206,4 +245,6 @@ export default async function OrderDetailPage({ params }: OrderPageProps) {
       </div>
     </div>
   );
-}
+git add app/\(app\)/orders/\[id\]/page.tsx
+git commit -m "Update order details page"
+git push
