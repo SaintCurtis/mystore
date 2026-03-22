@@ -50,7 +50,7 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
   const isCategoryActive = !!currentCategory;
   const isColorActive = !!currentColor;
   const isMaterialActive = !!currentMaterial;
-  const isPriceActive = urlMinPrice > 0 || urlMaxPrice < 5000;
+  const isPriceActive = urlMinPrice > 0 || urlMaxPrice < 5000000;
   const isInStockActive = currentInStock;
 
   const hasActiveFilters =
@@ -299,7 +299,7 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
               maxPrice: max < 5000 ? max : null,
             })
           }
-          className={`mt-4 ${isPriceActive ? "[&_[role=slider]]:border-amber-500 [&_[role=slider]]:ring-amber-500" : ""}`}
+          className={`mt-4 ${isPriceActive ? "[[&_[role=slider]]:ring-amber-500 [[&_[role=slider]]:ring-amber-500" : ""}`}
         />
       </div>
 
