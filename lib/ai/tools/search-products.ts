@@ -14,14 +14,14 @@ const productSearchSchema = z.object({
     .optional()
     .default("")
     .describe(
-      "Search term to find products by name, description, or category (e.g., 'gaming laptop', 'wireless keyboard', 'RTX')"
+      "Search term to find products by name, description, or category (e.g., 'wireless earbuds', 'smartwatch', 'power bank')"
     ),
   category: z
     .string()
     .optional()
     .default("")
     .describe(
-      "Filter by category slug (e.g., 'gaming-laptops', 'keyboards', 'mice', 'headsets')"
+      "Filter by category slug (e.g., 'phones', 'laptops', 'accessories', 'audio', 'wearables')"
     ),
   material: z
     .enum(["", ...MATERIAL_VALUES])
@@ -37,17 +37,17 @@ const productSearchSchema = z.object({
     .number()
     .optional()
     .default(0)
-    .describe("Minimum price in GBP (e.g., 100)"),
+    .describe("Minimum price in NGN (e.g., 50000). Use 0 for no minimum."),
   maxPrice: z
     .number()
     .optional()
     .default(0)
-    .describe("Maximum price in GBP (e.g., 500). Use 0 for no maximum."),
+    .describe("Maximum price in NGN (e.g., 5000000). Use 0 for no maximum."),
 });
 
 export const searchProductsTool = tool({
   description:
-    "Search for products in the tech store. Can search by name, description, or category, and filter by material, color, and price range. Returns product details including stock availability.",
+    "Search for products in the gadget store. Can search by name, description, or category, and filter by material, color, and price range in NGN. Returns product details including stock availability.",
   inputSchema: productSearchSchema,
   execute: async ({ query, category, material, color, minPrice, maxPrice }) => {
     console.log("[SearchProducts] Query received:", {
@@ -80,14 +80,7 @@ export const searchProductsTool = tool({
           message:
             "No products found matching your criteria. Try different search terms or filters.",
           products: [],
-          filters: {
-            query,
-            category,
-            material,
-            color,
-            minPrice,
-            maxPrice,
-          },
+          filters: { query, category, material, color, minPrice, maxPrice },
         };
       }
 
@@ -120,14 +113,7 @@ export const searchProductsTool = tool({
         message: `Found ${products.length} product${products.length === 1 ? "" : "s"} matching your search.`,
         totalResults: products.length,
         products: formattedProducts,
-        filters: {
-          query,
-          category,
-          material,
-          color,
-          minPrice,
-          maxPrice,
-        },
+        filters: { query, category, material, color, minPrice, maxPrice },
       };
     } catch (error) {
       console.error("[SearchProducts] Error:", error);
@@ -136,14 +122,7 @@ export const searchProductsTool = tool({
         message: "An error occurred while searching for products.",
         products: [],
         error: error instanceof Error ? error.message : "Unknown error",
-        filters: {
-          query,
-          category,
-          material,
-          color,
-          minPrice,
-          maxPrice,
-        },
+        filters: { query, category, material, color, minPrice, maxPrice },
       };
     }
   },

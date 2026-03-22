@@ -17,6 +17,9 @@ import { Slider } from "@/components/ui/slider";
 import { COLORS, MATERIALS, SORT_OPTIONS } from "@/lib/constants/filters";
 import type { ALL_CATEGORIES_QUERYResult } from "@/sanity.types";
 
+const PRICE_MIN = 50000;
+const PRICE_MAX = 5000000;
+
 interface ProductFiltersProps {
   categories: ALL_CATEGORIES_QUERYResult;
 }
@@ -30,8 +33,15 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
   const currentColor = searchParams.get("color") ?? "";
   const currentMaterial = searchParams.get("material") ?? "";
   const currentSort = searchParams.get("sort") ?? "name";
-  const urlMinPrice = Number(searchParams.get("minPrice")) || 0;
-  const urlMaxPrice = Number(searchParams.get("maxPrice")) || 5000;
+
+  // Only read from URL if explicitly set — don't fall back to PRICE_MIN/MAX
+  const urlMinPrice = searchParams.get("minPrice")
+    ? Number(searchParams.get("minPrice"))
+    : PRICE_MIN;
+  const urlMaxPrice = searchParams.get("maxPrice")
+    ? Number(searchParams.get("maxPrice"))
+    : PRICE_MAX;
+
   const currentInStock = searchParams.get("inStock") === "true";
 
   // Local state for price range (for smooth slider dragging)
@@ -45,12 +55,13 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
     setPriceRange([urlMinPrice, urlMaxPrice]);
   }, [urlMinPrice, urlMaxPrice]);
 
-  // Check which filters are active
+  // A filter is only "active" if it's explicitly in the URL
   const isSearchActive = !!currentSearch;
   const isCategoryActive = !!currentCategory;
   const isColorActive = !!currentColor;
   const isMaterialActive = !!currentMaterial;
-  const isPriceActive = urlMinPrice > 0 || urlMaxPrice < 5000000;
+  const isPriceActive =
+    searchParams.has("minPrice") || searchParams.has("maxPrice");
   const isInStockActive = currentInStock;
 
   const hasActiveFilters =
@@ -61,7 +72,6 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
     isPriceActive ||
     isInStockActive;
 
-  // Count active filters
   const activeFilterCount = [
     isSearchActive,
     isCategoryActive,
@@ -76,7 +86,7 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
       const params = new URLSearchParams(searchParams.toString());
 
       Object.entries(updates).forEach(([key, value]) => {
-        if (value === null || value === "" || value === 0) {
+        if (value === null || value === "") {
           params.delete(key);
         } else {
           params.set(key, String(value));
@@ -107,7 +117,6 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
     }
   };
 
-  // Helper for filter label with active indicator
   const FilterLabel = ({
     children,
     isActive,
@@ -147,7 +156,7 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
 
   return (
     <div className="space-y-6 rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
-      {/* Clear Filters - Show at top when active */}
+      {/* Clear Filters */}
       {hasActiveFilters && (
         <div className="rounded-lg border-2 border-amber-300 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-950">
           <div className="mb-2 flex items-center justify-between">
@@ -285,21 +294,22 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
       {/* Price Range */}
       <div>
         <FilterLabel isActive={isPriceActive} filterKey="price">
-          Price Range: ₦{priceRange[0]} - ₦{priceRange[1]}
+          Price Range: ₦{priceRange[0].toLocaleString()} - ₦
+          {priceRange[1].toLocaleString()}
         </FilterLabel>
         <Slider
-          min={0}
-          max={5000}
-          step={100}
+          min={PRICE_MIN}
+          max={PRICE_MAX}
+          step={10000}
           value={priceRange}
           onValueChange={(value) => setPriceRange(value as [number, number])}
           onValueCommit={([min, max]) =>
             updateParams({
-              minPrice: min > 0 ? min : null,
-              maxPrice: max < 5000 ? max : null,
+              minPrice: min > PRICE_MIN ? min : null,
+              maxPrice: max < PRICE_MAX ? max : null,
             })
           }
-          className={`mt-4 ${isPriceActive ? "[[&_[role=slider]]:ring-amber-500 [[&_[role=slider]]:ring-amber-500" : ""}`}
+          className={`mt-4 ${isPriceActive ? "[[&_[role=slider]]:ring-amber-500" : ""}`}
         />
       </div>
 
