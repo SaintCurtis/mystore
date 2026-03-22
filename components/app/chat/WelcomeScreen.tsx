@@ -7,7 +7,7 @@ interface WelcomeScreenProps {
 
 const productSuggestions = [
   "Show me sit-stand tables",
-  "MacBook Pro under ₦1000",
+  "MacBook Pro under ₦2M",
   "What chairs do you have?",
 ];
 
