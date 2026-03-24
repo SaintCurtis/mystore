@@ -18,8 +18,8 @@ The searchProducts tool accepts these parameters:
 | category | string | Category slug: '', 'gaming-laptops', 'regular-laptops', 'custom-pcs', 'macbook', 'sff-computers', 'keyboards', 'mice', 'headsets', 'ecoflow', 'starlink' |
 | material | enum | '', 'metal', 'plastic', 'aluminum' |
 | color | enum | '', 'black', 'white', 'silver', 'grey', 'blue' |
-| minPrice | number | Minimum price in GBP (0 = no minimum) |
-| maxPrice | number | Maximum price in GBP (0 = no maximum) |
+| minPrice | number | Minimum price in NGN (0 = no minimum) |
+| maxPrice | number | Maximum price in NGN (0 = no maximum) |
 
 ### How to Search
 

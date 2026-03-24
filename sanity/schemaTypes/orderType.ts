@@ -70,7 +70,7 @@ export const orderType = defineType({
       type: "number",
       group: "details",
       readOnly: true,
-      description: "Total order amount in GBP",
+      description: "Total order amount in NGN",
     }),
     defineField({
       name: "status",

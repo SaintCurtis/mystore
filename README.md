@@ -359,7 +359,7 @@ This app uses **Sanity** as its headless CMS with the following document types:
 | `name` | string | Product name |
 | `slug` | slug | URL-friendly identifier |
 | `description` | text | Product description |
-| `price` | number | Price in GBP |
+| `price` | number | Price in NGN |
 | `category` | reference | Link to category |
 | `material` | string | wood, metal, fabric, leather, glass |
 | `color` | string | black, white, oak, walnut, grey, natural |
@@ -383,7 +383,7 @@ This app uses **Sanity** as its headless CMS with the following document types:
 |-------|------|-------------|
 | `orderNumber` | string | Unique order ID (e.g., ORD-ABC123) |
 | `items` | array | Products with quantity and price at purchase |
-| `total` | number | Order total in GBP |
+| `total` | number | Order total in NGN |
 | `status` | string | pending, paid, shipped, delivered, cancelled |
 | `customer` | reference | Link to customer record |
 | `clerkUserId` | string | Clerk user identifier |

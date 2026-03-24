@@ -42,7 +42,7 @@ export const productType = defineType({
       name: "price",
       type: "number",
       group: "details",
-      description: "Price in GBP (e.g., 599.99)",
+      description: "Price in NGN (e.g., 599.99)",
       validation: (rule) => [
         rule.required().error("Price is required"),
         rule.positive().error("Price must be a positive number"),
