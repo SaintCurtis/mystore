@@ -8,24 +8,20 @@ import { getOrderStatus } from "@/lib/constants/orderStatus";
 import { formatPrice, formatDate, formatOrderNumber } from "@/lib/utils";
 
 interface OrderRowProps {
-  _id: string;
-  orderNumber: string;
-  email: string;
-  total: number;
-  status: string;
-  createdAt: string;
-  itemCount: number;
+  order: {
+    _id: string;
+    orderNumber: string;
+    email: string;
+    total: number;
+    status: string;
+    _createdAt: string;
+    itemCount: number;
+  };
 }
 
-export function OrderRow({
-  _id,
-  orderNumber,
-  email,
-  total,
-  status,
-  createdAt,
-  itemCount,
-}: OrderRowProps) {
+export function OrderRow({ order }: OrderRowProps) {
+  const { _id, orderNumber, email, total, status, _createdAt, itemCount } = order;
+
   const orderStatus = getOrderStatus(status);
   const StatusIcon = orderStatus.icon;
 
@@ -50,10 +46,10 @@ export function OrderRow({
             </p>
             <p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">
               {itemCount} {itemCount === 1 ? "item" : "items"}
-              {createdAt && (
+              {_createdAt && (
                 <>
                   {" · "}
-                  {formatDate(createdAt, "short")}
+                  {formatDate(_createdAt, "short")}
                 </>
               )}
             </p>
@@ -100,7 +96,7 @@ export function OrderRow({
       {/* Date - Desktop only */}
       <TableCell className="hidden py-4 text-zinc-500 dark:text-zinc-400 md:table-cell">
         <Link href={`/admin/orders/${_id}`} className="block">
-          {formatDate(createdAt, "long", "—")}
+          {formatDate(_createdAt, "long", "—")}
         </Link>
       </TableCell>
     </TableRow>
