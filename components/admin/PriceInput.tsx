@@ -1,51 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense } from "react";
+import {
+  useDocument,
+  useEditDocument,
+  type DocumentHandle,
+} from "@sanity/sdk-react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Loader2 } from "lucide-react";
-import { writeClient } from "@/sanity/lib/client";
 
-interface PriceInputProps {
-  documentId: string;
-  initialPrice: number;
-}
+interface PriceInputProps extends DocumentHandle {}
 
-export function PriceInput({ documentId, initialPrice }: PriceInputProps) {
-  const [price, setPrice] = useState(initialPrice);
-  const [saving, setSaving] = useState(false);
-
-  const handleBlur = async () => {
-    if (price === initialPrice) return;
-
-    setSaving(true);
-    try {
-      await writeClient
-        .patch(documentId)
-        .set({ price })
-        .commit();
-    } catch (error) {
-      console.error("Failed to update price:", error);
-      setPrice(initialPrice);
-    } finally {
-      setSaving(false);
-    }
-  };
+function PriceInputContent(handle: PriceInputProps) {
+  const { data: price } = useDocument({ ...handle, path: "price" });
+  const editPrice = useEditDocument({ ...handle, path: "price" });
 
   return (
     <div className="flex items-center gap-1">
-      <span className="text-sm text-zinc-500">₦</span>
+      <span className="text-sm text-zinc-500">£</span>
       <Input
         type="number"
-        step="0.01"
-        min="0"
-        value={price}
-        onChange={(e) => setPrice(parseFloat(e.target.value) || 0)}
-        onBlur={handleBlur}
+        min={0}
+        step={0.01}
+        value={(price as number) ?? 0}
+        onChange={(e) => editPrice(parseFloat(e.target.value) || 0)}
         className="h-8 w-24 text-right"
-        disabled={saving}
       />
-      {saving && <Loader2 className="h-3.5 w-3.5 animate-spin text-zinc-400" />}
     </div>
+  );
+}
+
+function PriceInputSkeleton() {
+  return <Skeleton className="h-8 w-24" />;
+}
+
+export function PriceInput(props: PriceInputProps) {
+  return (
+    <Suspense fallback={<PriceInputSkeleton />}>
+      <PriceInputContent {...props} />
+    </Suspense>
   );
 }

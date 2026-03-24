@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense } from "react";
+import {
+  useDocument,
+  useEditDocument,
+  useApplyDocumentActions,
+  publishDocument,
+  type DocumentHandle,
+} from "@sanity/sdk-react";
 import {
   Select,
   SelectContent,
@@ -9,84 +16,60 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Loader2 } from "lucide-react";
-import { writeClient } from "@/sanity/lib/client";
 import { ORDER_STATUS_CONFIG, getOrderStatus, type OrderStatusValue } from "@/lib/constants/orderStatus";
 
-interface StatusSelectProps {
-  documentId: string;
-  initialStatus?: string;
-}
+interface StatusSelectProps extends DocumentHandle {}
 
-export function StatusSelect({ documentId, initialStatus = "paid" }: StatusSelectProps) {
-  const [status, setStatus] = useState<OrderStatusValue>(initialStatus as OrderStatusValue);
-  const [saving, setSaving] = useState(false);
+function StatusSelectContent(handle: StatusSelectProps) {
+  const { data: status } = useDocument({ ...handle, path: "status" });
+  const editStatus = useEditDocument({ ...handle, path: "status" });
+  const apply = useApplyDocumentActions();
 
-  // Sync initialStatus when it changes
-  useEffect(() => {
-    if (initialStatus) {
-      setStatus(initialStatus as OrderStatusValue);
-    }
-  }, [initialStatus]);
-
-  const handleStatusChange = async (newStatus: OrderStatusValue) => {
-    if (newStatus === status) return;
-
-    setSaving(true);
-    setStatus(newStatus);
-
-    try {
-      await writeClient
-        .patch(documentId)
-        .set({ status: newStatus })
-        .commit();
-    } catch (error) {
-      console.error("Failed to update order status:", error);
-      // Revert on error
-      setStatus(status);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const statusConfig = getOrderStatus(status);
+  const currentStatus = (status as string) ?? "paid";
+  const statusConfig = getOrderStatus(currentStatus);
   const StatusIcon = statusConfig.icon;
 
-  return (
-    <div className="relative">
-      <Select value={status} onValueChange={handleStatusChange} disabled={saving}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue>
-            <div className="flex items-center gap-2">
-              <StatusIcon className="h-4 w-4" />
-              {statusConfig.label}
-            </div>
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          {Object.entries(ORDER_STATUS_CONFIG).map(([value, config]) => {
-            const Icon = config.icon;
-            return (
-              <SelectItem key={value} value={value}>
-                <div className="flex items-center gap-2">
-                  <Icon className="h-4 w-4" />
-                  {config.label}
-                </div>
-              </SelectItem>
-            );
-          })}
-        </SelectContent>
-      </Select>
+  const handleStatusChange = async (value: string) => {
+    editStatus(value);
+    // Auto-publish status changes so they take effect immediately
+    await apply(publishDocument(handle));
+  };
 
-      {saving && (
-        <div className="absolute right-3 top-1/2 -translate-y-1/2">
-          <Loader2 className="h-4 w-4 animate-spin text-zinc-400" />
-        </div>
-      )}
-    </div>
+  return (
+    <Select value={currentStatus} onValueChange={handleStatusChange}>
+      <SelectTrigger className="w-[180px]">
+        <SelectValue>
+          <div className="flex items-center gap-2">
+            <StatusIcon className="h-4 w-4" />
+            {statusConfig.label}
+          </div>
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {Object.entries(ORDER_STATUS_CONFIG).map(([value, config]) => {
+          const Icon = config.icon;
+          return (
+            <SelectItem key={value} value={value}>
+              <div className="flex items-center gap-2">
+                <Icon className="h-4 w-4" />
+                {config.label}
+              </div>
+            </SelectItem>
+          );
+        })}
+      </SelectContent>
+    </Select>
   );
 }
 
-export function StatusSelectSkeleton() {
+function StatusSelectSkeleton() {
   return <Skeleton className="h-10 w-[180px]" />;
+}
+
+export function StatusSelect(props: StatusSelectProps) {
+  return (
+    <Suspense fallback={<StatusSelectSkeleton />}>
+      <StatusSelectContent {...props} />
+    </Suspense>
+  );
 }

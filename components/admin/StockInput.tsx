@@ -1,56 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense } from "react";
+import {
+  useDocument,
+  useEditDocument,
+  type DocumentHandle,
+} from "@sanity/sdk-react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Loader2 } from "lucide-react";
-import { writeClient } from "@/sanity/lib/client";
+import { cn } from "@/lib/utils";
 
-interface StockInputProps {
-  documentId: string;
-  initialStock: number;
-}
+interface StockInputProps extends DocumentHandle {}
 
-export function StockInput({ documentId, initialStock }: StockInputProps) {
-  const [stock, setStock] = useState(initialStock);
-  const [saving, setSaving] = useState(false);
+function StockInputContent(handle: StockInputProps) {
+  const { data: stock } = useDocument({ ...handle, path: "stock" });
+  const editStock = useEditDocument({ ...handle, path: "stock" });
 
-  const handleBlur = async () => {
-    if (stock === initialStock) return; // No change
-
-    setSaving(true);
-    try {
-      await writeClient
-        .patch(documentId)
-        .set({ stock })
-        .commit();
-    } catch (error) {
-      console.error("Failed to update stock:", error);
-      // Optional: revert on error
-      setStock(initialStock);
-    } finally {
-      setSaving(false);
-    }
-  };
+  const stockValue = (stock as number) ?? 0;
+  const isLowStock = stockValue > 0 && stockValue <= 5;
+  const isOutOfStock = stockValue === 0;
 
   return (
-    <div className="relative">
-      <Input
-        type="number"
-        min="0"
-        value={stock}
-        onChange={(e) => setStock(parseInt(e.target.value) || 0)}
-        onBlur={handleBlur}
-        className="h-8 w-20 text-center"
-        disabled={saving}
-      />
-      {saving && (
-        <Loader2 className="absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 animate-spin text-zinc-400" />
+    <Input
+      type="number"
+      min={0}
+      value={stockValue}
+      onChange={(e) => editStock(parseInt(e.target.value) || 0)}
+      className={cn(
+        "h-8 w-20 text-center",
+        isOutOfStock &&
+          "border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-900/20",
+        isLowStock &&
+          "border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20",
       )}
-    </div>
+    />
   );
 }
 
-export function StockInputSkeleton() {
+function StockInputSkeleton() {
   return <Skeleton className="h-8 w-20" />;
+}
+
+export function StockInput(props: StockInputProps) {
+  return (
+    <Suspense fallback={<StockInputSkeleton />}>
+      <StockInputContent {...props} />
+    </Suspense>
+  );
 }

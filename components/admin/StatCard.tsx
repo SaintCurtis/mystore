@@ -1,11 +1,11 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense } from "react";
 import Link from "next/link";
+import { useDocuments } from "@sanity/sdk-react";
 import type { LucideIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { writeClient } from "@/sanity/lib/client";
 
 interface StatCardProps {
   title: string;
@@ -24,36 +24,19 @@ function StatCardContent({
   valueFormatter = (count) => count.toString(),
   href,
 }: StatCardProps) {
-  const [count, setCount] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const { data } = useDocuments({
+    documentType,
+    filter,
+  });
 
-  useEffect(() => {
-    const fetchCount = async () => {
-      setLoading(true);
-      try {
-        let query = `*[_type == $type`;
-        if (filter) query += ` && ${filter}`;
-        query += `] { _id }`;
-
-        const result = await writeClient.fetch(query, { type: documentType });
-        setCount(result.length);
-      } catch (error) {
-        console.error("Failed to fetch count:", error);
-        setCount(0);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCount();
-  }, [documentType, filter]);
+  const count = data?.length ?? 0;
 
   const content = (
     <div
       className={cn(
         "rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900",
         href &&
-          "cursor-pointer transition-colors hover:border-zinc-300 hover:bg-zinc-50 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/50"
+          "cursor-pointer transition-colors hover:border-zinc-300 hover:bg-zinc-50 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/50",
       )}
     >
       <div className="flex items-center justify-between">
@@ -62,7 +45,7 @@ function StatCardContent({
             {title}
           </p>
           <p className="mt-2 text-3xl font-bold text-zinc-900 dark:text-zinc-100">
-            {loading ? "..." : valueFormatter(count)}
+            {valueFormatter(count)}
           </p>
         </div>
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
@@ -102,7 +85,9 @@ function StatCardSkeleton({
 
 export function StatCard(props: StatCardProps) {
   return (
-    <Suspense fallback={<StatCardSkeleton title={props.title} icon={props.icon} />}>
+    <Suspense
+      fallback={<StatCardSkeleton title={props.title} icon={props.icon} />}
+    >
       <StatCardContent {...props} />
     </Suspense>
   );

@@ -1,10 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { writeClient } from "@/sanity/lib/client";
-import { Trash2, Loader2 } from "lucide-react";
+import {
+  useApplyDocumentActions,
+  useDocument,
+  useQuery,
+  deleteDocument,
+  discardDocument,
+  type DocumentHandle,
+} from "@sanity/sdk-react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -15,78 +22,79 @@ import {
 } from "@/components/ui/tooltip";
 
 interface DeleteButtonProps {
-  documentId: string;
-  documentType: string;
+  handle: DocumentHandle;
   redirectTo?: string;
 }
 
-export function DeleteButton({
-  documentId,
-  documentType,
+function DeleteButtonContent({
+  handle,
   redirectTo = "/admin/inventory",
 }: DeleteButtonProps) {
   const router = useRouter();
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [orderCount, setOrderCount] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
+  const apply = useApplyDocumentActions();
 
-  const baseId = documentId.replace("drafts.", "");
+  const baseId = handle.documentId.replace("drafts.", "");
+
+  // Real-time document state
+  const { data: doc } = useDocument(handle);
+
+  // Check if published version exists
+  const { data: publishedDoc } = useQuery<{ _id: string } | null>({
+    query: `*[_id == $id][0]{ _id }`,
+    params: { id: baseId },
+    perspective: "published",
+  });
 
   // Check if any orders reference this product
-  useEffect(() => {
-    async function checkReferences() {
-      try {
-        const orders = await writeClient.fetch<{ _id: string }[]>(
-          `*[_type == "order" && references($id)]{ _id }`,
-          { id: baseId }
-        );
-        setOrderCount(orders.length);
-      } catch (error) {
-        console.error("Failed to check references:", error);
-        setOrderCount(0);
-      } finally {
-        setLoading(false);
-      }
-    }
-    checkReferences();
-  }, [baseId]);
+  const { data: referencingOrders } = useQuery<{ _id: string }[]>({
+    query: `*[_type == "order" && references($id)]{ _id }`,
+    params: { id: baseId },
+  });
+
+  const isDraft = doc?._id?.startsWith("drafts.");
+  const hasPublishedVersion = !!publishedDoc;
+  const hasReferences = referencingOrders && referencingOrders.length > 0;
 
   const handleDelete = async () => {
     const confirmed = window.confirm(
-      "Delete this product permanently? This cannot be undone."
+      "Delete this product permanently? This cannot be undone.",
     );
     if (!confirmed) return;
 
-    setIsDeleting(true);
     try {
-      // Delete draft version if exists
-      await writeClient.delete(`drafts.${baseId}`).catch(() => {
-        // Ignore error if draft doesn't exist
-      });
-      // Delete published version
-      await writeClient.delete(baseId);
+      if (hasPublishedVersion) {
+        const result = await apply(
+          deleteDocument({
+            documentId: baseId,
+            documentType: handle.documentType,
+          }),
+        );
+        await result.submitted();
+      } else if (isDraft) {
+        const result = await apply(
+          discardDocument({
+            documentId: baseId,
+            documentType: handle.documentType,
+          }),
+        );
+        await result.submitted();
+      }
       router.push(redirectTo);
     } catch (error) {
       console.error("Delete failed:", error);
-      alert("Failed to delete product. Please try again.");
-    } finally {
-      setIsDeleting(false);
     }
   };
 
-  if (loading) {
-    return <Skeleton className="h-9 w-20" />;
-  }
-
   // If orders reference this product, redirect to Studio for safe deletion
-  if (orderCount && orderCount > 0) {
+  if (hasReferences) {
+    const orderCount = referencingOrders?.length ?? 0;
     return (
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="destructive" size="sm" className="gap-1.5" asChild>
               <Link
-                href={`/studio/structure/${documentType};${baseId}`}
+                href={`/studio/structure/${handle.documentType};${baseId}`}
                 target="_blank"
               >
                 <Trash2 className="h-4 w-4" />
@@ -105,20 +113,28 @@ export function DeleteButton({
     );
   }
 
+  // No references - can delete directly
   return (
     <Button
       variant="destructive"
       size="sm"
       className="gap-1.5"
       onClick={handleDelete}
-      disabled={isDeleting}
     >
-      {isDeleting ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
-      ) : (
-        <Trash2 className="h-4 w-4" />
-      )}
-      {isDeleting ? "Deleting..." : "Delete"}
+      <Trash2 className="h-4 w-4" />
+      Delete
     </Button>
+  );
+}
+
+function DeleteButtonFallback() {
+  return <Skeleton className="h-9 w-20" />;
+}
+
+export function DeleteButton(props: DeleteButtonProps) {
+  return (
+    <Suspense fallback={<DeleteButtonFallback />}>
+      <DeleteButtonContent {...props} />
+    </Suspense>
   );
 }

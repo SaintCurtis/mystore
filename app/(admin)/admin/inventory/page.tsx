@@ -1,7 +1,13 @@
 "use client";
 
-import { Suspense, useState, useEffect, useTransition } from "react";
+import { Suspense, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import {
+  useDocuments,
+  useApplyDocumentActions,
+  createDocumentHandle,
+  createDocument,
+} from "@sanity/sdk-react";
 import { Plus, Package, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -13,62 +19,34 @@ import {
   useProductSearchFilter,
   ProductTableHeader,
 } from "@/components/admin";
-import { writeClient } from "@/sanity/lib/client";
+
+interface ProductListContentProps {
+  filter?: string;
+  onCreateProduct: () => void;
+  isCreating: boolean;
+}
 
 function ProductListContent({
   filter,
   onCreateProduct,
   isCreating,
-}: {
-  filter?: string;
-  onCreateProduct: () => void;
-  isCreating: boolean;
-}) {
-  const [products, setProducts] = useState<any[]>([]);
-  const [hasMore, setHasMore] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+}: ProductListContentProps) {
+  const {
+    data: products,
+    hasMore,
+    loadMore,
+    isPending,
+  } = useDocuments({
+    documentType: "product",
+    filter,
+    orderings: [
+      { field: "stock", direction: "asc" },
+      { field: "name", direction: "asc" },
+    ],
+    batchSize: 20,
+  });
 
-  const fetchProducts = async (lastId?: string) => {
-    setIsLoadingMore(true);
-
-    let groq = `*[_type == "product"`;
-
-    if (filter) groq += ` && ${filter}`;
-    groq += `] | order(stock asc, name asc)`;
-
-    if (lastId) {
-      groq += ` [_id > $lastId][0...20]`;
-    } else {
-      groq += ` [0...20]`;
-    }
-
-    const result = await writeClient.fetch(groq, lastId ? { lastId } : {});
-
-    if (lastId) {
-      setProducts((prev) => [...prev, ...result]);
-    } else {
-      setProducts(result);
-    }
-
-    setHasMore(result.length === 20);
-    setIsLoadingMore(false);
-  };
-
-  // Initial fetch when component mounts or filter changes
-  useEffect(() => {
-    setProducts([]);        // Reset list when filter changes
-    setHasMore(true);
-    fetchProducts();
-  }, [filter]);
-
-  const loadMore = () => {
-    if (products.length > 0) {
-      const lastId = products[products.length - 1]._id;
-      fetchProducts(lastId);
-    }
-  };
-
-  if (products.length === 0) {
+  if (!products || products.length === 0) {
     return (
       <EmptyState
         icon={Package}
@@ -98,12 +76,8 @@ function ProductListContent({
         <Table>
           <ProductTableHeader />
           <TableBody>
-            {products.map((product) => (
-              <ProductRow
-                key={product._id}
-                documentId={product._id}
-                initialData={product}
-              />
+            {products.map((handle) => (
+              <ProductRow key={handle.documentId} {...handle} />
             ))}
           </TableBody>
         </Table>
@@ -113,10 +87,10 @@ function ProductListContent({
         <div className="mt-4 flex justify-center">
           <Button
             variant="outline"
-            onClick={loadMore}
-            disabled={isLoadingMore}
+            onClick={() => loadMore()}
+            disabled={isPending}
           >
-            {isLoadingMore ? "Loading..." : "Load More"}
+            {isPending ? "Loading..." : "Load More"}
           </Button>
         </div>
       )}
@@ -139,25 +113,21 @@ function ProductListSkeleton() {
   );
 }
 
-export default function InventoryPage() {
+function InventoryContent() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [isPending, startTransition] = useTransition();
   const { filter, isSearching } = useProductSearchFilter(searchQuery);
+  const apply = useApplyDocumentActions();
 
   const handleCreateProduct = () => {
     startTransition(async () => {
-      const newProduct = {
-        _type: "product",
-        name: "New Product",
-        slug: { current: `new-product-${Date.now()}` },
-        price: 0,
-        stock: 0,
-        featured: false,
-      };
-
-      const result = await writeClient.create(newProduct);
-      router.push(`/admin/inventory/${result._id}`);
+      const newDocHandle = createDocumentHandle({
+        documentId: crypto.randomUUID(),
+        documentType: "product",
+      });
+      await apply(createDocument(newDocHandle));
+      router.push(`/admin/inventory/${newDocHandle.documentId}`);
     });
   };
 
@@ -209,4 +179,8 @@ export default function InventoryPage() {
       )}
     </div>
   );
+}
+
+export default function InventoryPage() {
+  return <InventoryContent />;
 }

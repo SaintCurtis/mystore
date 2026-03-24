@@ -31,3 +31,5 @@ export {
 
 // Table Headers
 export { OrderTableHeader, ProductTableHeader } from "./table-headers";
+
+export { PublishButton, RevertButton } from "./PublishButton";
