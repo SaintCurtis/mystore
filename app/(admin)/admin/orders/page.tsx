@@ -1,7 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
-import { useDocuments } from "@sanity/sdk-react";
+import { Suspense, useState, useEffect } from "react";
 import { ShoppingCart } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody } from "@/components/ui/table";
@@ -15,39 +14,65 @@ import {
   OrderTableHeader,
 } from "@/components/admin";
 import { ORDER_STATUS_TABS } from "@/lib/constants/orderStatus";
+import { writeClient } from "@/sanity/lib/client";
 
 interface OrderListContentProps {
   statusFilter: string;
   searchFilter?: string;
 }
 
-function OrderListContent({
-  statusFilter,
-  searchFilter,
-}: OrderListContentProps) {
-  // Combine status and search filters
-  const filters: string[] = [];
-  if (statusFilter !== "all") {
-    filters.push(`status == "${statusFilter}"`);
-  }
-  if (searchFilter) {
-    filters.push(`(${searchFilter})`);
-  }
-  const filter = filters.length > 0 ? filters.join(" && ") : undefined;
+function OrderListContent({ statusFilter, searchFilter }: OrderListContentProps) {
+  const [orders, setOrders] = useState<any[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const {
-    data: orders,
-    hasMore,
-    loadMore,
-    isPending,
-  } = useDocuments({
-    documentType: "order",
-    filter,
-    orderings: [{ field: "_createdAt", direction: "desc" }],
-    batchSize: 20,
-  });
+  const fetchOrders = async (lastId?: string) => {
+    setIsLoadingMore(true);
 
-  if (!orders || orders.length === 0) {
+    let query = `*[_type == "order"`;
+
+    const conditions: string[] = [];
+
+    if (statusFilter !== "all") {
+      conditions.push(`status == "${statusFilter}"`);
+    }
+    if (searchFilter) {
+      conditions.push(`(${searchFilter})`);
+    }
+
+    if (conditions.length > 0) {
+      query += ` && ${conditions.join(" && ")}`;
+    }
+
+    query += `] | order(_createdAt desc)`;
+
+    // Add cursor-based pagination
+    if (lastId) {
+      query += ` [_id > $lastId][0...20]`;
+    } else {
+      query += ` [0...20]`;
+    }
+
+    const result = await writeClient.fetch(query, lastId ? { lastId } : {});
+
+    if (lastId) {
+      setOrders((prev) => [...prev, ...result]);
+    } else {
+      setOrders(result);
+    }
+
+    setHasMore(result.length === 20);
+    setIsLoadingMore(false);
+  };
+
+  // Fetch when filters change
+  useEffect(() => {
+    setOrders([]);           // Reset list when filter changes
+    setHasMore(true);
+    fetchOrders();
+  }, [statusFilter, searchFilter]);
+
+  if (orders.length === 0) {
     const description = searchFilter
       ? "Try adjusting your search terms."
       : statusFilter === "all"
@@ -69,8 +94,11 @@ function OrderListContent({
         <Table>
           <OrderTableHeader />
           <TableBody>
-            {orders.map((handle) => (
-              <OrderRow key={handle.documentId} {...handle} />
+            {orders.map((order) => (
+              <OrderRow
+                key={order._id}
+                order={order}           // ← Updated prop name
+              />
             ))}
           </TableBody>
         </Table>
@@ -80,10 +108,13 @@ function OrderListContent({
         <div className="mt-4 flex justify-center">
           <Button
             variant="outline"
-            onClick={() => loadMore()}
-            disabled={isPending}
+            onClick={() => {
+              const lastId = orders[orders.length - 1]._id;
+              fetchOrders(lastId);
+            }}
+            disabled={isLoadingMore}
           >
-            {isPending ? "Loading..." : "Load More"}
+            {isLoadingMore ? "Loading..." : "Load More"}
           </Button>
         </div>
       )}
@@ -109,8 +140,7 @@ function OrderListSkeleton() {
 export default function OrdersPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const { filter: searchFilter, isSearching } =
-    useOrderSearchFilter(searchQuery);
+  const { filter: searchFilter, isSearching } = useOrderSearchFilter(searchQuery);
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -132,6 +162,7 @@ export default function OrdersPage() {
           onChange={setSearchQuery}
           className="w-full sm:max-w-xs"
         />
+
         <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
           <Tabs value={statusFilter} onValueChange={setStatusFilter}>
             <TabsList className="w-max">

@@ -2,11 +2,6 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import {
-  useApplyDocumentActions,
-  createDocumentHandle,
-  createDocument,
-} from "@sanity/sdk-react";
 import { Package, ShoppingCart, TrendingUp, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,20 +10,32 @@ import {
   RecentOrders,
   AIInsightsCard,
 } from "@/components/admin";
+import { writeClient } from "@/sanity/lib/client";
 
 export default function AdminDashboard() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const apply = useApplyDocumentActions();
 
   const handleCreateProduct = () => {
     startTransition(async () => {
-      const newDocHandle = createDocumentHandle({
-        documentId: crypto.randomUUID(),
-        documentType: "product",
-      });
-      await apply(createDocument(newDocHandle));
-      router.push(`/admin/inventory/${newDocHandle.documentId}`);
+      const newProduct = {
+        _type: "product",
+        name: "New Product",
+        slug: { 
+          _type: "slug", 
+          current: `new-product-${Date.now()}` 
+        },
+        price: 0,
+        stock: 0,
+        featured: false,
+      };
+
+      try {
+        const result = await writeClient.create(newProduct);
+        router.push(`/admin/inventory/${result._id}`);
+      } catch (error) {
+        console.error("Failed to create product:", error);
+      }
     });
   };
 
@@ -44,6 +51,7 @@ export default function AdminDashboard() {
             Overview of your store
           </p>
         </div>
+
         <Button
           onClick={handleCreateProduct}
           disabled={isPending}
