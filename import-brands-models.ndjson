@@ -1,0 +1,24 @@
+{"_id": "brand.lenovo", "_type": "brand", "name": "Lenovo"}
+{"_id": "brand.dell", "_type": "brand", "name": "Dell"}
+{"_id": "brand.hp", "_type": "brand", "name": "HP"}
+{"_id": "brand.acer", "_type": "brand", "name": "Acer"}
+{"_id": "brand.asus", "_type": "brand", "name": "Asus"}
+{"_id": "brand.microsoft", "_type": "brand", "name": "Microsoft"}
+{"_id": "brand.samsung", "_type": "brand", "name": "Samsung"}
+{"_id": "condition.brand-new", "_type": "condition", "title": "Brand New"}
+{"_id": "condition.uk-used", "_type": "condition", "title": "UK Used"}
+{"_id": "model.thinkpad-x1-carbon", "_type": "model", "name": "ThinkPad X1 Carbon", "brand": {"_type": "reference", "_ref": "brand.lenovo"}}
+{"_id": "model.thinkpad-t14s", "_type": "model", "name": "ThinkPad T14s", "brand": {"_type": "reference", "_ref": "brand.lenovo"}}
+{"_id": "model.yoga-slim-7i", "_type": "model", "name": "Yoga Slim 7i", "brand": {"_type": "reference", "_ref": "brand.lenovo"}}
+{"_id": "model.xps-14", "_type": "model", "name": "XPS 14", "brand": {"_type": "reference", "_ref": "brand.dell"}}
+{"_id": "model.xps-16", "_type": "model", "name": "XPS 16", "brand": {"_type": "reference", "_ref": "brand.dell"}}
+{"_id": "model.latitude-7450", "_type": "model", "name": "Latitude 7450", "brand": {"_type": "reference", "_ref": "brand.dell"}}
+{"_id": "model.elitebook-ultra", "_type": "model", "name": "EliteBook Ultra", "brand": {"_type": "reference", "_ref": "brand.hp"}}
+{"_id": "model.omni-book-ultra", "_type": "model", "name": "OmniBook Ultra", "brand": {"_type": "reference", "_ref": "brand.hp"}}
+{"_id": "model.swift-go-14", "_type": "model", "name": "Swift Go 14 AI", "brand": {"_type": "reference", "_ref": "brand.acer"}}
+{"_id": "model.aspire-14", "_type": "model", "name": "Aspire 14 AI", "brand": {"_type": "reference", "_ref": "brand.acer"}}
+{"_id": "model.zenbook-s14", "_type": "model", "name": "Zenbook S 14", "brand": {"_type": "reference", "_ref": "brand.asus"}}
+{"_id": "model.vivobook-s15", "_type": "model", "name": "Vivobook S 15", "brand": {"_type": "reference", "_ref": "brand.asus"}}
+{"_id": "model.surface-laptop-7-13", "_type": "model", "name": "Surface Laptop 7 (13-inch)", "brand": {"_type": "reference", "_ref": "brand.microsoft"}}
+{"_id": "model.surface-laptop-7-15", "_type": "model", "name": "Surface Laptop 7 (15-inch)", "brand": {"_type": "reference", "_ref": "brand.microsoft"}}
+{"_id": "model.galaxy-book6-pro", "_type": "model", "name": "Galaxy Book6 Pro", "brand": {"_type": "reference", "_ref": "brand.samsung"}}

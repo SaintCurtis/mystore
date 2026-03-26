@@ -2,6 +2,13 @@ import { PackageIcon } from "@sanity/icons";
 import { defineField, defineType } from "sanity";
 import { MATERIALS_SANITY_LIST, COLORS_SANITY_LIST } from "@/lib/constants/filters";
 
+const LAPTOP_CATEGORIES = [
+  "Gaming Laptops",
+  "Regular Laptops",
+  "MacBook",
+  // Add any other laptop-related category titles exactly as they appear in your Category documents
+];
+
 export const productType = defineType({
   name: "product",
   title: "Product",
@@ -48,6 +55,7 @@ export const productType = defineType({
         rule.positive().error("Price must be a positive number"),
       ],
     }),
+
     defineField({
       name: "category",
       type: "reference",
@@ -55,6 +63,54 @@ export const productType = defineType({
       group: "details",
       validation: (rule) => [rule.required().error("Category is required")],
     }),
+
+    // ==================== LAPTOP-ONLY FIELDS ====================
+    defineField({
+      name: "condition",
+      title: "Condition",
+      type: "reference",
+      to: [{ type: "condition" }],
+      group: "details",
+      hidden: ({ document }) => {
+        const categoryTitle = (document?.category as any)?.title;
+        return !LAPTOP_CATEGORIES.includes(categoryTitle);
+      },
+      validation: (rule) =>
+        rule.custom((value, context) => {
+          const categoryTitle = (context.document?.category as any)?.title;
+          const isLaptop = LAPTOP_CATEGORIES.includes(categoryTitle);
+          if (isLaptop && !value) {
+            return "Condition is required for laptops";
+          }
+          return true;
+        }),
+    }),
+
+    defineField({
+      name: "brand",
+      title: "Brand",
+      type: "reference",
+      to: [{ type: "brand" }],
+      group: "details",
+      hidden: ({ document }) => {
+        const categoryTitle = (document?.category as any)?.title;
+        return !LAPTOP_CATEGORIES.includes(categoryTitle);
+      },
+    }),
+
+    defineField({
+      name: "model",
+      title: "Model",
+      type: "reference",
+      to: [{ type: "model" }],
+      group: "details",
+      hidden: ({ document }) => {
+        const categoryTitle = (document?.category as any)?.title;
+        return !LAPTOP_CATEGORIES.includes(categoryTitle);
+      },
+    }),
+    // ===========================================================
+
     defineField({
       name: "material",
       type: "string",
@@ -79,6 +135,7 @@ export const productType = defineType({
       group: "details",
       description: 'e.g., "120cm x 80cm x 75cm"',
     }),
+
     defineField({
       name: "images",
       type: "array",
@@ -95,6 +152,7 @@ export const productType = defineType({
         rule.min(1).error("At least one image is required"),
       ],
     }),
+
     defineField({
       name: "stock",
       type: "number",
@@ -121,6 +179,7 @@ export const productType = defineType({
       description: "Does this product require assembly?",
     }),
   ],
+
   preview: {
     select: {
       title: "name",
