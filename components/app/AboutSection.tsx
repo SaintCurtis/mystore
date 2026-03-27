@@ -1,0 +1,130 @@
+import { GraduationCap, Wrench, ShieldCheck, Globe } from "lucide-react";
+
+const MILESTONES = [
+  {
+    icon: Wrench,
+    year: "2016",
+    title: "Started Repairing Computers",
+    desc: "Long before selling, he was fixing — motherboards, GPUs, everything. That hands-on foundation separates him from every other reseller.",
+  },
+  {
+    icon: GraduationCap,
+    year: "2019",
+    title: "Computer Engineering @ FUTA",
+    desc: "Gained admission to the Federal University of Technology Akure — Nigeria's #1 tech university — to study Computer Engineering. Started selling tech to his fellow students from his hostel room.",
+  },
+  {
+    icon: ShieldCheck,
+    year: "2021",
+    title: "CAC Business Registration",
+    desc: "Formalised as The Saint's Technology Networks — a fully registered Nigerian business. No side hustle. This is the real thing.",
+  },
+  {
+    icon: Globe,
+    year: "2024",
+    title: "Shipping Worldwide",
+    desc: "What started in a FUTA hostel now ships brand new and premium foreign-used tech to buyers across Nigeria and beyond.",
+  },
+];
+
+export function AboutSection() {
+  return (
+    <section className="bg-zinc-900 py-24 sm:py-32">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Two-column layout */}
+        <div className="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:gap-24">
+          {/* Left — Story */}
+          <div>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-amber-400">
+              About The Saint's TechNet
+            </p>
+            <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+              Not Just a Seller.{" "}
+              <span className="text-amber-400">An Engineer</span> Who Happens
+              to Sell.
+            </h2>
+
+            <div className="mt-6 space-y-5 text-base leading-relaxed text-zinc-400">
+              <p>
+                The Saint's Technology Networks (shortened as{" "}
+                <span className="font-semibold text-zinc-200">
+                  The Saint's TechNet
+                </span>
+                ) was born not from a business plan, but from a genuine passion
+                for computers that started long before university.
+              </p>
+              <p>
+                Our founder learned to repair computers from the ground up —
+                diagnosing faults, replacing components, understanding hardware
+                the way most resellers never will. That knowledge is what you
+                are buying when you shop here. Not just a product, but the
+                expertise behind it.
+              </p>
+              <p>
+                After gaining admission to study Computer Engineering at{" "}
+                <span className="font-semibold text-zinc-200">
+                  FUTA — Nigeria's foremost university of technology
+                </span>
+                , he started selling to fellow students in 200 level. Five years
+                later, The Saint's TechNet is a CAC-registered business
+                shipping brand new and premium foreign-used gadgets to
+                customers across Nigeria and worldwide.
+              </p>
+              <p>
+                Every device is personally verified. Every recommendation is
+                honest. Every sale is backed by a warranty and a 7-day return
+                policy — because someone who understands the tech has no reason
+                to hide behind fine print.
+              </p>
+            </div>
+
+            {/* Stats */}
+            <div className="mt-10 grid grid-cols-3 gap-6">
+              {[
+                { value: "5+", label: "Years in business" },
+                { value: "1000+", label: "Happy customers" },
+                { value: "100%", label: "Verified products" },
+              ].map(({ value, label }) => (
+                <div key={label}>
+                  <p className="text-3xl font-extrabold text-amber-400">
+                    {value}
+                  </p>
+                  <p className="mt-1 text-sm text-zinc-500">{label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right — Timeline */}
+          <div className="relative">
+            {/* Vertical line */}
+            <div className="absolute left-5 top-0 h-full w-px bg-zinc-800" />
+
+            <div className="space-y-10">
+              {MILESTONES.map(({ icon: Icon, year, title, desc }) => (
+                <div key={year} className="relative flex gap-6 pl-14">
+                  {/* Icon bubble */}
+                  <div className="absolute left-0 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-amber-500/30 bg-amber-500/10">
+                    <Icon className="h-5 w-5 text-amber-400" />
+                  </div>
+
+                  <div>
+                    <span className="mb-1 inline-block rounded-full bg-zinc-800 px-3 py-0.5 text-xs font-semibold text-amber-400">
+                      {year}
+                    </span>
+                    <h3 className="mt-1 text-base font-bold text-white">
+                      {title}
+                    </h3>
+                    <p className="mt-1.5 text-sm leading-relaxed text-zinc-400">
+                      {desc}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

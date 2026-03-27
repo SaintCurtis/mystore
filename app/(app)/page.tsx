@@ -12,6 +12,9 @@ import { ProductSection } from "@/components/app/ProductSection";
 import { CategoryTiles } from "@/components/app/CategoryTiles";
 import { FeaturedCarousel } from "@/components/app/FeaturedCarousel";
 import { FeaturedCarouselSkeleton } from "@/components/app/FeaturedCarouselSkeleton";
+import { HeroSection } from "@/components/app/HeroSection";
+import { TestimonialsCarousel } from "@/components/app/TestimonialsCarousel";
+import { AboutSection } from "@/components/app/AboutSection";
 
 interface PageProps {
   searchParams: Promise<{
@@ -38,70 +41,51 @@ export default async function HomePage({ searchParams }: PageProps) {
   const sort = params.sort ?? "name";
   const inStock = params.inStock === "true";
 
-  // Select query based on sort parameter
-  const getQuery = () => {
-    // If searching and sort is relevance, use relevance query
-    if (searchQuery && sort === "relevance") {
-      return FILTER_PRODUCTS_BY_RELEVANCE_QUERY;
-    }
+  const isHomepage = !categorySlug && !searchQuery;
 
+  const getQuery = () => {
+    if (searchQuery && sort === "relevance") return FILTER_PRODUCTS_BY_RELEVANCE_QUERY;
     switch (sort) {
-      case "price_asc":
-        return FILTER_PRODUCTS_BY_PRICE_ASC_QUERY;
-      case "price_desc":
-        return FILTER_PRODUCTS_BY_PRICE_DESC_QUERY;
-      case "relevance":
-        return FILTER_PRODUCTS_BY_RELEVANCE_QUERY;
-      default:
-        return FILTER_PRODUCTS_BY_NAME_QUERY;
+      case "price_asc": return FILTER_PRODUCTS_BY_PRICE_ASC_QUERY;
+      case "price_desc": return FILTER_PRODUCTS_BY_PRICE_DESC_QUERY;
+      case "relevance": return FILTER_PRODUCTS_BY_RELEVANCE_QUERY;
+      default: return FILTER_PRODUCTS_BY_NAME_QUERY;
     }
   };
 
-  // Fetch products with filters (server-side via GROQ)
-  const { data: products } = await sanityFetch({
-    query: getQuery(),
-    params: {
-      searchQuery,
-      categorySlug,
-      color,
-      material,
-      minPrice,
-      maxPrice,
-      inStock,
-    },
-  });
-
-  // Fetch categories for filter sidebar
-  const { data: categories } = await sanityFetch({
-    query: ALL_CATEGORIES_QUERY,
-  });
-
-  // Fetch featured products for carousel
-  const { data: featuredProducts } = await sanityFetch({
-    query: FEATURED_PRODUCTS_QUERY,
-  });
+  const [{ data: products }, { data: categories }, { data: featuredProducts }] =
+    await Promise.all([
+      sanityFetch({
+        query: getQuery(),
+        params: { searchQuery, categorySlug, color, material, minPrice, maxPrice, inStock },
+      }),
+      sanityFetch({ query: ALL_CATEGORIES_QUERY }),
+      sanityFetch({ query: FEATURED_PRODUCTS_QUERY }),
+    ]);
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
-      {/* Featured Products Carousel */}
-      {featuredProducts.length > 0 && (
+
+      {/* Hero — homepage only */}
+      {isHomepage && <HeroSection />}
+
+      {/* Featured Carousel — homepage only */}
+      {isHomepage && featuredProducts.length > 0 && (
         <Suspense fallback={<FeaturedCarouselSkeleton />}>
           <FeaturedCarousel products={featuredProducts} />
         </Suspense>
       )}
 
-      {/* Page Banner */}
+      {/* Page Banner + Category Tiles */}
       <div className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
         <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
           <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
             Shop {categorySlug ? categorySlug : "All Products"}
           </h1>
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-            Premium tech products for your digital lifestyle
+            Premium tech — verified, warranted, shipped worldwide
           </p>
         </div>
-
-        {/* Category Tiles - Full width */}
         <div className="mt-6">
           <CategoryTiles
             categories={categories}
@@ -110,6 +94,7 @@ export default async function HomePage({ searchParams }: PageProps) {
         </div>
       </div>
 
+      {/* Product Grid */}
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <ProductSection
           categories={categories}
@@ -117,6 +102,13 @@ export default async function HomePage({ searchParams }: PageProps) {
           searchQuery={searchQuery}
         />
       </div>
+
+      {/* Testimonials — homepage only */}
+      {isHomepage && <TestimonialsCarousel />}
+
+      {/* About — homepage only */}
+      {isHomepage && <AboutSection />}
+
     </div>
   );
 }
