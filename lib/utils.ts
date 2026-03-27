@@ -6,16 +6,28 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * Format a price amount with currency symbol
- * @param amount - The price amount (can be null/undefined)
+ * Format a price amount in Nigerian Naira with thousand separators
+ * @param amount - The price amount in Naira (can be null/undefined)
  * @param currency - Currency symbol (default: "₦")
- * @returns Formatted price string (e.g., "₦599.99")
+ * @returns Formatted price string (e.g., "₦3,299,990")
+ *
+ * Note: Prices in Sanity should be stored as full Naira amounts (e.g., 3299990)
+ * not in dollars/cents. Whole numbers are used since Naira kobo is rarely shown
+ * in retail contexts.
  */
 export function formatPrice(
   amount: number | null | undefined,
   currency = "₦"
 ): string {
-  return `${currency}${(amount ?? 0).toFixed(2)}`;
+  const value = amount ?? 0;
+
+  // Use Intl.NumberFormat for proper locale-aware thousand separators
+  const formatted = new Intl.NumberFormat("en-NG", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(Math.round(value));
+
+  return `${currency}${formatted}`;
 }
 
 type DateFormatOption = "short" | "long" | "datetime";
@@ -37,10 +49,6 @@ const DATE_FORMAT_OPTIONS: Record<
 
 /**
  * Format a date string with locale-specific formatting
- * @param date - ISO date string (can be null/undefined)
- * @param format - Format option: "short" (5 Jan), "long" (5 January 2025), "datetime" (5 January 2025, 14:30)
- * @param fallback - Fallback text when date is null/undefined
- * @returns Formatted date string
  */
 export function formatDate(
   date: string | null | undefined,
@@ -55,9 +63,7 @@ export function formatDate(
 }
 
 /**
- * Format an order number for display (shows only the last segment after the last hyphen)
- * @param orderNumber - Full order number (e.g., "ORD-2024-ABC123")
- * @returns Shortened order number (e.g., "ABC123") or "N/A" if null
+ * Format an order number for display (shows only the last segment)
  */
 export function formatOrderNumber(
   orderNumber: string | null | undefined
