@@ -27,7 +27,7 @@ export function Header() {
               The Saint's TechNet
             </span>
             <span className="text-[10px] font-medium text-amber-500 tracking-wider uppercase">
-              CAC Registered
+              Built by an Engineer. Trusted by Thousands.
             </span>
           </div>
         </Link>

@@ -7,6 +7,7 @@ import { Header } from "@/components/app/Header";
 import { CartSheet } from "@/components/app/CartSheet";
 import { ChatSheet } from "@/components/app/ChatSheet";
 import { AppShell } from "@/components/app/AppShell";
+import { Footer } from "@/components/app/Footer";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -14,8 +15,11 @@ function AppLayout({ children }: { children: React.ReactNode }) {
       <CartStoreProvider>
         <ChatStoreProvider>
           <AppShell>
-            <Header />
-            <main>{children}</main>
+            <div className="flex min-h-screen flex-col bg-zinc-950">
+              <Header />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
           </AppShell>
           <CartSheet />
           <ChatSheet />
