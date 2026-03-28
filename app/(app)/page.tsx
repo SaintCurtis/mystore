@@ -110,12 +110,12 @@ export default async function HomePage({ searchParams }: PageProps) {
     if (condition) {
       const label =
         condition === "brand-new" ? "Brand New" : "Foreign Used (UK/US)";
-      const cat = categories.find((c) => c.slug === categorySlug);
+      const cat = categories.find((c: { slug?: string | null }) => c.slug === categorySlug);
       return cat ? `${cat.title} — ${label}` : label;
     }
     if (categorySlug) {
       return (
-        categories.find((c) => c.slug === categorySlug)?.title ?? categorySlug
+        categories.find((c: { slug?: string | null; title?: string | null }) => c.slug === categorySlug)?.title ?? categorySlug
       );
     }
     return "All Products";
