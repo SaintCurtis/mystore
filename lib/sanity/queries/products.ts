@@ -2,13 +2,26 @@ import { defineQuery } from "next-sanity";
 import { LOW_STOCK_THRESHOLD } from "@/lib/constants/stock";
 
 // ============================================
-// Shared Query Fragments (DRY)
+// Shared Query Fragments
 // ============================================
 
-/** Common filter conditions for product filtering */
+/**
+ * Full filter conditions including condition + brand drill-down.
+ * categorySlug matches EITHER:
+ *   - the product's direct category slug, OR
+ *   - the product's category's parent slug
+ * This means filtering by "gaming-laptops" returns products in
+ * both "brand-new" and "foreign-used" subcategories under it.
+ */
 const PRODUCT_FILTER_CONDITIONS = `
   _type == "product"
-  && ($categorySlug == "" || category->slug.current == $categorySlug)
+  && (
+    $categorySlug == ""
+    || category->slug.current == $categorySlug
+    || category->parentCategory->slug.current == $categorySlug
+  )
+  && ($condition == "" || condition->slug.current == $condition)
+  && ($brandSlug == "" || brand->slug.current == $brandSlug)
   && ($color == "" || color == $color)
   && ($material == "" || material == $material)
   && ($minPrice == 0 || price >= $minPrice)
@@ -17,43 +30,40 @@ const PRODUCT_FILTER_CONDITIONS = `
   && ($inStock == false || stock > 0)
 `;
 
-/** Projection for filtered product lists (includes multiple images for hover) */
+/** Projection for filtered product lists */
 const FILTERED_PRODUCT_PROJECTION = `{
   _id,
   name,
   "slug": slug.current,
   price,
+  "condition": condition->{ _id, title, "slug": slug.current },
+  "brand": brand->{ _id, title, "slug": slug.current },
+  "model": model->{ _id, title, "slug": slug.current },
   "images": images[0...4]{
     _key,
-    asset->{
-      _id,
-      url
-    }
+    asset->{ _id, url }
   },
   category->{
     _id,
     title,
-    "slug": slug.current
+    "slug": slug.current,
+    "parentSlug": parentCategory->slug.current,
+    "parentTitle": parentCategory->title
   },
   material,
   color,
   stock
 }`;
 
-/** Scoring for relevance-based search */
 const RELEVANCE_SCORE = `score(
   boost(name match $searchQuery + "*", 3),
   boost(description match $searchQuery + "*", 1)
 )`;
 
 // ============================================
-// All Products Query
+// All Products
 // ============================================
 
-/**
- * Get all products with category expanded
- * Used on landing page
- */
 export const ALL_PRODUCTS_QUERY = defineQuery(`*[
   _type == "product"
 ] | order(name asc) {
@@ -62,19 +72,11 @@ export const ALL_PRODUCTS_QUERY = defineQuery(`*[
   "slug": slug.current,
   description,
   price,
-  "images": images[]{
-    _key,
-    asset->{
-      _id,
-      url
-    },
-    hotspot
-  },
-  category->{
-    _id,
-    title,
-    "slug": slug.current
-  },
+  "condition": condition->{ _id, title, "slug": slug.current },
+  "brand": brand->{ _id, title, "slug": slug.current },
+  "model": model->{ _id, title, "slug": slug.current },
+  "images": images[]{ _key, asset->{ _id, url }, hotspot },
+  category->{ _id, title, "slug": slug.current },
   material,
   color,
   dimensions,
@@ -83,9 +85,10 @@ export const ALL_PRODUCTS_QUERY = defineQuery(`*[
   assemblyRequired
 }`);
 
-/**
- * Get featured products for homepage carousel
- */
+// ============================================
+// Featured Products
+// ============================================
+
 export const FEATURED_PRODUCTS_QUERY = defineQuery(`*[
   _type == "product"
   && featured == true
@@ -96,54 +99,15 @@ export const FEATURED_PRODUCTS_QUERY = defineQuery(`*[
   "slug": slug.current,
   description,
   price,
-  "images": images[]{
-    _key,
-    asset->{
-      _id,
-      url
-    },
-    hotspot
-  },
-  category->{
-    _id,
-    title,
-    "slug": slug.current
-  },
+  "images": images[]{ _key, asset->{ _id, url }, hotspot },
+  category->{ _id, title, "slug": slug.current },
   stock
 }`);
 
-/**
- * Get products by category slug
- */
-export const PRODUCTS_BY_CATEGORY_QUERY = defineQuery(`*[
-  _type == "product"
-  && category->slug.current == $categorySlug
-] | order(name asc) {
-  _id,
-  name,
-  "slug": slug.current,
-  price,
-  "image": images[0]{
-    asset->{
-      _id,
-      url
-    },
-    hotspot
-  },
-  category->{
-    _id,
-    title,
-    "slug": slug.current
-  },
-  material,
-  color,
-  stock
-}`);
+// ============================================
+// Single Product
+// ============================================
 
-/**
- * Get single product by slug
- * Used on product detail page
- */
 export const PRODUCT_BY_SLUG_QUERY = defineQuery(`*[
   _type == "product"
   && slug.current == $slug
@@ -153,18 +117,16 @@ export const PRODUCT_BY_SLUG_QUERY = defineQuery(`*[
   "slug": slug.current,
   description,
   price,
-  "images": images[]{
-    _key,
-    asset->{
-      _id,
-      url
-    },
-    hotspot
-  },
+  "condition": condition->{ _id, title, "slug": slug.current },
+  "brand": brand->{ _id, title, "slug": slug.current },
+  "model": model->{ _id, title, "slug": slug.current },
+  "images": images[]{ _key, asset->{ _id, url }, hotspot },
   category->{
     _id,
     title,
-    "slug": slug.current
+    "slug": slug.current,
+    "parentSlug": parentCategory->slug.current,
+    "parentTitle": parentCategory->title
   },
   material,
   color,
@@ -175,15 +137,54 @@ export const PRODUCT_BY_SLUG_QUERY = defineQuery(`*[
 }`);
 
 // ============================================
-// Search & Filter Queries (Server-Side)
-// Uses GROQ score() for relevance ranking
+// Filter Queries (with condition + brand)
 // ============================================
 
-/**
- * Search products with relevance scoring
- * Uses score() + boost() for better ranking
- * Orders by relevance score descending
- */
+export const FILTER_PRODUCTS_BY_NAME_QUERY = defineQuery(
+  `*[${PRODUCT_FILTER_CONDITIONS}] | order(name asc) ${FILTERED_PRODUCT_PROJECTION}`
+);
+
+export const FILTER_PRODUCTS_BY_PRICE_ASC_QUERY = defineQuery(
+  `*[${PRODUCT_FILTER_CONDITIONS}] | order(price asc) ${FILTERED_PRODUCT_PROJECTION}`
+);
+
+export const FILTER_PRODUCTS_BY_PRICE_DESC_QUERY = defineQuery(
+  `*[${PRODUCT_FILTER_CONDITIONS}] | order(price desc) ${FILTERED_PRODUCT_PROJECTION}`
+);
+
+export const FILTER_PRODUCTS_BY_RELEVANCE_QUERY = defineQuery(
+  `*[${PRODUCT_FILTER_CONDITIONS}] | ${RELEVANCE_SCORE} | order(_score desc, name asc) ${FILTERED_PRODUCT_PROJECTION}`
+);
+
+// ============================================
+// Products by Category (expanded — matches both
+// direct category AND parent category)
+// ============================================
+
+export const PRODUCTS_BY_CATEGORY_QUERY = defineQuery(`*[
+  _type == "product"
+  && (
+    category->slug.current == $categorySlug
+    || category->parentCategory->slug.current == $categorySlug
+  )
+] | order(name asc) {
+  _id,
+  name,
+  "slug": slug.current,
+  price,
+  "condition": condition->{ _id, title, "slug": slug.current },
+  "brand": brand->{ _id, title, "slug": slug.current },
+  "image": images[0]{ asset->{ _id, url }, hotspot },
+  category->{ _id, title, "slug": slug.current },
+  material,
+  color,
+  stock
+}`);
+
+// ============================================
+// Search
+// ============================================
+
 export const SEARCH_PRODUCTS_QUERY = defineQuery(`*[
   _type == "product"
   && (
@@ -199,59 +200,17 @@ export const SEARCH_PRODUCTS_QUERY = defineQuery(`*[
   name,
   "slug": slug.current,
   price,
-  "image": images[0]{
-    asset->{
-      _id,
-      url
-    },
-    hotspot
-  },
-  category->{
-    _id,
-    title,
-    "slug": slug.current
-  },
+  "image": images[0]{ asset->{ _id, url }, hotspot },
+  category->{ _id, title, "slug": slug.current },
   material,
   color,
   stock
 }`);
 
-/**
- * Filter products - ordered by name (A-Z)
- * Returns up to 4 images for hover preview in product cards
- */
-export const FILTER_PRODUCTS_BY_NAME_QUERY = defineQuery(
-  `*[${PRODUCT_FILTER_CONDITIONS}] | order(name asc) ${FILTERED_PRODUCT_PROJECTION}`
-);
+// ============================================
+// Cart / Checkout
+// ============================================
 
-/**
- * Filter products - ordered by price ascending
- * Returns up to 4 images for hover preview in product cards
- */
-export const FILTER_PRODUCTS_BY_PRICE_ASC_QUERY = defineQuery(
-  `*[${PRODUCT_FILTER_CONDITIONS}] | order(price asc) ${FILTERED_PRODUCT_PROJECTION}`
-);
-
-/**
- * Filter products - ordered by price descending
- * Returns up to 4 images for hover preview in product cards
- */
-export const FILTER_PRODUCTS_BY_PRICE_DESC_QUERY = defineQuery(
-  `*[${PRODUCT_FILTER_CONDITIONS}] | order(price desc) ${FILTERED_PRODUCT_PROJECTION}`
-);
-
-/**
- * Filter products - ordered by relevance (when searching)
- * Uses score() for search term matching
- * Returns up to 4 images for hover preview in product cards
- */
-export const FILTER_PRODUCTS_BY_RELEVANCE_QUERY = defineQuery(
-  `*[${PRODUCT_FILTER_CONDITIONS}] | ${RELEVANCE_SCORE} | order(_score desc, name asc) ${FILTERED_PRODUCT_PROJECTION}`
-);
-
-/**
- * Get products by IDs (for cart/checkout)
- */
 export const PRODUCTS_BY_IDS_QUERY = defineQuery(`*[
   _type == "product"
   && _id in $ids
@@ -260,20 +219,14 @@ export const PRODUCTS_BY_IDS_QUERY = defineQuery(`*[
   name,
   "slug": slug.current,
   price,
-  "image": images[0]{
-    asset->{
-      _id,
-      url
-    },
-    hotspot
-  },
+  "image": images[0]{ asset->{ _id, url } },
   stock
 }`);
 
-/**
- * Get low stock products (admin)
- * Uses LOW_STOCK_THRESHOLD constant for consistency
- */
+// ============================================
+// Admin
+// ============================================
+
 export const LOW_STOCK_PRODUCTS_QUERY = defineQuery(`*[
   _type == "product"
   && stock > 0
@@ -283,17 +236,9 @@ export const LOW_STOCK_PRODUCTS_QUERY = defineQuery(`*[
   name,
   "slug": slug.current,
   stock,
-  "image": images[0]{
-    asset->{
-      _id,
-      url
-    }
-  }
+  "image": images[0]{ asset->{ _id, url } }
 }`);
 
-/**
- * Get out of stock products (admin)
- */
 export const OUT_OF_STOCK_PRODUCTS_QUERY = defineQuery(`*[
   _type == "product"
   && stock == 0
@@ -301,23 +246,13 @@ export const OUT_OF_STOCK_PRODUCTS_QUERY = defineQuery(`*[
   _id,
   name,
   "slug": slug.current,
-  "image": images[0]{
-    asset->{
-      _id,
-      url
-    }
-  }
+  "image": images[0]{ asset->{ _id, url } }
 }`);
 
 // ============================================
-// AI Shopping Assistant Query
-// Uses score() + boost() with all filters for AI agent
+// AI Shopping Assistant
 // ============================================
 
-/**
- * Search products for AI shopping assistant
- * Full-featured search with all filters and product details
- */
 export const AI_SEARCH_PRODUCTS_QUERY = defineQuery(`*[
   _type == "product"
   && (
@@ -325,8 +260,16 @@ export const AI_SEARCH_PRODUCTS_QUERY = defineQuery(`*[
     || name match $searchQuery + "*"
     || description match $searchQuery + "*"
     || category->title match $searchQuery + "*"
+    || brand->title match $searchQuery + "*"
+    || model->title match $searchQuery + "*"
   )
-  && ($categorySlug == "" || category->slug.current == $categorySlug)
+  && (
+    $categorySlug == ""
+    || category->slug.current == $categorySlug
+    || category->parentCategory->slug.current == $categorySlug
+  )
+  && ($condition == "" || condition->slug.current == $condition)
+  && ($brandSlug == "" || brand->slug.current == $brandSlug)
   && ($material == "" || material == $material)
   && ($color == "" || color == $color)
   && ($minPrice == 0 || price >= $minPrice)
@@ -337,17 +280,11 @@ export const AI_SEARCH_PRODUCTS_QUERY = defineQuery(`*[
   "slug": slug.current,
   description,
   price,
-  "image": images[0]{
-    asset->{
-      _id,
-      url
-    }
-  },
-  category->{
-    _id,
-    title,
-    "slug": slug.current
-  },
+  "condition": condition->{ _id, title, "slug": slug.current },
+  "brand": brand->{ _id, title, "slug": slug.current },
+  "model": model->{ _id, title, "slug": slug.current },
+  "image": images[0]{ asset->{ _id, url } },
+  category->{ _id, title, "slug": slug.current },
   material,
   color,
   dimensions,
