@@ -42,7 +42,7 @@ const productSearchSchema = z.object({
     .number()
     .optional()
     .default(0)
-    .describe("Maximum price in NGN (e.g., 5000000). Use 0 for no maximum."),
+    .describe("Maximum price in NGN (e.g., 8000000). Use 0 for no maximum."),
 });
 
 export const searchProductsTool = tool({

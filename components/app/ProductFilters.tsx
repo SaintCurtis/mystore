@@ -18,7 +18,7 @@ import { COLORS, MATERIALS, SORT_OPTIONS } from "@/lib/constants/filters";
 import type { ALL_CATEGORIES_QUERYResult } from "@/sanity.types";
 
 const PRICE_MIN = 50000;
-const PRICE_MAX = 5000000;
+const PRICE_MAX = 8000000;
 
 interface ProductFiltersProps {
   categories: ALL_CATEGORIES_QUERYResult;
