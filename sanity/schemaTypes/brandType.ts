@@ -8,15 +8,28 @@ export const brandType = defineType({
   icon: TagIcon,
   fields: [
     defineField({
-      name: "name",
+      name: "title",
       title: "Brand Name",
       type: "string",
       validation: (rule) => rule.required().error("Brand name is required"),
     }),
+    defineField({
+      name: "slug",
+      type: "slug",
+      options: { source: "title", maxLength: 96 },
+      validation: (rule) => rule.required().error("Slug is required"),
+    }),
   ],
   preview: {
     select: {
-      title: "name",
+      title: "title",
+      subtitle: "slug.current",
+    },
+    prepare({ title, subtitle }) {
+      return {
+        title,
+        subtitle: subtitle ? `slug: ${subtitle}` : "⚠️ No slug",
+      };
     },
   },
 });

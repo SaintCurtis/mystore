@@ -1,0 +1,120 @@
+{"_id": "brand-asus-rog", "_type": "brand", "title": "ASUS ROG", "slug": {"_type": "slug", "current": "asus-rog"}}
+{"_id": "brand-msi", "_type": "brand", "title": "MSI", "slug": {"_type": "slug", "current": "msi"}}
+{"_id": "brand-acer", "_type": "brand", "title": "Acer", "slug": {"_type": "slug", "current": "acer"}}
+{"_id": "brand-hp", "_type": "brand", "title": "HP", "slug": {"_type": "slug", "current": "hp"}}
+{"_id": "brand-lenovo", "_type": "brand", "title": "Lenovo", "slug": {"_type": "slug", "current": "lenovo"}}
+{"_id": "brand-dell", "_type": "brand", "title": "Dell", "slug": {"_type": "slug", "current": "dell"}}
+{"_id": "brand-razer", "_type": "brand", "title": "Razer", "slug": {"_type": "slug", "current": "razer"}}
+{"_id": "brand-gigabyte", "_type": "brand", "title": "Gigabyte AORUS", "slug": {"_type": "slug", "current": "gigabyte-aorus"}}
+{"_id": "brand-samsung", "_type": "brand", "title": "Samsung", "slug": {"_type": "slug", "current": "samsung"}}
+{"_id": "brand-microsoft", "_type": "brand", "title": "Microsoft", "slug": {"_type": "slug", "current": "microsoft"}}
+{"_id": "brand-apple", "_type": "brand", "title": "Apple", "slug": {"_type": "slug", "current": "apple"}}
+{"_id": "brand-toshiba", "_type": "brand", "title": "Toshiba", "slug": {"_type": "slug", "current": "toshiba"}}
+{"_id": "brand-lg", "_type": "brand", "title": "LG", "slug": {"_type": "slug", "current": "lg"}}
+
+{"_id": "model-asus-rog-strix-scar-18", "_type": "model", "title": "ROG Strix SCAR 18", "slug": {"_type": "slug", "current": "rog-strix-scar-18"}, "brand": {"_type": "reference", "_ref": "brand-asus-rog"}}
+{"_id": "model-asus-rog-strix-scar-16", "_type": "model", "title": "ROG Strix SCAR 16", "slug": {"_type": "slug", "current": "rog-strix-scar-16"}, "brand": {"_type": "reference", "_ref": "brand-asus-rog"}}
+{"_id": "model-asus-rog-strix-g18", "_type": "model", "title": "ROG Strix G18", "slug": {"_type": "slug", "current": "rog-strix-g18"}, "brand": {"_type": "reference", "_ref": "brand-asus-rog"}}
+{"_id": "model-asus-rog-strix-g16", "_type": "model", "title": "ROG Strix G16", "slug": {"_type": "slug", "current": "rog-strix-g16"}, "brand": {"_type": "reference", "_ref": "brand-asus-rog"}}
+{"_id": "model-asus-rog-zephyrus-g14", "_type": "model", "title": "ROG Zephyrus G14", "slug": {"_type": "slug", "current": "rog-zephyrus-g14"}, "brand": {"_type": "reference", "_ref": "brand-asus-rog"}}
+{"_id": "model-asus-rog-zephyrus-g16", "_type": "model", "title": "ROG Zephyrus G16", "slug": {"_type": "slug", "current": "rog-zephyrus-g16"}, "brand": {"_type": "reference", "_ref": "brand-asus-rog"}}
+{"_id": "model-asus-rog-zephyrus-duo-16", "_type": "model", "title": "ROG Zephyrus Duo 16", "slug": {"_type": "slug", "current": "rog-zephyrus-duo-16"}, "brand": {"_type": "reference", "_ref": "brand-asus-rog"}}
+{"_id": "model-asus-tuf-gaming-a15", "_type": "model", "title": "TUF Gaming A15", "slug": {"_type": "slug", "current": "tuf-gaming-a15"}, "brand": {"_type": "reference", "_ref": "brand-asus-rog"}}
+{"_id": "model-asus-tuf-gaming-f15", "_type": "model", "title": "TUF Gaming F15", "slug": {"_type": "slug", "current": "tuf-gaming-f15"}, "brand": {"_type": "reference", "_ref": "brand-asus-rog"}}
+{"_id": "model-asus-tuf-gaming-f16", "_type": "model", "title": "TUF Gaming F16", "slug": {"_type": "slug", "current": "tuf-gaming-f16"}, "brand": {"_type": "reference", "_ref": "brand-asus-rog"}}
+{"_id": "model-asus-rog-flow-x13", "_type": "model", "title": "ROG Flow X13", "slug": {"_type": "slug", "current": "rog-flow-x13"}, "brand": {"_type": "reference", "_ref": "brand-asus-rog"}}
+{"_id": "model-asus-rog-flow-z13", "_type": "model", "title": "ROG Flow Z13", "slug": {"_type": "slug", "current": "rog-flow-z13"}, "brand": {"_type": "reference", "_ref": "brand-asus-rog"}}
+
+{"_id": "model-msi-katana-15", "_type": "model", "title": "Katana 15", "slug": {"_type": "slug", "current": "msi-katana-15"}, "brand": {"_type": "reference", "_ref": "brand-msi"}}
+{"_id": "model-msi-katana-17", "_type": "model", "title": "Katana 17", "slug": {"_type": "slug", "current": "msi-katana-17"}, "brand": {"_type": "reference", "_ref": "brand-msi"}}
+{"_id": "model-msi-stealth-15", "_type": "model", "title": "Stealth 15", "slug": {"_type": "slug", "current": "msi-stealth-15"}, "brand": {"_type": "reference", "_ref": "brand-msi"}}
+{"_id": "model-msi-stealth-16", "_type": "model", "title": "Stealth 16", "slug": {"_type": "slug", "current": "msi-stealth-16"}, "brand": {"_type": "reference", "_ref": "brand-msi"}}
+{"_id": "model-msi-stealth-18", "_type": "model", "title": "Stealth 18", "slug": {"_type": "slug", "current": "msi-stealth-18"}, "brand": {"_type": "reference", "_ref": "brand-msi"}}
+{"_id": "model-msi-raider-ge68", "_type": "model", "title": "Raider GE68", "slug": {"_type": "slug", "current": "msi-raider-ge68"}, "brand": {"_type": "reference", "_ref": "brand-msi"}}
+{"_id": "model-msi-raider-ge78", "_type": "model", "title": "Raider GE78", "slug": {"_type": "slug", "current": "msi-raider-ge78"}, "brand": {"_type": "reference", "_ref": "brand-msi"}}
+{"_id": "model-msi-titan-gt77", "_type": "model", "title": "Titan GT77", "slug": {"_type": "slug", "current": "msi-titan-gt77"}, "brand": {"_type": "reference", "_ref": "brand-msi"}}
+{"_id": "model-msi-titan-18-hx", "_type": "model", "title": "Titan 18 HX", "slug": {"_type": "slug", "current": "msi-titan-18-hx"}, "brand": {"_type": "reference", "_ref": "brand-msi"}}
+{"_id": "model-msi-vector-gp68", "_type": "model", "title": "Vector GP68", "slug": {"_type": "slug", "current": "msi-vector-gp68"}, "brand": {"_type": "reference", "_ref": "brand-msi"}}
+{"_id": "model-msi-vector-gp78", "_type": "model", "title": "Vector GP78", "slug": {"_type": "slug", "current": "msi-vector-gp78"}, "brand": {"_type": "reference", "_ref": "brand-msi"}}
+{"_id": "model-msi-crosshair-16", "_type": "model", "title": "Crosshair 16", "slug": {"_type": "slug", "current": "msi-crosshair-16"}, "brand": {"_type": "reference", "_ref": "brand-msi"}}
+{"_id": "model-msi-cyborg-15", "_type": "model", "title": "Cyborg 15", "slug": {"_type": "slug", "current": "msi-cyborg-15"}, "brand": {"_type": "reference", "_ref": "brand-msi"}}
+{"_id": "model-msi-pulse-15", "_type": "model", "title": "Pulse 15", "slug": {"_type": "slug", "current": "msi-pulse-15"}, "brand": {"_type": "reference", "_ref": "brand-msi"}}
+{"_id": "model-msi-pulse-17", "_type": "model", "title": "Pulse 17", "slug": {"_type": "slug", "current": "msi-pulse-17"}, "brand": {"_type": "reference", "_ref": "brand-msi"}}
+{"_id": "model-msi-sword-15", "_type": "model", "title": "Sword 15", "slug": {"_type": "slug", "current": "msi-sword-15"}, "brand": {"_type": "reference", "_ref": "brand-msi"}}
+{"_id": "model-msi-sword-17", "_type": "model", "title": "Sword 17", "slug": {"_type": "slug", "current": "msi-sword-17"}, "brand": {"_type": "reference", "_ref": "brand-msi"}}
+
+{"_id": "model-acer-nitro-5", "_type": "model", "title": "Nitro 5", "slug": {"_type": "slug", "current": "acer-nitro-5"}, "brand": {"_type": "reference", "_ref": "brand-acer"}}
+{"_id": "model-acer-nitro-16", "_type": "model", "title": "Nitro 16", "slug": {"_type": "slug", "current": "acer-nitro-16"}, "brand": {"_type": "reference", "_ref": "brand-acer"}}
+{"_id": "model-acer-nitro-17", "_type": "model", "title": "Nitro 17", "slug": {"_type": "slug", "current": "acer-nitro-17"}, "brand": {"_type": "reference", "_ref": "brand-acer"}}
+{"_id": "model-acer-predator-helios-16", "_type": "model", "title": "Predator Helios 16", "slug": {"_type": "slug", "current": "acer-predator-helios-16"}, "brand": {"_type": "reference", "_ref": "brand-acer"}}
+{"_id": "model-acer-predator-helios-18", "_type": "model", "title": "Predator Helios 18", "slug": {"_type": "slug", "current": "acer-predator-helios-18"}, "brand": {"_type": "reference", "_ref": "brand-acer"}}
+{"_id": "model-acer-predator-helios-neo-16", "_type": "model", "title": "Predator Helios Neo 16", "slug": {"_type": "slug", "current": "acer-predator-helios-neo-16"}, "brand": {"_type": "reference", "_ref": "brand-acer"}}
+{"_id": "model-acer-predator-helios-neo-18", "_type": "model", "title": "Predator Helios Neo 18", "slug": {"_type": "slug", "current": "acer-predator-helios-neo-18"}, "brand": {"_type": "reference", "_ref": "brand-acer"}}
+{"_id": "model-acer-predator-triton-16", "_type": "model", "title": "Predator Triton 16", "slug": {"_type": "slug", "current": "acer-predator-triton-16"}, "brand": {"_type": "reference", "_ref": "brand-acer"}}
+{"_id": "model-acer-predator-triton-neo-16", "_type": "model", "title": "Predator Triton Neo 16", "slug": {"_type": "slug", "current": "acer-predator-triton-neo-16"}, "brand": {"_type": "reference", "_ref": "brand-acer"}}
+{"_id": "model-acer-predator-orion-3000", "_type": "model", "title": "Predator Orion 3000", "slug": {"_type": "slug", "current": "acer-predator-orion-3000"}, "brand": {"_type": "reference", "_ref": "brand-acer"}}
+{"_id": "model-acer-aspire-gaming", "_type": "model", "title": "Aspire Gaming", "slug": {"_type": "slug", "current": "acer-aspire-gaming"}, "brand": {"_type": "reference", "_ref": "brand-acer"}}
+
+{"_id": "model-hp-omen-16", "_type": "model", "title": "OMEN 16", "slug": {"_type": "slug", "current": "hp-omen-16"}, "brand": {"_type": "reference", "_ref": "brand-hp"}}
+{"_id": "model-hp-omen-17", "_type": "model", "title": "OMEN 17", "slug": {"_type": "slug", "current": "hp-omen-17"}, "brand": {"_type": "reference", "_ref": "brand-hp"}}
+{"_id": "model-hp-omen-max-16", "_type": "model", "title": "OMEN Max 16", "slug": {"_type": "slug", "current": "hp-omen-max-16"}, "brand": {"_type": "reference", "_ref": "brand-hp"}}
+{"_id": "model-hp-omen-transcend-14", "_type": "model", "title": "OMEN Transcend 14", "slug": {"_type": "slug", "current": "hp-omen-transcend-14"}, "brand": {"_type": "reference", "_ref": "brand-hp"}}
+{"_id": "model-hp-omen-transcend-16", "_type": "model", "title": "OMEN Transcend 16", "slug": {"_type": "slug", "current": "hp-omen-transcend-16"}, "brand": {"_type": "reference", "_ref": "brand-hp"}}
+{"_id": "model-hp-victus-15", "_type": "model", "title": "Victus 15", "slug": {"_type": "slug", "current": "hp-victus-15"}, "brand": {"_type": "reference", "_ref": "brand-hp"}}
+{"_id": "model-hp-victus-16", "_type": "model", "title": "Victus 16", "slug": {"_type": "slug", "current": "hp-victus-16"}, "brand": {"_type": "reference", "_ref": "brand-hp"}}
+{"_id": "model-hp-spectre-x360-14", "_type": "model", "title": "Spectre x360 14", "slug": {"_type": "slug", "current": "hp-spectre-x360-14"}, "brand": {"_type": "reference", "_ref": "brand-hp"}}
+{"_id": "model-hp-spectre-x360-16", "_type": "model", "title": "Spectre x360 16", "slug": {"_type": "slug", "current": "hp-spectre-x360-16"}, "brand": {"_type": "reference", "_ref": "brand-hp"}}
+{"_id": "model-hp-envy-x360-15", "_type": "model", "title": "ENVY x360 15", "slug": {"_type": "slug", "current": "hp-envy-x360-15"}, "brand": {"_type": "reference", "_ref": "brand-hp"}}
+{"_id": "model-hp-elitebook-840", "_type": "model", "title": "EliteBook 840", "slug": {"_type": "slug", "current": "hp-elitebook-840"}, "brand": {"_type": "reference", "_ref": "brand-hp"}}
+
+{"_id": "model-lenovo-legion-5i", "_type": "model", "title": "Legion 5i", "slug": {"_type": "slug", "current": "lenovo-legion-5i"}, "brand": {"_type": "reference", "_ref": "brand-lenovo"}}
+{"_id": "model-lenovo-legion-5-pro", "_type": "model", "title": "Legion 5 Pro", "slug": {"_type": "slug", "current": "lenovo-legion-5-pro"}, "brand": {"_type": "reference", "_ref": "brand-lenovo"}}
+{"_id": "model-lenovo-legion-7i", "_type": "model", "title": "Legion 7i", "slug": {"_type": "slug", "current": "lenovo-legion-7i"}, "brand": {"_type": "reference", "_ref": "brand-lenovo"}}
+{"_id": "model-lenovo-legion-7-gen9", "_type": "model", "title": "Legion 7 Gen 9", "slug": {"_type": "slug", "current": "lenovo-legion-7-gen9"}, "brand": {"_type": "reference", "_ref": "brand-lenovo"}}
+{"_id": "model-lenovo-legion-9i", "_type": "model", "title": "Legion 9i", "slug": {"_type": "slug", "current": "lenovo-legion-9i"}, "brand": {"_type": "reference", "_ref": "brand-lenovo"}}
+{"_id": "model-lenovo-legion-pro-5i", "_type": "model", "title": "Legion Pro 5i", "slug": {"_type": "slug", "current": "lenovo-legion-pro-5i"}, "brand": {"_type": "reference", "_ref": "brand-lenovo"}}
+{"_id": "model-lenovo-legion-pro-7i", "_type": "model", "title": "Legion Pro 7i", "slug": {"_type": "slug", "current": "lenovo-legion-pro-7i"}, "brand": {"_type": "reference", "_ref": "brand-lenovo"}}
+{"_id": "model-lenovo-ideapad-gaming-3", "_type": "model", "title": "IdeaPad Gaming 3", "slug": {"_type": "slug", "current": "lenovo-ideapad-gaming-3"}, "brand": {"_type": "reference", "_ref": "brand-lenovo"}}
+{"_id": "model-lenovo-thinkpad-x1-carbon", "_type": "model", "title": "ThinkPad X1 Carbon", "slug": {"_type": "slug", "current": "lenovo-thinkpad-x1-carbon"}, "brand": {"_type": "reference", "_ref": "brand-lenovo"}}
+{"_id": "model-lenovo-thinkpad-t14s", "_type": "model", "title": "ThinkPad T14s", "slug": {"_type": "slug", "current": "lenovo-thinkpad-t14s"}, "brand": {"_type": "reference", "_ref": "brand-lenovo"}}
+{"_id": "model-lenovo-yoga-9i", "_type": "model", "title": "Yoga 9i", "slug": {"_type": "slug", "current": "lenovo-yoga-9i"}, "brand": {"_type": "reference", "_ref": "brand-lenovo"}}
+
+{"_id": "model-dell-alienware-m16", "_type": "model", "title": "Alienware m16", "slug": {"_type": "slug", "current": "dell-alienware-m16"}, "brand": {"_type": "reference", "_ref": "brand-dell"}}
+{"_id": "model-dell-alienware-m18", "_type": "model", "title": "Alienware m18", "slug": {"_type": "slug", "current": "dell-alienware-m18"}, "brand": {"_type": "reference", "_ref": "brand-dell"}}
+{"_id": "model-dell-alienware-x16", "_type": "model", "title": "Alienware x16", "slug": {"_type": "slug", "current": "dell-alienware-x16"}, "brand": {"_type": "reference", "_ref": "brand-dell"}}
+{"_id": "model-dell-g15", "_type": "model", "title": "Dell G15", "slug": {"_type": "slug", "current": "dell-g15"}, "brand": {"_type": "reference", "_ref": "brand-dell"}}
+{"_id": "model-dell-g16", "_type": "model", "title": "Dell G16", "slug": {"_type": "slug", "current": "dell-g16"}, "brand": {"_type": "reference", "_ref": "brand-dell"}}
+{"_id": "model-dell-xps-13", "_type": "model", "title": "XPS 13", "slug": {"_type": "slug", "current": "dell-xps-13"}, "brand": {"_type": "reference", "_ref": "brand-dell"}}
+{"_id": "model-dell-xps-15", "_type": "model", "title": "XPS 15", "slug": {"_type": "slug", "current": "dell-xps-15"}, "brand": {"_type": "reference", "_ref": "brand-dell"}}
+{"_id": "model-dell-xps-16", "_type": "model", "title": "XPS 16", "slug": {"_type": "slug", "current": "dell-xps-16"}, "brand": {"_type": "reference", "_ref": "brand-dell"}}
+{"_id": "model-dell-inspiron-15", "_type": "model", "title": "Inspiron 15", "slug": {"_type": "slug", "current": "dell-inspiron-15"}, "brand": {"_type": "reference", "_ref": "brand-dell"}}
+{"_id": "model-dell-latitude-7440", "_type": "model", "title": "Latitude 7440", "slug": {"_type": "slug", "current": "dell-latitude-7440"}, "brand": {"_type": "reference", "_ref": "brand-dell"}}
+
+{"_id": "model-razer-blade-14", "_type": "model", "title": "Razer Blade 14", "slug": {"_type": "slug", "current": "razer-blade-14"}, "brand": {"_type": "reference", "_ref": "brand-razer"}}
+{"_id": "model-razer-blade-15", "_type": "model", "title": "Razer Blade 15", "slug": {"_type": "slug", "current": "razer-blade-15"}, "brand": {"_type": "reference", "_ref": "brand-razer"}}
+{"_id": "model-razer-blade-16", "_type": "model", "title": "Razer Blade 16", "slug": {"_type": "slug", "current": "razer-blade-16"}, "brand": {"_type": "reference", "_ref": "brand-razer"}}
+{"_id": "model-razer-blade-18", "_type": "model", "title": "Razer Blade 18", "slug": {"_type": "slug", "current": "razer-blade-18"}, "brand": {"_type": "reference", "_ref": "brand-razer"}}
+
+{"_id": "model-gigabyte-aorus-15", "_type": "model", "title": "AORUS 15", "slug": {"_type": "slug", "current": "gigabyte-aorus-15"}, "brand": {"_type": "reference", "_ref": "brand-gigabyte"}}
+{"_id": "model-gigabyte-aorus-16", "_type": "model", "title": "AORUS 16", "slug": {"_type": "slug", "current": "gigabyte-aorus-16"}, "brand": {"_type": "reference", "_ref": "brand-gigabyte"}}
+{"_id": "model-gigabyte-aorus-17", "_type": "model", "title": "AORUS 17", "slug": {"_type": "slug", "current": "gigabyte-aorus-17"}, "brand": {"_type": "reference", "_ref": "brand-gigabyte"}}
+{"_id": "model-gigabyte-aorus-master-16", "_type": "model", "title": "AORUS Master 16", "slug": {"_type": "slug", "current": "gigabyte-aorus-master-16"}, "brand": {"_type": "reference", "_ref": "brand-gigabyte"}}
+{"_id": "model-gigabyte-g5", "_type": "model", "title": "G5", "slug": {"_type": "slug", "current": "gigabyte-g5"}, "brand": {"_type": "reference", "_ref": "brand-gigabyte"}}
+{"_id": "model-gigabyte-g6", "_type": "model", "title": "G6", "slug": {"_type": "slug", "current": "gigabyte-g6"}, "brand": {"_type": "reference", "_ref": "brand-gigabyte"}}
+
+{"_id": "model-macbook-air-m2", "_type": "model", "title": "MacBook Air M2", "slug": {"_type": "slug", "current": "macbook-air-m2"}, "brand": {"_type": "reference", "_ref": "brand-apple"}}
+{"_id": "model-macbook-air-m3", "_type": "model", "title": "MacBook Air M3", "slug": {"_type": "slug", "current": "macbook-air-m3"}, "brand": {"_type": "reference", "_ref": "brand-apple"}}
+{"_id": "model-macbook-air-m4", "_type": "model", "title": "MacBook Air M4", "slug": {"_type": "slug", "current": "macbook-air-m4"}, "brand": {"_type": "reference", "_ref": "brand-apple"}}
+{"_id": "model-macbook-pro-14-m3", "_type": "model", "title": "MacBook Pro 14 M3", "slug": {"_type": "slug", "current": "macbook-pro-14-m3"}, "brand": {"_type": "reference", "_ref": "brand-apple"}}
+{"_id": "model-macbook-pro-14-m4", "_type": "model", "title": "MacBook Pro 14 M4", "slug": {"_type": "slug", "current": "macbook-pro-14-m4"}, "brand": {"_type": "reference", "_ref": "brand-apple"}}
+{"_id": "model-macbook-pro-16-m3", "_type": "model", "title": "MacBook Pro 16 M3", "slug": {"_type": "slug", "current": "macbook-pro-16-m3"}, "brand": {"_type": "reference", "_ref": "brand-apple"}}
+{"_id": "model-macbook-pro-16-m4", "_type": "model", "title": "MacBook Pro 16 M4", "slug": {"_type": "slug", "current": "macbook-pro-16-m4"}, "brand": {"_type": "reference", "_ref": "brand-apple"}}
+
+{"_id": "model-microsoft-surface-laptop-5", "_type": "model", "title": "Surface Laptop 5", "slug": {"_type": "slug", "current": "surface-laptop-5"}, "brand": {"_type": "reference", "_ref": "brand-microsoft"}}
+{"_id": "model-microsoft-surface-laptop-6", "_type": "model", "title": "Surface Laptop 6", "slug": {"_type": "slug", "current": "surface-laptop-6"}, "brand": {"_type": "reference", "_ref": "brand-microsoft"}}
+{"_id": "model-microsoft-surface-pro-10", "_type": "model", "title": "Surface Pro 10", "slug": {"_type": "slug", "current": "surface-pro-10"}, "brand": {"_type": "reference", "_ref": "brand-microsoft"}}
+{"_id": "model-microsoft-surface-book-3", "_type": "model", "title": "Surface Book 3", "slug": {"_type": "slug", "current": "surface-book-3"}, "brand": {"_type": "reference", "_ref": "brand-microsoft"}}
+
+{"_id": "model-samsung-galaxy-book4-pro", "_type": "model", "title": "Galaxy Book4 Pro", "slug": {"_type": "slug", "current": "samsung-galaxy-book4-pro"}, "brand": {"_type": "reference", "_ref": "brand-samsung"}}
+{"_id": "model-samsung-galaxy-book4-ultra", "_type": "model", "title": "Galaxy Book4 Ultra", "slug": {"_type": "slug", "current": "samsung-galaxy-book4-ultra"}, "brand": {"_type": "reference", "_ref": "brand-samsung"}}
+{"_id": "model-samsung-galaxy-book4-360", "_type": "model", "title": "Galaxy Book4 360", "slug": {"_type": "slug", "current": "samsung-galaxy-book4-360"}, "brand": {"_type": "reference", "_ref": "brand-samsung"}}

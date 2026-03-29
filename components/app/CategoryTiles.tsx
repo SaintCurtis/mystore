@@ -7,21 +7,18 @@ import { Grid2x2, ChevronRight } from "lucide-react";
 import {
   CONDITIONS,
   CATEGORIES_WITH_BRANDS,
-  CATEGORIES_WITHOUT_BRANDS,
   CATEGORIES_WITH_CONDITIONS,
 } from "@/lib/constants/filters";
 import type { ALL_CATEGORIES_QUERYResult } from "@/sanity.types";
-
-// ── Types ──────────────────────────────────────────────────────────────────
 
 interface CategoryTilesProps {
   categories: ALL_CATEGORIES_QUERYResult;
   activeCategory?: string;
   activeCondition?: string;
   activeBrand?: string;
+  /** brands keyed by category slug — passed from page.tsx server fetch */
+  brandsMap?: Record<string, { title: string; slug: string }[]>;
 }
-
-// ── Helpers ────────────────────────────────────────────────────────────────
 
 function buildHref(params: {
   category?: string;
@@ -46,19 +43,16 @@ function categoryHasBrands(slug: string): boolean {
 
 // ── Condition Dropdown ─────────────────────────────────────────────────────
 
-interface ConditionDropdownProps {
-  categorySlug: string;
-  activeCondition?: string;
-  activeBrand?: string;
-  /** brands fetched server-side, keyed by condition */
-  brands?: string[];
-}
-
 function ConditionDropdown({
   categorySlug,
   activeCondition,
   brands = [],
-}: ConditionDropdownProps) {
+}: {
+  categorySlug: string;
+  activeCondition?: string;
+  activeBrand?: string;
+  brands?: { title: string; slug: string }[];
+}) {
   const [hoveredCondition, setHoveredCondition] = useState<string | null>(null);
   const hasBrands = categoryHasBrands(categorySlug);
 
@@ -67,9 +61,7 @@ function ConditionDropdown({
       {CONDITIONS.map((cond) => {
         const isActive = activeCondition === cond.value;
         const showBrandSub =
-          hasBrands &&
-          hoveredCondition === cond.value &&
-          brands.length > 0;
+          hasBrands && hoveredCondition === cond.value && (brands?.length ?? 0) > 0;
 
         return (
           <div
@@ -79,10 +71,7 @@ function ConditionDropdown({
             onMouseLeave={() => setHoveredCondition(null)}
           >
             <Link
-              href={buildHref({
-                category: categorySlug,
-                condition: cond.value,
-              })}
+              href={buildHref({ category: categorySlug, condition: cond.value })}
               className={`flex items-center justify-between px-4 py-3 text-sm transition-colors ${
                 isActive
                   ? "bg-amber-500/15 text-amber-400"
@@ -90,7 +79,7 @@ function ConditionDropdown({
               }`}
             >
               <span className="font-medium">{cond.label}</span>
-              {hasBrands && brands.length > 0 && (
+              {hasBrands && (brands?.length ?? 0) > 0 && (
                 <ChevronRight className="h-3.5 w-3.5 text-zinc-500" />
               )}
             </Link>
@@ -100,15 +89,15 @@ function ConditionDropdown({
               <div className="absolute bottom-0 left-full z-50 ml-1 w-44 overflow-hidden rounded-xl border border-zinc-700/80 bg-zinc-900 shadow-2xl shadow-zinc-950/60">
                 {brands.map((brand) => (
                   <Link
-                    key={brand}
+                    key={brand.slug}
                     href={buildHref({
                       category: categorySlug,
                       condition: cond.value,
-                      brand,
+                      brand: brand.slug,
                     })}
                     className="block px-4 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-zinc-800 hover:text-white"
                   >
-                    {brand}
+                    {brand.title}
                   </Link>
                 ))}
               </div>
@@ -122,21 +111,19 @@ function ConditionDropdown({
 
 // ── Single Tile ─────────────────────────────────────────────────────────────
 
-interface TileProps {
-  category: ALL_CATEGORIES_QUERYResult[number];
-  isActive: boolean;
-  activeCondition?: string;
-  activeBrand?: string;
-  brands?: string[];
-}
-
 function CategoryTile({
   category,
   isActive,
   activeCondition,
   activeBrand,
   brands = [],
-}: TileProps) {
+}: {
+  category: ALL_CATEGORIES_QUERYResult[number];
+  isActive: boolean;
+  activeCondition?: string;
+  activeBrand?: string;
+  brands?: { title: string; slug: string }[];
+}) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const imageUrl = category.image?.asset?.url;
@@ -178,8 +165,6 @@ function CategoryTile({
             <div className="absolute inset-0 bg-linear-to-br from-amber-500 to-orange-600" />
           )}
           <div className="absolute inset-0 bg-linear-to-t from-black/75 via-black/20 to-transparent" />
-
-          {/* Name + dropdown hint */}
           <div className="absolute inset-x-0 bottom-0 p-3">
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold text-white drop-shadow-md">
@@ -194,8 +179,6 @@ function CategoryTile({
               )}
             </div>
           </div>
-
-          {/* Active dot */}
           {isActive && (
             <div className="absolute top-2 right-2">
               <span className="flex h-2 w-2">
@@ -207,7 +190,6 @@ function CategoryTile({
         </div>
       </Link>
 
-      {/* Condition dropdown — only for categories that support it */}
       {hasConditions && dropdownOpen && (
         <ConditionDropdown
           categorySlug={slug}
@@ -227,13 +209,9 @@ export function CategoryTiles({
   activeCategory,
   activeCondition,
   activeBrand,
+  brandsMap = {},
 }: CategoryTilesProps) {
-  // Only top-level categories in the tile row
   const topLevel = categories.filter((c) => !(c as any).parentSlug);
-
-  // Brand list for each category that has brands — passed from page server-side
-  // For now we use an empty array; page.tsx will pass them as props
-  const getBrandsForCategory = (_slug: string): string[] => [];
 
   return (
     <div className="relative">
@@ -269,7 +247,7 @@ export function CategoryTiles({
             isActive={activeCategory === category.slug}
             activeCondition={activeCondition}
             activeBrand={activeBrand}
-            brands={getBrandsForCategory(category.slug ?? "")}
+            brands={brandsMap[category.slug ?? ""] ?? []}
           />
         ))}
       </div>

@@ -14,7 +14,8 @@ interface ProductSectionProps {
   categories: ALL_CATEGORIES_QUERYResult;
   products: FILTER_PRODUCTS_BY_NAME_QUERYResult;
   searchQuery: string;
-  brands?: string[];
+  brands?: { title: string; slug: string }[];
+  models?: { title: string; slug: string }[];
 }
 
 export function ProductSection({
@@ -22,6 +23,7 @@ export function ProductSection({
   products,
   searchQuery,
   brands = [],
+  models = [],
 }: ProductSectionProps) {
   const [filtersOpen, setFiltersOpen] = useState(true);
 
@@ -64,7 +66,7 @@ export function ProductSection({
             filtersOpen ? "w-full lg:w-72" : "hidden"
           }`}
         >
-          <ProductFilters categories={categories} brands={brands} />
+          <ProductFilters categories={categories} brands={brands} models={models} />
         </aside>
         <main className="flex-1">
           <ProductGrid products={products} />

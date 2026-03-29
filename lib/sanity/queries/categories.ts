@@ -104,3 +104,16 @@ export const ALL_BRANDS_BY_CATEGORY_QUERY = defineQuery(`*[
   title,
   "slug": slug.current
 }`);
+
+/**
+ * Get distinct models for a given brand (filtered by category)
+ * Used to populate model dropdown after brand is selected
+ */
+export const MODELS_BY_BRAND_QUERY = defineQuery(`*[
+  _type == "model"
+  && brand->slug.current == $brandSlug
+] | order(title asc) {
+  _id,
+  title,
+  "slug": slug.current
+}`);

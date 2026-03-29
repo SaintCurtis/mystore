@@ -8,28 +8,34 @@ export const modelType = defineType({
   icon: TagIcon,
   fields: [
     defineField({
-      name: "name",
+      name: "title",
       title: "Model Name",
       type: "string",
       validation: (rule) => rule.required().error("Model name is required"),
+    }),
+    defineField({
+      name: "slug",
+      type: "slug",
+      options: { source: "title", maxLength: 96 },
+      validation: (rule) => rule.required().error("Slug is required"),
     }),
     defineField({
       name: "brand",
       title: "Brand",
       type: "reference",
       to: [{ type: "brand" }],
+      description: "Which brand does this model belong to?",
     }),
   ],
   preview: {
     select: {
-      title: "name",
-      brandName: "brand.name",
+      title: "title",
+      brand: "brand.title",
     },
-    prepare(selection) {
-      const { title, brandName } = selection;
+    prepare({ title, brand }) {
       return {
-        title: title,
-        subtitle: brandName ? `by ${brandName}` : "",
+        title,
+        subtitle: brand ? brand : "⚠️ No brand set",
       };
     },
   },

@@ -30,12 +30,15 @@ const PRICE_MAX = 8000000;
 interface ProductFiltersProps {
   categories: ALL_CATEGORIES_QUERYResult;
   /** Server-fetched brands for current category */
-  brands?: string[];
+  brands?: { title: string; slug: string }[];
+  /** Server-fetched models for selected brand */
+  models?: { title: string; slug: string }[];
 }
 
 export function ProductFilters({
   categories,
   brands = [],
+  models = [],
 }: ProductFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -75,11 +78,15 @@ export function ProductFilters({
     (CATEGORIES_WITH_BRANDS as readonly string[]).includes(currentCategory) &&
     brands.length > 0;
 
+  const showModel = showBrand && !!currentBrand && models.length > 0;
+
   // ── Active states ──────────────────────────────────────────────
   const isSearchActive = !!currentSearch;
   const isCategoryActive = !!currentCategory;
   const isConditionActive = !!currentCondition;
   const isBrandActive = !!currentBrand;
+  const currentModel = searchParams.get("model") ?? "";
+  const isModelActive = !!currentModel;
   const isColorActive = !!currentColor;
   const isMaterialActive = !!currentMaterial;
   const isPriceActive =
@@ -91,6 +98,7 @@ export function ProductFilters({
     isCategoryActive,
     isConditionActive,
     isBrandActive,
+    isModelActive,
     isColorActive,
     isMaterialActive,
     isPriceActive,
@@ -126,7 +134,7 @@ export function ProductFilters({
     if (key === "price") {
       updateParams({ minPrice: null, maxPrice: null });
     } else if (key === "brand") {
-      updateParams({ brand: null });
+      updateParams({ brand: null, model: null });
     } else if (key === "condition") {
       updateParams({ condition: null, brand: null });
     } else {
@@ -290,8 +298,35 @@ export function ProductFilters({
             <SelectContent className="bg-zinc-800 border-zinc-700">
               <SelectItem value="all" className="text-zinc-100">All Brands</SelectItem>
               {brands.map((brand) => (
-                <SelectItem key={brand} value={brand} className="text-zinc-100">
-                  {brand}
+                <SelectItem key={brand.slug} value={brand.slug} className="text-zinc-100">
+                  {brand.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {/* Model */}
+      {showModel && (
+        <div>
+          <FilterLabel isActive={isModelActive} filterKey="model">
+            Model
+          </FilterLabel>
+          <Select
+            value={currentModel || "all"}
+            onValueChange={(value) =>
+              updateParams({ model: value === "all" ? null : value })
+            }
+          >
+            <SelectTrigger className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${isModelActive ? "border-amber-500 ring-1 ring-amber-500" : ""}`}>
+              <SelectValue placeholder="All Models" />
+            </SelectTrigger>
+            <SelectContent className="bg-zinc-800 border-zinc-700">
+              <SelectItem value="all" className="text-zinc-100">All Models</SelectItem>
+              {models.map((model) => (
+                <SelectItem key={model.slug} value={model.slug} className="text-zinc-100">
+                  {model.title}
                 </SelectItem>
               ))}
             </SelectContent>

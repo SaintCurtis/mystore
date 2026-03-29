@@ -2,13 +2,6 @@ import { PackageIcon } from "@sanity/icons";
 import { defineField, defineType } from "sanity";
 import { MATERIALS_SANITY_LIST, COLORS_SANITY_LIST } from "@/lib/constants/filters";
 
-const LAPTOP_CATEGORIES = [
-  "Gaming Laptops",
-  "Regular Laptops",
-  "MacBook",
-  // Add any other laptop-related category titles exactly as they appear in your Category documents
-];
-
 export const productType = defineType({
   name: "product",
   title: "Product",
@@ -16,143 +9,104 @@ export const productType = defineType({
   icon: PackageIcon,
   groups: [
     { name: "details", title: "Details", default: true },
+    { name: "classification", title: "Classification" },
     { name: "media", title: "Media" },
     { name: "inventory", title: "Inventory" },
   ],
   fields: [
+    // ── Core Details ───────────────────────────────────────────
     defineField({
       name: "name",
       type: "string",
       group: "details",
-      validation: (rule) => [rule.required().error("Product name is required")],
+      validation: (rule) => rule.required().error("Product name is required"),
     }),
     defineField({
       name: "slug",
       type: "slug",
       group: "details",
-      options: {
-        source: "name",
-        maxLength: 96,
-      },
-      validation: (rule) => [
-        rule.required().error("Slug is required for URL generation"),
-      ],
+      options: { source: "name", maxLength: 96 },
+      validation: (rule) => rule.required().error("Slug is required"),
     }),
     defineField({
       name: "description",
       type: "text",
       group: "details",
       rows: 4,
-      description: "Product description",
     }),
     defineField({
       name: "price",
       type: "number",
       group: "details",
-      description: "Price in NGN (e.g., 599.99)",
+      description: "Price in NGN (e.g., 1950000)",
       validation: (rule) => [
         rule.required().error("Price is required"),
-        rule.positive().error("Price must be a positive number"),
+        rule.positive().error("Price must be positive"),
       ],
     }),
 
+    // ── Classification ─────────────────────────────────────────
     defineField({
       name: "category",
       type: "reference",
       to: [{ type: "category" }],
-      group: "details",
-      validation: (rule) => [rule.required().error("Category is required")],
+      group: "classification",
+      description: "Select the subcategory (e.g. Regular Laptops — Brand New)",
+      validation: (rule) => rule.required().error("Category is required"),
     }),
-
-    // ==================== LAPTOP-ONLY FIELDS ====================
     defineField({
       name: "condition",
       title: "Condition",
       type: "reference",
       to: [{ type: "condition" }],
-      group: "details",
-      hidden: ({ document }) => {
-        const categoryTitle = (document?.category as any)?.title;
-        return !LAPTOP_CATEGORIES.includes(categoryTitle);
-      },
-      validation: (rule) =>
-        rule.custom((value, context) => {
-          const categoryTitle = (context.document?.category as any)?.title;
-          const isLaptop = LAPTOP_CATEGORIES.includes(categoryTitle);
-          if (isLaptop && !value) {
-            return "Condition is required for laptops";
-          }
-          return true;
-        }),
+      group: "classification",
+      description: "Brand New or Foreign Used — set for all laptops and MacBooks",
     }),
-
     defineField({
       name: "brand",
       title: "Brand",
       type: "reference",
       to: [{ type: "brand" }],
-      group: "details",
-      hidden: ({ document }) => {
-        const categoryTitle = (document?.category as any)?.title;
-        return !LAPTOP_CATEGORIES.includes(categoryTitle);
-      },
+      group: "classification",
+      description: "e.g. Dell, HP, MSI, ASUS ROG — leave empty for MacBooks",
     }),
-
     defineField({
       name: "model",
       title: "Model",
       type: "reference",
       to: [{ type: "model" }],
-      group: "details",
-      hidden: ({ document }) => {
-        const categoryTitle = (document?.category as any)?.title;
-        return !LAPTOP_CATEGORIES.includes(categoryTitle);
-      },
+      group: "classification",
+      description: "e.g. XPS 13 9350, MacBook Air M3 — create in Models if not listed",
     }),
-    // ===========================================================
-
     defineField({
       name: "material",
       type: "string",
-      group: "details",
-      options: {
-        list: MATERIALS_SANITY_LIST,
-        layout: "radio",
-      },
+      group: "classification",
+      options: { list: MATERIALS_SANITY_LIST, layout: "radio" },
     }),
     defineField({
       name: "color",
       type: "string",
-      group: "details",
-      options: {
-        list: COLORS_SANITY_LIST,
-        layout: "radio",
-      },
+      group: "classification",
+      options: { list: COLORS_SANITY_LIST, layout: "radio" },
     }),
     defineField({
       name: "dimensions",
       type: "string",
-      group: "details",
-      description: 'e.g., "120cm x 80cm x 75cm"',
+      group: "classification",
+      description: 'e.g. "29.6cm x 19.9cm x 1.5cm"',
     }),
 
+    // ── Media ──────────────────────────────────────────────────
     defineField({
       name: "images",
       type: "array",
       group: "media",
-      of: [
-        {
-          type: "image",
-          options: {
-            hotspot: true,
-          },
-        },
-      ],
-      validation: (rule) => [
-        rule.min(1).error("At least one image is required"),
-      ],
+      of: [{ type: "image", options: { hotspot: true } }],
+      validation: (rule) => rule.min(1).error("At least one image is required"),
     }),
 
+    // ── Inventory ──────────────────────────────────────────────
     defineField({
       name: "stock",
       type: "number",
@@ -169,14 +123,13 @@ export const productType = defineType({
       type: "boolean",
       group: "inventory",
       initialValue: false,
-      description: "Show on homepage and promotions",
+      description: "Show on homepage carousel",
     }),
     defineField({
       name: "assemblyRequired",
       type: "boolean",
       group: "inventory",
       initialValue: false,
-      description: "Does this product require assembly?",
     }),
   ],
 
@@ -184,13 +137,16 @@ export const productType = defineType({
     select: {
       title: "name",
       subtitle: "category.title",
+      condition: "condition.title",
+      brand: "brand.title",
       media: "images.0",
       price: "price",
     },
-    prepare({ title, subtitle, media, price }) {
+    prepare({ title, subtitle, condition, brand, media, price }) {
+      const parts = [subtitle, condition, brand].filter(Boolean).join(" · ");
       return {
         title,
-        subtitle: `${subtitle ? subtitle + " • " : ""}₦${price ?? 0}`,
+        subtitle: `${parts ? parts + "  " : ""}₦${(price ?? 0).toLocaleString()}`,
         media,
       };
     },
