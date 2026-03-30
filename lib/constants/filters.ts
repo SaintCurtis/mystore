@@ -46,6 +46,8 @@ export const CONDITIONS = [
 export const CATEGORIES_WITH_BRANDS = [
   "gaming-laptops",
   "regular-laptops",
+  "monitors-professional",
+  "monitors-gaming",
 ] as const;
 
 /** Has condition → model drill-down (no brand step — Apple only) */
@@ -55,6 +57,16 @@ export const CATEGORIES_WITHOUT_BRANDS = ["macbook"] as const;
 export const CATEGORIES_WITH_CONDITIONS = [
   ...CATEGORIES_WITH_BRANDS,
   ...CATEGORIES_WITHOUT_BRANDS,
+] as const;
+
+/** Content creation subcategories — no condition filter, just browse */
+export const CONTENT_CREATION_SUBCATEGORIES = [
+  "cameras",
+  "microphones",
+  "lighting",
+  "stabilization-mounts",
+  "aerials-drones",
+  "smart-wearables",
 ] as const;
 
 // ============================================
