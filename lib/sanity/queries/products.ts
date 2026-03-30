@@ -19,6 +19,8 @@ const PRODUCT_FILTER_CONDITIONS = `
     $categorySlug == ""
     || category->slug.current == $categorySlug
     || category->parentCategory->slug.current == $categorySlug
+    || category->parentCategory->parentCategory->slug.current == $categorySlug
+    || category->parentCategory->parentCategory->parentCategory->slug.current == $categorySlug
   )
   && ($condition == "" || condition->slug.current == $condition)
   && ($brandSlug == "" || brand->slug.current == $brandSlug)
@@ -166,6 +168,8 @@ export const PRODUCTS_BY_CATEGORY_QUERY = defineQuery(`*[
   && (
     category->slug.current == $categorySlug
     || category->parentCategory->slug.current == $categorySlug
+    || category->parentCategory->parentCategory->slug.current == $categorySlug
+    || category->parentCategory->parentCategory->parentCategory->slug.current == $categorySlug
   )
 ] | order(name asc) {
   _id,
@@ -267,6 +271,8 @@ export const AI_SEARCH_PRODUCTS_QUERY = defineQuery(`*[
     $categorySlug == ""
     || category->slug.current == $categorySlug
     || category->parentCategory->slug.current == $categorySlug
+    || category->parentCategory->parentCategory->slug.current == $categorySlug
+    || category->parentCategory->parentCategory->parentCategory->slug.current == $categorySlug
   )
   && ($condition == "" || condition->slug.current == $condition)
   && ($brandSlug == "" || brand->slug.current == $brandSlug)

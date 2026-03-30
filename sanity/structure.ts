@@ -20,28 +20,28 @@ export const structure: StructureResolver = (S) =>
                 .child(
                   S.documentTypeList("product")
                     .title("Gaming Laptops")
-                    .filter('_type == "product" && (category->slug.current == "gaming-laptops" || category->parentCategory->slug.current == "gaming-laptops")'),
+                    .filter('_type == "product" && (category->slug.current == "gaming-laptops" || category->parentCategory->slug.current == "gaming-laptops" || category->parentCategory->parentCategory->slug.current == "gaming-laptops" || category->parentCategory->parentCategory->parentCategory->slug.current == "gaming-laptops")'),
                 ),
               S.listItem()
                 .title("Regular Laptops")
                 .child(
                   S.documentTypeList("product")
                     .title("Regular Laptops")
-                    .filter('_type == "product" && (category->slug.current == "regular-laptops" || category->parentCategory->slug.current == "regular-laptops")'),
+                    .filter('_type == "product" && (category->slug.current == "regular-laptops" || category->parentCategory->slug.current == "regular-laptops" || category->parentCategory->parentCategory->slug.current == "regular-laptops" || category->parentCategory->parentCategory->parentCategory->slug.current == "regular-laptops")'),
                 ),
               S.listItem()
                 .title("MacBooks")
                 .child(
                   S.documentTypeList("product")
                     .title("MacBooks")
-                    .filter('_type == "product" && (category->slug.current == "macbook" || category->parentCategory->slug.current == "macbook")'),
+                    .filter('_type == "product" && (category->slug.current == "macbook" || category->parentCategory->slug.current == "macbook" || category->parentCategory->parentCategory->slug.current == "macbook" || category->parentCategory->parentCategory->parentCategory->slug.current == "macbook")'),
                 ),
               S.listItem()
                 .title("Monitors")
                 .child(
                   S.documentTypeList("product")
                     .title("Monitors")
-                    .filter('_type == "product" && (category->slug.current == "monitors" || category->parentCategory->slug.current == "monitors" || category->parentCategory->parentCategory->slug.current == "monitors")'),
+                    .filter('_type == "product" && (category->slug.current == "monitors" || category->parentCategory->slug.current == "monitors" || category->parentCategory->parentCategory->slug.current == "monitors" || category->parentCategory->parentCategory->parentCategory->slug.current == "monitors")'),
                 ),
               S.divider(),
               S.listItem()
@@ -55,42 +55,42 @@ export const structure: StructureResolver = (S) =>
                         .child(
                           S.documentTypeList("product")
                             .title("Cameras")
-                            .filter('_type == "product" && (category->slug.current == "cameras" || category->parentCategory->slug.current == "cameras")'),
+                            .filter('_type == "product" && (category->slug.current == "cameras" || category->parentCategory->slug.current == "cameras" || category->parentCategory->parentCategory->slug.current == "cameras" || category->parentCategory->parentCategory->parentCategory->slug.current == "cameras")'),
                         ),
                       S.listItem()
                         .title("Microphones")
                         .child(
                           S.documentTypeList("product")
                             .title("Microphones")
-                            .filter('_type == "product" && (category->slug.current == "microphones" || category->parentCategory->slug.current == "microphones")'),
+                            .filter('_type == "product" && (category->slug.current == "microphones" || category->parentCategory->slug.current == "microphones" || category->parentCategory->parentCategory->slug.current == "microphones" || category->parentCategory->parentCategory->parentCategory->slug.current == "microphones")'),
                         ),
                       S.listItem()
                         .title("Lighting")
                         .child(
                           S.documentTypeList("product")
                             .title("Lighting")
-                            .filter('_type == "product" && (category->slug.current == "lighting" || category->parentCategory->slug.current == "lighting")'),
+                            .filter('_type == "product" && (category->slug.current == "lighting" || category->parentCategory->slug.current == "lighting" || category->parentCategory->parentCategory->slug.current == "lighting" || category->parentCategory->parentCategory->parentCategory->slug.current == "lighting")'),
                         ),
                       S.listItem()
                         .title("Stabilization & Mounts")
                         .child(
                           S.documentTypeList("product")
                             .title("Stabilization & Mounts")
-                            .filter('_type == "product" && (category->slug.current == "stabilization-mounts" || category->parentCategory->slug.current == "stabilization-mounts")'),
+                            .filter('_type == "product" && (category->slug.current == "stabilization-mounts" || category->parentCategory->slug.current == "stabilization-mounts" || category->parentCategory->parentCategory->slug.current == "stabilization-mounts" || category->parentCategory->parentCategory->parentCategory->slug.current == "stabilization-mounts")'),
                         ),
                       S.listItem()
                         .title("Aerials & Drones")
                         .child(
                           S.documentTypeList("product")
                             .title("Aerials & Drones")
-                            .filter('_type == "product" && (category->slug.current == "aerials-drones" || category->parentCategory->slug.current == "aerials-drones")'),
+                            .filter('_type == "product" && (category->slug.current == "aerials-drones" || category->parentCategory->slug.current == "aerials-drones" || category->parentCategory->parentCategory->slug.current == "aerials-drones" || category->parentCategory->parentCategory->parentCategory->slug.current == "aerials-drones")'),
                         ),
                       S.listItem()
                         .title("Smart Wearables")
                         .child(
                           S.documentTypeList("product")
                             .title("Smart Wearables")
-                            .filter('_type == "product" && (category->slug.current == "smart-wearables" || category->parentCategory->slug.current == "smart-wearables")'),
+                            .filter('_type == "product" && (category->slug.current == "smart-wearables" || category->parentCategory->slug.current == "smart-wearables" || category->parentCategory->parentCategory->slug.current == "smart-wearables" || category->parentCategory->parentCategory->parentCategory->slug.current == "smart-wearables")'),
                         ),
                     ]),
                 ),

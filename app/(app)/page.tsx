@@ -80,6 +80,8 @@ export default async function HomePage({ searchParams }: PageProps) {
     { data: featuredProducts },
     { data: gamingBrandsData },
     { data: regularBrandsData },
+    { data: monitorProBrandsData },
+    { data: monitorGamingBrandsData },
   ] = await Promise.all([
     sanityFetch({
       query: getQuery(),
@@ -108,12 +110,22 @@ export default async function HomePage({ searchParams }: PageProps) {
       query: BRANDS_BY_CATEGORY_QUERY,
       params: { categorySlug: "regular-laptops", condition: "" },
     }),
+    sanityFetch({
+      query: BRANDS_BY_CATEGORY_QUERY,
+      params: { categorySlug: "monitors-professional", condition: "" },
+    }),
+    sanityFetch({
+      query: BRANDS_BY_CATEGORY_QUERY,
+      params: { categorySlug: "monitors-gaming", condition: "" },
+    }),
   ]);
 
   // brandsMap keyed by category slug — passed to CategoryTiles hover dropdowns
   const brandsMap: Record<string, { title: string; slug: string }[]> = {
     "gaming-laptops": extractBrands(gamingBrandsData),
     "regular-laptops": extractBrands(regularBrandsData),
+    "monitors-professional": extractBrands(monitorProBrandsData),
+    "monitors-gaming": extractBrands(monitorGamingBrandsData),
   };
 
   // brands for current category sidebar filter
