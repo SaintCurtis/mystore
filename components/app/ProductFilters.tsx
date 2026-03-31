@@ -27,11 +27,29 @@ import type { ALL_CATEGORIES_QUERYResult } from "@/sanity.types";
 const PRICE_MIN = 50000;
 const PRICE_MAX = 8000000;
 
+function pluralize(word: string): string {
+  if (word.toLowerCase().endsWith("y")) return word.slice(0, -1) + "ies";
+  return word + "s";
+}
+
+// Root categories that use the drilldown subcategory selects
+// instead of the condition → brand → model flow
+const DRILLDOWN_ROOTS = ["monitors", "content-creation-tools"] as const;
+type DrilldownRoot = (typeof DRILLDOWN_ROOTS)[number];
+
+function isDrilldownRoot(slug: string): slug is DrilldownRoot {
+  return (DRILLDOWN_ROOTS as readonly string[]).includes(slug);
+}
+
+// Labels for each drilldown level
+const DRILLDOWN_LABELS: Record<DrilldownRoot, string[]> = {
+  monitors: ["Type", "Condition", "Panel Type"],
+  "content-creation-tools": ["Category", "Sub-category"],
+};
+
 interface ProductFiltersProps {
   categories: ALL_CATEGORIES_QUERYResult;
-  /** Server-fetched brands for current category */
   brands?: { title: string; slug: string }[];
-  /** Server-fetched models for selected brand */
   models?: { title: string; slug: string }[];
 }
 
@@ -50,6 +68,7 @@ export function ProductFilters({
   const currentColor = searchParams.get("color") ?? "";
   const currentMaterial = searchParams.get("material") ?? "";
   const currentSort = searchParams.get("sort") ?? "name";
+  const currentModel = searchParams.get("model") ?? "";
 
   const urlMinPrice = searchParams.get("minPrice")
     ? Number(searchParams.get("minPrice"))
@@ -68,10 +87,100 @@ export function ProductFilters({
     setPriceRange([urlMinPrice, urlMaxPrice]);
   }, [urlMinPrice, urlMaxPrice]);
 
-  // ── Show/hide logic ────────────────────────────────────────────
-  const showCondition = (
-    CATEGORIES_WITH_CONDITIONS as readonly string[]
-  ).includes(currentCategory);
+  // ── Drilldown logic ────────────────────────────────────────────
+  // Walk up the current category's ancestor chain to find the root
+  // and build the selection path for the cascading selects.
+  type FlatCat = ALL_CATEGORIES_QUERYResult[number] & { parentSlug?: string | null };
+
+  function findDrilldownRoot(catSlug: string): DrilldownRoot | null {
+    if (!catSlug) return null;
+    if (isDrilldownRoot(catSlug)) return catSlug;
+    // Walk up via parentSlug
+    let current = (categories as FlatCat[]).find((c) => c.slug === catSlug);
+    while (current) {
+      const parentSlug = (current as FlatCat).parentSlug;
+      if (!parentSlug) break;
+      if (isDrilldownRoot(parentSlug)) return parentSlug;
+      current = (categories as FlatCat[]).find((c) => c.slug === parentSlug);
+    }
+    return null;
+  }
+
+  // Get the ancestor chain from root → currentCategory (excluding root itself)
+  function getSelectionChain(catSlug: string, rootSlug: string): string[] {
+    if (!catSlug || catSlug === rootSlug) return [];
+    const chain: string[] = [];
+    let current = (categories as FlatCat[]).find((c) => c.slug === catSlug);
+    while (current && current.slug !== rootSlug) {
+      chain.unshift(current.slug ?? "");
+      const parentSlug = (current as FlatCat).parentSlug;
+      if (!parentSlug) break;
+      current = (categories as FlatCat[]).find((c) => c.slug === parentSlug);
+    }
+    return chain.filter(Boolean);
+  }
+
+  // Get children of a given parent slug from the flat categories list
+  function getChildren(parentSlug: string) {
+    return (categories as FlatCat[])
+      .filter((c) => (c as FlatCat).parentSlug === parentSlug)
+      .sort((a, b) => ((a as any).order ?? 0) - ((b as any).order ?? 0));
+  }
+
+  const drilldownRoot = findDrilldownRoot(currentCategory);
+  const selectionChain = drilldownRoot
+    ? getSelectionChain(currentCategory, drilldownRoot)
+    : [];
+
+  // Levels to show: always show level 0 (children of root).
+  // Show level N+1 if user selected at level N AND there are children.
+  function getDrilldownLevels(): { parentSlug: string; selectedSlug: string; label: string }[] {
+    if (!drilldownRoot) return [];
+    const labels = DRILLDOWN_LABELS[drilldownRoot];
+    const levels: { parentSlug: string; selectedSlug: string; label: string }[] = [];
+
+    // Level 0: children of root
+    levels.push({
+      parentSlug: drilldownRoot,
+      selectedSlug: selectionChain[0] ?? "",
+      label: labels[0] ?? "Type",
+    });
+
+    // Additional levels: only if previous level has a selection AND has children
+    for (let i = 0; i < selectionChain.length; i++) {
+      const selected = selectionChain[i];
+      if (!selected) break;
+      const children = getChildren(selected);
+      if (children.length === 0) break;
+      levels.push({
+        parentSlug: selected,
+        selectedSlug: selectionChain[i + 1] ?? "",
+        label: labels[i + 1] ?? `Level ${i + 2}`,
+      });
+    }
+
+    return levels;
+  }
+
+  const drilldownLevels = getDrilldownLevels();
+
+  function handleDrilldownChange(levelIndex: number, newSlug: string) {
+    // When a level changes, truncate deeper selections
+    // Navigate to the newly selected slug (or back to root if cleared)
+    const target = newSlug || drilldownRoot || "";
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("category", target);
+    params.delete("condition");
+    params.delete("brand");
+    params.delete("model");
+    router.push(`?${params.toString()}`, { scroll: false });
+  }
+
+  // ── Show/hide logic (existing) ─────────────────────────────────
+  // Only show condition/brand/model for non-drilldown categories
+  const showCondition =
+    !drilldownRoot &&
+    (CATEGORIES_WITH_CONDITIONS as readonly string[]).includes(currentCategory);
 
   const showBrand =
     showCondition &&
@@ -85,13 +194,15 @@ export function ProductFilters({
   const isCategoryActive = !!currentCategory;
   const isConditionActive = !!currentCondition;
   const isBrandActive = !!currentBrand;
-  const currentModel = searchParams.get("model") ?? "";
   const isModelActive = !!currentModel;
   const isColorActive = !!currentColor;
   const isMaterialActive = !!currentMaterial;
   const isPriceActive =
     searchParams.has("minPrice") || searchParams.has("maxPrice");
   const isInStockActive = currentInStock;
+  const isDrilldownActive = drilldownRoot
+    ? currentCategory !== drilldownRoot
+    : false;
 
   const activeFilters = [
     isSearchActive,
@@ -137,13 +248,17 @@ export function ProductFilters({
       updateParams({ brand: null, model: null });
     } else if (key === "condition") {
       updateParams({ condition: null, brand: null });
+    } else if (key === "drilldown") {
+      // Reset to the drilldown root
+      updateParams({ category: drilldownRoot ?? null });
     } else {
       updateParams({ [key]: null });
     }
   };
 
-  // Top-level only
-  const topLevelCategories = categories.filter((c) => !(c as any).parentSlug);
+  const topLevelCategories = (categories as FlatCat[]).filter(
+    (c) => !c.parentSlug,
+  );
 
   const FilterLabel = ({
     children,
@@ -227,22 +342,36 @@ export function ProductFilters({
           Category
         </FilterLabel>
         <Select
-          value={currentCategory || "all"}
+          value={
+            // If we're inside a drilldown, show the root in this select
+            drilldownRoot ?? (currentCategory || "all")
+          }
           onValueChange={(value) =>
             updateParams({
               category: value === "all" ? null : value,
               condition: null,
               brand: null,
+              model: null,
             })
           }
         >
-          <SelectTrigger className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${isCategoryActive ? "border-amber-500 ring-1 ring-amber-500" : ""}`}>
+          <SelectTrigger
+            className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${
+              isCategoryActive ? "border-amber-500 ring-1 ring-amber-500" : ""
+            }`}
+          >
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
           <SelectContent className="bg-zinc-800 border-zinc-700">
-            <SelectItem value="all" className="text-zinc-100">All Categories</SelectItem>
+            <SelectItem value="all" className="text-zinc-100">
+              All Categories
+            </SelectItem>
             {topLevelCategories.map((cat) => (
-              <SelectItem key={cat._id} value={cat.slug ?? ""} className="text-zinc-100">
+              <SelectItem
+                key={cat._id}
+                value={cat.slug ?? ""}
+                className="text-zinc-100"
+              >
                 {cat.title}
               </SelectItem>
             ))}
@@ -250,7 +379,54 @@ export function ProductFilters({
         </Select>
       </div>
 
-      {/* Condition — only for laptop/MacBook categories */}
+      {/* ── Drilldown selects (Monitors / Content Creation) ────── */}
+      {drilldownRoot &&
+        drilldownLevels.map((level, i) => {
+          const options = getChildren(level.parentSlug);
+          if (options.length === 0) return null;
+          const isActive = !!level.selectedSlug;
+
+          return (
+            <div key={level.parentSlug}>
+              <FilterLabel
+                isActive={isActive && i === drilldownLevels.length - 1}
+                filterKey="drilldown"
+              >
+                {level.label}
+              </FilterLabel>
+              <Select
+                value={level.selectedSlug || "all"}
+                onValueChange={(value) =>
+                  handleDrilldownChange(i, value === "all" ? "" : value)
+                }
+              >
+                <SelectTrigger
+                  className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${
+                    isActive ? "border-amber-500 ring-1 ring-amber-500" : ""
+                  }`}
+                >
+                  <SelectValue placeholder={`All ${pluralize(level.label)}`} />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-800 border-zinc-700">
+                  <SelectItem value="all" className="text-zinc-100">
+                    All {pluralize(level.label)}
+                  </SelectItem>
+                  {options.map((opt) => (
+                    <SelectItem
+                      key={opt._id}
+                      value={opt.slug ?? ""}
+                      className="text-zinc-100"
+                    >
+                      {opt.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          );
+        })}
+
+      {/* Condition — only for laptop/MacBook categories (not drilldown) */}
       {showCondition && (
         <div>
           <FilterLabel isActive={isConditionActive} filterKey="condition">
@@ -265,13 +441,23 @@ export function ProductFilters({
               })
             }
           >
-            <SelectTrigger className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${isConditionActive ? "border-amber-500 ring-1 ring-amber-500" : ""}`}>
+            <SelectTrigger
+              className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${
+                isConditionActive ? "border-amber-500 ring-1 ring-amber-500" : ""
+              }`}
+            >
               <SelectValue placeholder="Any Condition" />
             </SelectTrigger>
             <SelectContent className="bg-zinc-800 border-zinc-700">
-              <SelectItem value="all" className="text-zinc-100">Any Condition</SelectItem>
+              <SelectItem value="all" className="text-zinc-100">
+                Any Condition
+              </SelectItem>
               {CONDITIONS.map((cond) => (
-                <SelectItem key={cond.value} value={cond.value} className="text-zinc-100">
+                <SelectItem
+                  key={cond.value}
+                  value={cond.value}
+                  className="text-zinc-100"
+                >
                   {cond.label}
                 </SelectItem>
               ))}
@@ -280,7 +466,7 @@ export function ProductFilters({
         </div>
       )}
 
-      {/* Brand — only when brands available */}
+      {/* Brand */}
       {showBrand && (
         <div>
           <FilterLabel isActive={isBrandActive} filterKey="brand">
@@ -292,13 +478,23 @@ export function ProductFilters({
               updateParams({ brand: value === "all" ? null : value })
             }
           >
-            <SelectTrigger className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${isBrandActive ? "border-amber-500 ring-1 ring-amber-500" : ""}`}>
+            <SelectTrigger
+              className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${
+                isBrandActive ? "border-amber-500 ring-1 ring-amber-500" : ""
+              }`}
+            >
               <SelectValue placeholder="All Brands" />
             </SelectTrigger>
             <SelectContent className="bg-zinc-800 border-zinc-700">
-              <SelectItem value="all" className="text-zinc-100">All Brands</SelectItem>
+              <SelectItem value="all" className="text-zinc-100">
+                All Brands
+              </SelectItem>
               {brands.map((brand) => (
-                <SelectItem key={brand.slug} value={brand.slug} className="text-zinc-100">
+                <SelectItem
+                  key={brand.slug}
+                  value={brand.slug}
+                  className="text-zinc-100"
+                >
                   {brand.title}
                 </SelectItem>
               ))}
@@ -319,13 +515,23 @@ export function ProductFilters({
               updateParams({ model: value === "all" ? null : value })
             }
           >
-            <SelectTrigger className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${isModelActive ? "border-amber-500 ring-1 ring-amber-500" : ""}`}>
+            <SelectTrigger
+              className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${
+                isModelActive ? "border-amber-500 ring-1 ring-amber-500" : ""
+              }`}
+            >
               <SelectValue placeholder="All Models" />
             </SelectTrigger>
             <SelectContent className="bg-zinc-800 border-zinc-700">
-              <SelectItem value="all" className="text-zinc-100">All Models</SelectItem>
+              <SelectItem value="all" className="text-zinc-100">
+                All Models
+              </SelectItem>
               {models.map((model) => (
-                <SelectItem key={model.slug} value={model.slug} className="text-zinc-100">
+                <SelectItem
+                  key={model.slug}
+                  value={model.slug}
+                  className="text-zinc-100"
+                >
                   {model.title}
                 </SelectItem>
               ))}
@@ -345,13 +551,23 @@ export function ProductFilters({
             updateParams({ color: value === "all" ? null : value })
           }
         >
-          <SelectTrigger className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${isColorActive ? "border-amber-500 ring-1 ring-amber-500" : ""}`}>
+          <SelectTrigger
+            className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${
+              isColorActive ? "border-amber-500 ring-1 ring-amber-500" : ""
+            }`}
+          >
             <SelectValue placeholder="All Colors" />
           </SelectTrigger>
           <SelectContent className="bg-zinc-800 border-zinc-700">
-            <SelectItem value="all" className="text-zinc-100">All Colors</SelectItem>
+            <SelectItem value="all" className="text-zinc-100">
+              All Colors
+            </SelectItem>
             {COLORS.map((color) => (
-              <SelectItem key={color.value} value={color.value} className="text-zinc-100">
+              <SelectItem
+                key={color.value}
+                value={color.value}
+                className="text-zinc-100"
+              >
                 {color.label}
               </SelectItem>
             ))}
@@ -370,13 +586,23 @@ export function ProductFilters({
             updateParams({ material: value === "all" ? null : value })
           }
         >
-          <SelectTrigger className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${isMaterialActive ? "border-amber-500 ring-1 ring-amber-500" : ""}`}>
+          <SelectTrigger
+            className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${
+              isMaterialActive ? "border-amber-500 ring-1 ring-amber-500" : ""
+            }`}
+          >
             <SelectValue placeholder="All Materials" />
           </SelectTrigger>
           <SelectContent className="bg-zinc-800 border-zinc-700">
-            <SelectItem value="all" className="text-zinc-100">All Materials</SelectItem>
+            <SelectItem value="all" className="text-zinc-100">
+              All Materials
+            </SelectItem>
             {MATERIALS.map((mat) => (
-              <SelectItem key={mat.value} value={mat.value} className="text-zinc-100">
+              <SelectItem
+                key={mat.value}
+                value={mat.value}
+                className="text-zinc-100"
+              >
                 {mat.label}
               </SelectItem>
             ))}
@@ -387,7 +613,8 @@ export function ProductFilters({
       {/* Price Range */}
       <div>
         <FilterLabel isActive={isPriceActive} filterKey="price">
-          Price: ₦{priceRange[0].toLocaleString()} — ₦{priceRange[1].toLocaleString()}
+          Price: ₦{priceRange[0].toLocaleString()} — ₦
+          {priceRange[1].toLocaleString()}
         </FilterLabel>
         <Slider
           min={PRICE_MIN}
@@ -416,7 +643,11 @@ export function ProductFilters({
             }
             className="h-5 w-5 rounded border-zinc-600 bg-zinc-800 text-amber-500 focus:ring-amber-500"
           />
-          <span className={`text-sm font-medium ${isInStockActive ? "text-zinc-100" : "text-zinc-300"}`}>
+          <span
+            className={`text-sm font-medium ${
+              isInStockActive ? "text-zinc-100" : "text-zinc-300"
+            }`}
+          >
             In stock only
             {isInStockActive && (
               <Badge className="ml-2 h-5 bg-amber-500 px-1.5 text-xs text-white hover:bg-amber-500">
@@ -441,7 +672,11 @@ export function ProductFilters({
           </SelectTrigger>
           <SelectContent className="bg-zinc-800 border-zinc-700">
             {SORT_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value} className="text-zinc-100">
+              <SelectItem
+                key={opt.value}
+                value={opt.value}
+                className="text-zinc-100"
+              >
                 {opt.label}
               </SelectItem>
             ))}

@@ -14,11 +14,22 @@ import {
 } from "@/lib/sanity/queries/categories";
 import { ProductSection } from "@/components/app/ProductSection";
 import { CategoryTiles } from "@/components/app/CategoryTiles";
+import { CategoryDrilldown } from "@/components/app/CategoryDrilldown";
 import { FeaturedCarousel } from "@/components/app/FeaturedCarousel";
 import { FeaturedCarouselSkeleton } from "@/components/app/FeaturedCarouselSkeleton";
 import { HeroSection } from "@/components/app/HeroSection";
 import { TestimonialsCarousel } from "@/components/app/TestimonialsCarousel";
 import { AboutSection } from "@/components/app/AboutSection";
+
+// ── Drilldown roots — defined here (server-safe) AND in CategoryDrilldown ──
+// These are the two top-level categories that get cascading dropdowns
+// instead of the old hover condition dropdown.
+const DRILLDOWN_ROOTS = ["monitors", "content-creation-tools"] as const;
+type DrilldownRoot = (typeof DRILLDOWN_ROOTS)[number];
+
+function isDrilldownRoot(slug: string): slug is DrilldownRoot {
+  return (DRILLDOWN_ROOTS as readonly string[]).includes(slug);
+}
 
 interface PageProps {
   searchParams: Promise<{
@@ -100,8 +111,6 @@ export default async function HomePage({ searchParams }: PageProps) {
     }),
     sanityFetch({ query: ALL_CATEGORIES_QUERY }),
     sanityFetch({ query: FEATURED_PRODUCTS_QUERY }),
-    // Fetch brands for ALL brand-supporting categories upfront
-    // so hover dropdowns work on every tile without clicking first
     sanityFetch({
       query: BRANDS_BY_CATEGORY_QUERY,
       params: { categorySlug: "gaming-laptops", condition: "" },
@@ -120,7 +129,6 @@ export default async function HomePage({ searchParams }: PageProps) {
     }),
   ]);
 
-  // brandsMap keyed by category slug — passed to CategoryTiles hover dropdowns
   const brandsMap: Record<string, { title: string; slug: string }[]> = {
     "gaming-laptops": extractBrands(gamingBrandsData),
     "regular-laptops": extractBrands(regularBrandsData),
@@ -128,10 +136,8 @@ export default async function HomePage({ searchParams }: PageProps) {
     "monitors-gaming": extractBrands(monitorGamingBrandsData),
   };
 
-  // brands for current category sidebar filter
   const brands: { title: string; slug: string }[] = brandsMap[categorySlug] ?? [];
 
-  // Fetch models when a brand is selected
   const { data: modelsData } = brandSlug
     ? await sanityFetch({
         query: MODELS_BY_BRAND_QUERY,
@@ -144,6 +150,41 @@ export default async function HomePage({ searchParams }: PageProps) {
         .filter((m: any) => m?.title && m?.slug)
         .map((m: any) => ({ title: m.title as string, slug: m.slug as string }))
     : [];
+
+  // ── Resolve drilldown context ─────────────────────────────────
+  // Walk up the active category's ancestor chain to find if it belongs
+  // to a drilldown root (monitors or content-creation-tools).
+  // This means ?category=monitors-gaming-qdoled still activates the
+  // Monitors drilldown UI with the correct root.
+  type CatWithParent = {
+    _id: string;
+    slug: string | null;
+    parentSlug?: string | null;
+    parent?: CatWithParent | null;
+    [key: string]: unknown;
+  };
+
+  function getDrilldownRoot(
+    allCats: CatWithParent[],
+    activeSlug: string,
+  ): DrilldownRoot | null {
+    if (!activeSlug) return null;
+    if (isDrilldownRoot(activeSlug)) return activeSlug;
+
+    let current = allCats.find((c) => c.slug === activeSlug);
+    while (current) {
+      const parentSlug = current.parentSlug ?? (current.parent as CatWithParent | null)?.slug;
+      if (!parentSlug) break;
+      if (isDrilldownRoot(parentSlug)) return parentSlug;
+      current = allCats.find((c) => c.slug === parentSlug);
+    }
+    return null;
+  }
+
+  const drilldownRoot = getDrilldownRoot(
+    categories as CatWithParent[],
+    categorySlug,
+  );
 
   // ── Page title ────────────────────────────────────────────────
   const getPageTitle = () => {
@@ -193,12 +234,21 @@ export default async function HomePage({ searchParams }: PageProps) {
         <div className="mt-6">
           <CategoryTiles
             categories={categories}
-            activeCategory={categorySlug || undefined}
+            activeCategory={drilldownRoot ?? (categorySlug || undefined)}
             activeCondition={condition || undefined}
             activeBrand={brandSlug || undefined}
             brandsMap={brandsMap}
           />
         </div>
+
+        {/* Cascading Drilldown Dropdowns — Monitors & Content Creation only */}
+        {drilldownRoot && (
+          <CategoryDrilldown
+            allCategories={categories as any}
+            rootSlug={drilldownRoot}
+            currentSlug={categorySlug}
+          />
+        )}
       </div>
 
       {/* Product Grid */}

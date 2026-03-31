@@ -13,9 +13,49 @@ type Product = FILTER_PRODUCTS_BY_NAME_QUERYResult[number];
 
 interface ProductCardProps {
   product: Product;
+  /**
+   * The currently active category slug from the URL (?category=...).
+   * Used to pick the right ancestor label for the badge.
+   * e.g. activeCategory="monitors" → badge shows "Monitors"
+   *      activeCategory="monitors-gaming" → badge shows "Gaming Monitors"
+   *      activeCategory=undefined → badge shows direct category title
+   */
+  activeCategory?: string;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+/**
+ * Walk the product's category ancestor chain and return the title that
+ * matches the active category slug. Falls back to the leaf title.
+ *
+ * The category object from GROQ already has parentSlug + parentTitle,
+ * so we can resolve up to 2 levels without any extra fetch.
+ * For deeper ancestors (monitors has 4 levels) we fall back gracefully.
+ */
+function getCategoryLabel(
+  category: Product["category"],
+  activeCategory: string | undefined,
+): string {
+  if (!category) return "";
+  if (!activeCategory) return category.title ?? "";
+
+  const cat = category as typeof category & {
+    parentSlug?: string | null;
+    parentTitle?: string | null;
+  };
+
+  // Direct match — e.g. product is in "monitors-gaming-qdoled", activeCategory is same
+  if (cat.slug === activeCategory) return cat.title ?? "";
+
+  // Parent match — e.g. activeCategory is "monitors-gaming-brand-new"
+  if (cat.parentSlug === activeCategory) return cat.parentTitle ?? cat.title ?? "";
+
+  // For deeper ancestors (grandparent = "monitors-gaming", great-grandparent = "monitors")
+  // we don't have those titles readily on the card, so just show the leaf title.
+  // The filtering itself is already correct via GROQ — only the badge label is affected.
+  return cat.title ?? "";
+}
+
+export function ProductCard({ product, activeCategory }: ProductCardProps) {
   const [hoveredImageIndex, setHoveredImageIndex] = useState<number | null>(null);
 
   const images = product.images ?? [];
@@ -26,6 +66,8 @@ export function ProductCard({ product }: ProductCardProps) {
   const stock = product.stock ?? 0;
   const isOutOfStock = stock <= 0;
   const hasMultipleImages = images.length > 1;
+
+  const categoryLabel = getCategoryLabel(product.category, activeCategory);
 
   return (
     <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-zinc-900 ring-1 ring-zinc-800 transition-all duration-300 hover:-translate-y-1 hover:ring-zinc-700 hover:shadow-2xl hover:shadow-zinc-950/60">
@@ -57,7 +99,7 @@ export function ProductCard({ product }: ProductCardProps) {
           {/* Dark gradient overlay */}
           <div className="absolute inset-0 bg-linear-to-t from-zinc-950/50 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-          {/* Quick view button — appears on hover */}
+          {/* Quick view button */}
           <div className="absolute inset-x-0 bottom-4 flex justify-center opacity-0 translate-y-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
             <span className="flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-1.5 text-xs font-semibold text-white backdrop-blur-md border border-white/10">
               <Eye className="h-3 w-3" />
@@ -65,15 +107,17 @@ export function ProductCard({ product }: ProductCardProps) {
             </span>
           </div>
 
-          {/* Badges */}
+          {/* Out of stock badge */}
           {isOutOfStock && (
             <div className="absolute right-3 top-3 rounded-full bg-red-500/90 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
               Out of Stock
             </div>
           )}
-          {product.category && (
+
+          {/* Category badge — now shows the correct ancestor label */}
+          {categoryLabel && (
             <span className="absolute left-3 top-3 rounded-full bg-zinc-950/70 px-3 py-1 text-xs font-medium text-zinc-300 backdrop-blur-sm border border-zinc-700/50">
-              {product.category.title}
+              {categoryLabel}
             </span>
           )}
         </div>
@@ -125,7 +169,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         </div>
 
-        {/* ── Sophisticated CTA area ────────────────────────── */}
+        {/* CTA */}
         <div className="mt-auto flex flex-col gap-2">
           <AddToCartButton
             productId={product._id}

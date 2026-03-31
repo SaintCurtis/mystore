@@ -1,9 +1,5 @@
 import { defineQuery } from "next-sanity";
 
-/**
- * Get all top-level categories (no parent)
- * Used for navigation tiles
- */
 export const TOP_LEVEL_CATEGORIES_QUERY = defineQuery(`*[
   _type == "category"
   && !defined(parentCategory)
@@ -18,10 +14,6 @@ export const TOP_LEVEL_CATEGORIES_QUERY = defineQuery(`*[
   }
 }`);
 
-/**
- * Get all categories (flat list, includes parent info)
- * Used for filter sidebar and admin
- */
 export const ALL_CATEGORIES_QUERY = defineQuery(`*[
   _type == "category"
 ] | order(order asc, title asc) {
@@ -35,12 +27,30 @@ export const ALL_CATEGORIES_QUERY = defineQuery(`*[
   "image": image{
     asset->{ _id, url },
     hotspot
+  },
+  "parent": parentCategory->{
+    _id,
+    title,
+    "slug": slug.current,
+    condition,
+    order,
+    "parent": parentCategory->{
+      _id,
+      title,
+      "slug": slug.current,
+      condition,
+      order,
+      "parent": parentCategory->{
+        _id,
+        title,
+        "slug": slug.current,
+        condition,
+        order
+      }
+    }
   }
 }`);
 
-/**
- * Get category by slug (with parent info)
- */
 export const CATEGORY_BY_SLUG_QUERY = defineQuery(`*[
   _type == "category"
   && slug.current == $slug
@@ -58,10 +68,6 @@ export const CATEGORY_BY_SLUG_QUERY = defineQuery(`*[
   }
 }`);
 
-/**
- * Get condition subcategories for a given parent category slug
- * e.g. "Brand New" and "Foreign Used" under "gaming-laptops"
- */
 export const SUBCATEGORIES_BY_PARENT_QUERY = defineQuery(`*[
   _type == "category"
   && parentCategory->slug.current == $parentSlug
@@ -77,11 +83,6 @@ export const SUBCATEGORIES_BY_PARENT_QUERY = defineQuery(`*[
   }
 }`);
 
-/**
- * Get distinct brands for a given top-level category + optional condition
- * Brands come from the brand reference on products
- * Used to populate brand dropdown after condition is selected
- */
 export const BRANDS_BY_CATEGORY_QUERY = defineQuery(`array::unique(*[
   _type == "product"
   && defined(brand)
@@ -92,10 +93,6 @@ export const BRANDS_BY_CATEGORY_QUERY = defineQuery(`array::unique(*[
   && ($condition == "" || brand->condition == $condition || condition->slug.current == $condition)
 ].brand->{ _id, title, "slug": slug.current }) | order(title asc)`);
 
-/**
- * Get distinct brands for a category regardless of condition
- * Simpler version used for hover dropdowns
- */
 export const ALL_BRANDS_BY_CATEGORY_QUERY = defineQuery(`*[
   _type == "brand"
   && $categorySlug in categories[]->slug.current
@@ -105,10 +102,6 @@ export const ALL_BRANDS_BY_CATEGORY_QUERY = defineQuery(`*[
   "slug": slug.current
 }`);
 
-/**
- * Get distinct models for a given brand (filtered by category)
- * Used to populate model dropdown after brand is selected
- */
 export const MODELS_BY_BRAND_QUERY = defineQuery(`*[
   _type == "model"
   && brand->slug.current == $brandSlug
@@ -117,3 +110,64 @@ export const MODELS_BY_BRAND_QUERY = defineQuery(`*[
   title,
   "slug": slug.current
 }`);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Client-side tree helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type SanityCategory = {
+  _id: string;
+  title: string | null;
+  slug: string | null;
+  condition?: string | null;
+  order?: number | null;
+  parentSlug?: string | null;
+  parentTitle?: string | null;
+  image?: { asset?: { url?: string | null } | null } | null;
+  parent?: SanityCategory | null;
+};
+
+export type CategoryNode = SanityCategory & { children: CategoryNode[] };
+
+/**
+ * Build a nested tree from the flat ALL_CATEGORIES_QUERY result,
+ * scoped to a specific root slug.
+ *
+ * FIX: Previously used `parent?._id` which wasn't reliable after
+ * TypeGen serialization. Now uses `parentSlug` (flat string from GROQ)
+ * which is always present and reliable.
+ *
+ * Example for rootSlug="monitors":
+ * [
+ *   { slug: "monitors-gaming", children: [
+ *     { slug: "monitors-gaming-brand-new", children: [
+ *       { slug: "monitors-gaming-qdoled" },
+ *       { slug: "monitors-fast-ips" },
+ *       ...
+ *     ]},
+ *     { slug: "monitors-gaming-foreign-used", children: [] }
+ *   ]},
+ *   { slug: "monitors-professional", children: [...] }
+ * ]
+ */
+export function buildCategoryTree(
+  allCategories: SanityCategory[],
+  rootSlug: string,
+): CategoryNode[] {
+  // Confirm root exists and is truly top-level
+  const root = allCategories.find(
+    (c) => c.slug === rootSlug && !c.parentSlug,
+  );
+  if (!root) return [];
+
+  // Recursively get children using parentSlug string matching
+  // This is reliable because parentSlug is always set by GROQ
+  function getChildren(slug: string): CategoryNode[] {
+    return allCategories
+      .filter((c) => c.parentSlug === slug)
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+      .map((c) => ({ ...c, children: getChildren(c.slug ?? "") }));
+  }
+
+  return getChildren(rootSlug);
+}

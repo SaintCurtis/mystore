@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { PanelLeftClose, PanelLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductFilters } from "./ProductFilters";
@@ -26,6 +27,11 @@ export function ProductSection({
   models = [],
 }: ProductSectionProps) {
   const [filtersOpen, setFiltersOpen] = useState(true);
+
+  // Read the active category slug from the URL so we can pass it to
+  // ProductGrid → ProductCard for the correct category badge label.
+  const searchParams = useSearchParams();
+  const activeCategory = searchParams.get("category") ?? undefined;
 
   return (
     <div className="flex flex-col gap-6">
@@ -69,7 +75,7 @@ export function ProductSection({
           <ProductFilters categories={categories} brands={brands} models={models} />
         </aside>
         <main className="flex-1">
-          <ProductGrid products={products} />
+          <ProductGrid products={products} activeCategory={activeCategory} />
         </main>
       </div>
     </div>
