@@ -10,10 +10,18 @@ import {
   CATEGORIES_WITH_CONDITIONS,
   CATEGORIES_WITH_SUBCATEGORY_DROPDOWN,
 } from "@/lib/constants/filters";
-import type { ALL_CATEGORIES_QUERYResult } from "@/sanity.types";
+
+interface LooseCategory {
+  _id: string;
+  title?: string | null;
+  slug?: string | null;
+  condition?: string | null;
+  parentSlug?: string | null;
+  image?: { asset?: { url?: string | null } | null } | null;
+}
 
 interface CategoryTilesProps {
-  categories: ALL_CATEGORIES_QUERYResult;
+  categories: LooseCategory[];
   activeCategory?: string;
   activeCondition?: string;
   activeBrand?: string;
@@ -45,7 +53,7 @@ function categoryHasSubcategoryDropdown(slug: string): boolean {
   return (CATEGORIES_WITH_SUBCATEGORY_DROPDOWN as readonly string[]).includes(slug);
 }
 
-// ── Subcategory list dropdown (Computers, Accessories, Tech Setup Gears etc) ─
+// ── Subcategory list dropdown ──────────────────────────────────────────────
 
 function SubcategoryDropdown({
   parentSlug,
@@ -53,17 +61,14 @@ function SubcategoryDropdown({
   activeCategory,
 }: {
   parentSlug: string;
-  allCategories: ALL_CATEGORIES_QUERYResult;
+  allCategories: LooseCategory[];
   activeCategory?: string;
 }) {
-  const children = allCategories.filter(
-    (c) => (c as any).parentSlug === parentSlug,
-  );
-
+  const children = allCategories.filter((c) => c.parentSlug === parentSlug);
   if (children.length === 0) return null;
 
   return (
-    <div className="absolute bottom-full left-0 z-50 mb-1 w-56 overflow-hidden rounded-xl border border-zinc-700/80 bg-zinc-900 shadow-2xl shadow-zinc-950/60">
+    <div className="w-56 overflow-hidden rounded-xl border border-zinc-700/80 bg-zinc-900 shadow-2xl shadow-zinc-950/60">
       {children.map((child) => {
         const isActive = activeCategory === child.slug;
         return (
@@ -77,12 +82,8 @@ function SubcategoryDropdown({
             }`}
           >
             <span className="font-medium">{child.title}</span>
-            {/* Show chevron hint if this child also has conditions */}
             {categoryHasConditions(child.slug ?? "") && (
               <ChevronRight className="h-3.5 w-3.5 text-zinc-600" />
-            )}
-            {isActive && (
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
             )}
           </Link>
         );
@@ -91,12 +92,11 @@ function SubcategoryDropdown({
   );
 }
 
-// ── Condition dropdown (Gaming Laptops, Regular Laptops, MacBook, Monitors) ──
+// ── Condition dropdown ─────────────────────────────────────────────────────
 
 function ConditionDropdown({
   categorySlug,
   activeCondition,
-  activeBrand,
   brands = [],
 }: {
   categorySlug: string;
@@ -108,11 +108,11 @@ function ConditionDropdown({
   const hasBrands = categoryHasBrands(categorySlug);
 
   return (
-    <div className="absolute bottom-full left-0 z-50 mb-1 w-52 overflow-hidden rounded-xl border border-zinc-700/80 bg-zinc-900 shadow-2xl shadow-zinc-950/60">
+    <div className="w-52 overflow-hidden rounded-xl border border-zinc-700/80 bg-zinc-900 shadow-2xl shadow-zinc-950/60">
       {CONDITIONS.map((cond) => {
         const isActive = activeCondition === cond.value;
         const showBrandSub =
-          hasBrands && hoveredCondition === cond.value && (brands?.length ?? 0) > 0;
+          hasBrands && hoveredCondition === cond.value && brands.length > 0;
 
         return (
           <div
@@ -130,14 +130,13 @@ function ConditionDropdown({
               }`}
             >
               <span className="font-medium">{cond.label}</span>
-              {hasBrands && (brands?.length ?? 0) > 0 && (
+              {hasBrands && brands.length > 0 && (
                 <ChevronRight className="h-3.5 w-3.5 text-zinc-500" />
               )}
             </Link>
 
-            {/* Brand sub-dropdown */}
             {showBrandSub && (
-              <div className="absolute bottom-0 left-full z-50 ml-1 w-44 overflow-hidden rounded-xl border border-zinc-700/80 bg-zinc-900 shadow-2xl shadow-zinc-950/60">
+              <div className="absolute top-0 left-full z-50 ml-1 w-44 overflow-hidden rounded-xl border border-zinc-700/80 bg-zinc-900 shadow-2xl">
                 {brands.map((brand) => (
                   <Link
                     key={brand.slug}
@@ -171,13 +170,13 @@ function CategoryTile({
   brands = [],
   allCategories,
 }: {
-  category: ALL_CATEGORIES_QUERYResult[number];
+  category: LooseCategory;
   isActive: boolean;
   activeCategory?: string;
   activeCondition?: string;
   activeBrand?: string;
   brands?: { title: string; slug: string }[];
-  allCategories: ALL_CATEGORIES_QUERYResult;
+  allCategories: LooseCategory[];
 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -185,7 +184,8 @@ function CategoryTile({
   const slug = category.slug ?? "";
 
   const showsConditionDropdown = categoryHasConditions(slug);
-  const showsSubcategoryDropdown = !showsConditionDropdown && categoryHasSubcategoryDropdown(slug);
+  const showsSubcategoryDropdown =
+    !showsConditionDropdown && categoryHasSubcategoryDropdown(slug);
   const showDropdown = showsConditionDropdown || showsSubcategoryDropdown;
 
   const handleMouseEnter = () => {
@@ -194,7 +194,7 @@ function CategoryTile({
   };
 
   const handleMouseLeave = () => {
-    timeoutRef.current = setTimeout(() => setDropdownOpen(false), 150);
+    timeoutRef.current = setTimeout(() => setDropdownOpen(false), 200);
   };
 
   return (
@@ -248,23 +248,25 @@ function CategoryTile({
         </div>
       </Link>
 
-      {/* Condition dropdown — Gaming Laptops, Regular Laptops, MacBook, Monitors */}
-      {showsConditionDropdown && dropdownOpen && (
-        <ConditionDropdown
-          categorySlug={slug}
-          activeCondition={activeCondition}
-          activeBrand={activeBrand}
-          brands={brands}
-        />
-      )}
-
-      {/* Subcategory list — Computers, Accessories, Tech Setup Gears, Monitors, Content Creation */}
-      {showsSubcategoryDropdown && dropdownOpen && (
-        <SubcategoryDropdown
-          parentSlug={slug}
-          allCategories={allCategories}
-          activeCategory={activeCategory}
-        />
+      {/* Dropdown rendered via fixed positioning to escape overflow clipping */}
+      {showDropdown && dropdownOpen && (
+        <div className="fixed z-999" style={{ top: 'var(--dropdown-top)', left: 'var(--dropdown-left)' }}>
+          {showsConditionDropdown && (
+            <ConditionDropdown
+              categorySlug={slug}
+              activeCondition={activeCondition}
+              activeBrand={activeBrand}
+              brands={brands}
+            />
+          )}
+          {showsSubcategoryDropdown && (
+            <SubcategoryDropdown
+              parentSlug={slug}
+              allCategories={allCategories}
+              activeCategory={activeCategory}
+            />
+          )}
+        </div>
       )}
     </div>
   );
@@ -279,13 +281,11 @@ export function CategoryTiles({
   activeBrand,
   brandsMap = {},
 }: CategoryTilesProps) {
-  // Only show top-level categories (no parent) in the tile row
-  const topLevel = categories.filter((c) => !(c as any).parentSlug);
+  const topLevel = categories.filter((c) => !c.parentSlug);
 
   return (
     <div className="relative">
       <div className="flex gap-4 overflow-x-auto py-4 pl-8 pr-4 sm:pl-12 sm:pr-6 lg:pl-10 lg:pr-8 scrollbar-hide">
-        {/* All Products tile */}
         <Link
           href="/"
           className={`group relative shrink-0 overflow-hidden rounded-xl transition-all duration-300 ${
@@ -301,16 +301,13 @@ export function CategoryTiles({
             </div>
             <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-3">
-              <span className="text-sm font-semibold text-white">
-                All Products
-              </span>
+              <span className="text-sm font-semibold text-white">All Products</span>
             </div>
           </div>
         </Link>
 
-        {/* Category tiles — top level only */}
         {topLevel.map((category) => (
-          <CategoryTile
+          <CategoryTileWithPortal
             key={category._id}
             category={category}
             isActive={activeCategory === category.slug}
@@ -322,6 +319,136 @@ export function CategoryTiles({
           />
         ))}
       </div>
+    </div>
+  );
+}
+
+// ── Tile with portal-style dropdown using getBoundingClientRect ────────────
+
+function CategoryTileWithPortal({
+  category,
+  isActive,
+  activeCategory,
+  activeCondition,
+  activeBrand,
+  brands = [],
+  allCategories,
+}: {
+  category: LooseCategory;
+  isActive: boolean;
+  activeCategory?: string;
+  activeCondition?: string;
+  activeBrand?: string;
+  brands?: { title: string; slug: string }[];
+  allCategories: LooseCategory[];
+}) {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tileRef = useRef<HTMLDivElement>(null);
+  const imageUrl = category.image?.asset?.url;
+  const slug = category.slug ?? "";
+
+  const showsConditionDropdown = categoryHasConditions(slug);
+  const showsSubcategoryDropdown =
+    !showsConditionDropdown && categoryHasSubcategoryDropdown(slug);
+  const showDropdown = showsConditionDropdown || showsSubcategoryDropdown;
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (tileRef.current) {
+      const rect = tileRef.current.getBoundingClientRect();
+      setDropdownPos({
+        top: rect.bottom + window.scrollY + 4,
+        left: rect.left + window.scrollX,
+      });
+    }
+    setDropdownOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => setDropdownOpen(false), 200);
+  };
+
+  return (
+    <div
+      ref={tileRef}
+      className="relative shrink-0"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <Link
+        href={`/?category=${slug}`}
+        className={`group relative block overflow-hidden rounded-xl transition-all duration-300 ${
+          isActive
+            ? "ring-2 ring-amber-500 ring-offset-2 ring-offset-zinc-950"
+            : "hover:ring-2 hover:ring-zinc-600 hover:ring-offset-2 hover:ring-offset-zinc-950"
+        }`}
+      >
+        <div className="relative h-32 w-44 sm:h-48 sm:w-64">
+          {imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt={category.title ?? "Category"}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-linear-to-br from-amber-500 to-orange-600" />
+          )}
+          <div className="absolute inset-0 bg-linear-to-t from-black/75 via-black/20 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 p-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-white drop-shadow-md">
+                {category.title}
+              </span>
+              {showDropdown && (
+                <ChevronRight
+                  className={`h-3.5 w-3.5 text-white/70 transition-transform duration-200 ${
+                    dropdownOpen ? "rotate-90" : ""
+                  }`}
+                />
+              )}
+            </div>
+          </div>
+          {isActive && (
+            <div className="absolute top-2 right-2">
+              <span className="flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500" />
+              </span>
+            </div>
+          )}
+        </div>
+      </Link>
+
+      {/* Fixed-position dropdown — escapes overflow clipping entirely */}
+      {showDropdown && dropdownOpen && (
+        <div
+          className="fixed z-9999"
+          style={{ top: dropdownPos.top, left: dropdownPos.left }}
+          onMouseEnter={() => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+          }}
+          onMouseLeave={handleMouseLeave}
+        >
+          {showsConditionDropdown && (
+            <ConditionDropdown
+              categorySlug={slug}
+              activeCondition={activeCondition}
+              activeBrand={activeBrand}
+              brands={brands}
+            />
+          )}
+          {showsSubcategoryDropdown && (
+            <SubcategoryDropdown
+              parentSlug={slug}
+              allCategories={allCategories}
+              activeCategory={activeCategory}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }

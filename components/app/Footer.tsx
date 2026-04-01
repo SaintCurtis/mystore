@@ -42,13 +42,14 @@ const SOCIAL_LINKS = [
 
 const QUICK_LINKS = [
   { label: "All Products", href: "/" },
-  { label: "Gaming Laptops", href: "/?category=gaming-laptops" },
-  { label: "MacBooks", href: "/?category=macbook" },
-  { label: "Regular Laptops", href: "/?category=regular-laptops" },
+  { label: "Computers", href: "/?category=computers" },
+  { label: "Accessories", href: "/?category=accessories" },
+  { label: "Tech Setup Gears", href: "/?category=tech-setup-gears" },
+  { label: "Monitors", href: "/?category=monitors" },
+  { label: "Content Creation Tools", href: "/?category=content-creation-tools" },
   { label: "Custom PCs", href: "/?category=custom-pcs" },
-  { label: "Keyboards", href: "/?category=keyboards" },
-  { label: "Headsets", href: "/?category=headsets" },
   { label: "EcoFlow", href: "/?category=ecoflow" },
+  { label: "Starlink", href: "/?category=starlink" },
 ];
 
 const POLICY_LINKS = [
@@ -78,14 +79,14 @@ export function Footer() {
                   The Saint's TechNet
                 </span>
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-500">
-                  BN: 9245886
+                  CAC Registered
                 </span>
               </div>
             </Link>
 
             <p className="text-sm leading-relaxed text-zinc-400 max-w-xs">
-              Premium brand-new and foreign-used tech — verified by a seasoned Computer
-              Engineer. Warranty on everything. Shipped worldwide
+              Premium brand-new and foreign-used tech — verified by a Computer
+              Engineer from FUTA. Warranty on everything. Shipped worldwide
               since 2019.
             </p>
 
@@ -243,7 +244,7 @@ export function Footer() {
           <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
             <p className="text-xs text-zinc-600">
               © {new Date().getFullYear()} The Saint's Technology Networks.
-              BN: 9245886. All rights reserved.
+              CAC Registered. All rights reserved.
             </p>
             <p className="text-xs text-zinc-700">
               Built by an Engineer. Trusted by Thousands.
