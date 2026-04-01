@@ -32,12 +32,12 @@ function pluralize(word: string): string {
   return word + "s";
 }
 
-// Root categories that use the drilldown subcategory selects
-// instead of the condition → brand → model flow
+// Root categories that use cascading subcategory selects
 const DRILLDOWN_ROOTS = [
   "monitors",
   "content-creation-tools",
   "computers",
+  "accessories",
 ] as const;
 type DrilldownRoot = (typeof DRILLDOWN_ROOTS)[number];
 
@@ -49,7 +49,11 @@ function isDrilldownRoot(slug: string): slug is DrilldownRoot {
 const DRILLDOWN_LABELS: Record<DrilldownRoot, string[]> = {
   monitors: ["Type", "Condition", "Panel Type"],
   "content-creation-tools": ["Category", "Sub-category"],
+  // computers: Type → Condition only via drilldown.
+  // Brand + Model appear separately below via existing CATEGORIES_WITH_BRANDS logic
+  // once the user lands on a condition-level slug (e.g. gaming-laptops-brand-new)
   computers: ["Type", "Condition"],
+  accessories: ["Type"],
 };
 
 interface ProductFiltersProps {
@@ -93,7 +97,9 @@ export function ProductFilters({
   }, [urlMinPrice, urlMaxPrice]);
 
   // ── Drilldown logic ────────────────────────────────────────────
-  type FlatCat = ALL_CATEGORIES_QUERYResult[number] & { parentSlug?: string | null };
+  type FlatCat = ALL_CATEGORIES_QUERYResult[number] & {
+    parentSlug?: string | null;
+  };
 
   function findDrilldownRoot(catSlug: string): DrilldownRoot | null {
     if (!catSlug) return null;
@@ -132,10 +138,18 @@ export function ProductFilters({
     ? getSelectionChain(currentCategory, drilldownRoot)
     : [];
 
-  function getDrilldownLevels(): { parentSlug: string; selectedSlug: string; label: string }[] {
+  function getDrilldownLevels(): {
+    parentSlug: string;
+    selectedSlug: string;
+    label: string;
+  }[] {
     if (!drilldownRoot) return [];
     const labels = DRILLDOWN_LABELS[drilldownRoot];
-    const levels: { parentSlug: string; selectedSlug: string; label: string }[] = [];
+    const levels: {
+      parentSlug: string;
+      selectedSlug: string;
+      label: string;
+    }[] = [];
 
     levels.push({
       parentSlug: drilldownRoot,
@@ -148,6 +162,9 @@ export function ProductFilters({
       if (!selected) break;
       const children = getChildren(selected);
       if (children.length === 0) break;
+      // For computers: stop drilldown after condition level (depth 2).
+      // Brand/Model are handled separately below via CATEGORIES_WITH_BRANDS.
+      if (drilldownRoot === "computers" && i >= labels.length - 1) break;
       levels.push({
         parentSlug: selected,
         selectedSlug: selectionChain[i + 1] ?? "",
@@ -170,15 +187,26 @@ export function ProductFilters({
     router.push(`?${params.toString()}`, { scroll: false });
   }
 
-  // ── Show/hide logic ────────────────────────────────────────────
+  // ── Brand / Model logic ────────────────────────────────────────
+  // For non-drilldown categories AND for computers once a condition-
+  // level slug is active (e.g. gaming-laptops-brand-new which is in
+  // CATEGORIES_WITH_BRANDS).
   const showCondition =
     !drilldownRoot &&
     (CATEGORIES_WITH_CONDITIONS as readonly string[]).includes(currentCategory);
 
+  // Show brand when:
+  // a) old flow: condition is selected for a non-drilldown category, OR
+  // b) computers drilldown: the current category slug itself is in CATEGORIES_WITH_BRANDS
+  //    (meaning user has drilled down to e.g. "gaming-laptops-brand-new")
   const showBrand =
-    showCondition &&
-    (CATEGORIES_WITH_BRANDS as readonly string[]).includes(currentCategory) &&
-    brands.length > 0;
+    brands.length > 0 &&
+    (
+      // old flow
+      (showCondition && (CATEGORIES_WITH_BRANDS as readonly string[]).includes(currentCategory)) ||
+      // computers drilldown flow — current slug is a brand-supporting category
+      (drilldownRoot === "computers" && (CATEGORIES_WITH_BRANDS as readonly string[]).includes(currentCategory))
+    );
 
   const showModel = showBrand && !!currentBrand && models.length > 0;
 
@@ -319,7 +347,11 @@ export function ProductFilters({
               isSearchActive ? "border-amber-500 ring-1 ring-amber-500" : ""
             }`}
           />
-          <Button type="submit" size="sm" className="bg-amber-500 text-zinc-950 hover:bg-amber-400">
+          <Button
+            type="submit"
+            size="sm"
+            className="bg-amber-500 text-zinc-950 hover:bg-amber-400"
+          >
             Go
           </Button>
         </form>
@@ -412,7 +444,7 @@ export function ProductFilters({
           );
         })}
 
-      {/* Condition — only for laptop/MacBook (not drilldown) */}
+      {/* Condition — only for non-drilldown categories (e.g. standalone gaming-laptops tile) */}
       {showCondition && (
         <div>
           <FilterLabel isActive={isConditionActive} filterKey="condition">
@@ -429,7 +461,9 @@ export function ProductFilters({
           >
             <SelectTrigger
               className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${
-                isConditionActive ? "border-amber-500 ring-1 ring-amber-500" : ""
+                isConditionActive
+                  ? "border-amber-500 ring-1 ring-amber-500"
+                  : ""
               }`}
             >
               <SelectValue placeholder="Any Condition" />
@@ -452,7 +486,7 @@ export function ProductFilters({
         </div>
       )}
 
-      {/* Brand */}
+      {/* Brand — shown for both old flow and computers drilldown */}
       {showBrand && (
         <div>
           <FilterLabel isActive={isBrandActive} filterKey="brand">

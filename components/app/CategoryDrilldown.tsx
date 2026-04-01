@@ -29,12 +29,13 @@ const LEVEL_LABELS: Record<DrilldownRoot, Record<number, string>> = {
     1: "Sub-category", // Digital Cameras / Lavalier Mics etc.
     2: "Type",
   },
-   computers: {
-  0: "Type",        // SFF / Custom PCs etc.
-  1: "Condition",   // Brand New / Foreign Used
-  2: "Brand",
-  3: "Model",
-},
+  computers: {
+    0: "Type",         // Gaming Laptops / Regular Laptops / SFF etc.
+    1: "Condition",    // Brand New / Foreign Used
+  },
+  accessories: {
+    0: "Type",         // Headsets / Keyboards / Mice / Webcams etc.
+  },
 };
 
 interface CategoryDrilldownProps {
@@ -55,7 +56,6 @@ export function CategoryDrilldown({
 
   const [selections, setSelections] = useState<string[]>([]);
 
-  // Sync selections with the current URL slug
   useEffect(() => {
     if (!currentSlug || currentSlug === rootSlug) {
       setSelections([]);
@@ -68,7 +68,6 @@ export function CategoryDrilldown({
       return;
     }
 
-    // Build chain from root → leaf, excluding the root itself
     const chain: string[] = [];
     let current: SanityCategory | null | undefined = cat;
     while (current && current.slug !== rootSlug) {
@@ -104,19 +103,25 @@ export function CategoryDrilldown({
     router.push(`/?${params.toString()}`);
   }
 
+  const labelMap = LEVEL_LABELS[rootSlug] ?? {};
+  const maxDepth = Object.keys(labelMap).length;
+
   // Determine which depth levels to render
   const depthsToShow: number[] = [0];
   for (let i = 0; i < selections.length; i++) {
+    if (i + 1 >= maxDepth) break; // don't exceed defined levels
     const childrenAtNext = getOptionsAtLevel(i + 1);
     if (childrenAtNext.length > 0) depthsToShow.push(i + 1);
     else break;
   }
   const lastShown = depthsToShow[depthsToShow.length - 1];
-  if (selections[lastShown] && getOptionsAtLevel(lastShown + 1).length > 0) {
+  if (
+    lastShown + 1 < maxDepth &&
+    selections[lastShown] &&
+    getOptionsAtLevel(lastShown + 1).length > 0
+  ) {
     depthsToShow.push(lastShown + 1);
   }
-
-  const labelMap = LEVEL_LABELS[rootSlug] ?? {};
 
   if (tree.length === 0) return null;
 

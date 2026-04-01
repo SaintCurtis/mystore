@@ -20,6 +20,18 @@ import { HeroSection } from "@/components/app/HeroSection";
 import { TestimonialsCarousel } from "@/components/app/TestimonialsCarousel";
 import { AboutSection } from "@/components/app/AboutSection";
 
+// Drilldown roots — keep in sync with lib/constants/drilldown.ts
+const DRILLDOWN_ROOTS = [
+  "monitors",
+  "content-creation-tools",
+  "computers",
+  "accessories",
+] as const;
+
+function isDrilldownRoot(slug: string): boolean {
+  return (DRILLDOWN_ROOTS as readonly string[]).includes(slug);
+}
+
 interface PageProps {
   searchParams: Promise<{
     q?: string;
@@ -118,14 +130,34 @@ export default async function HomePage({ searchParams }: PageProps) {
     }),
   ]);
 
-  const brandsMap: Record<string, { title: string; slug: string }[]> = {
+  const brandsMap: Record<string, BrandOption[]> = {
     "gaming-laptops": extractBrands(gamingBrandsData),
     "regular-laptops": extractBrands(regularBrandsData),
     "monitors-professional": extractBrands(monitorProBrandsData),
     "monitors-gaming": extractBrands(monitorGamingBrandsData),
   };
 
-  const brands: { title: string; slug: string }[] = brandsMap[categorySlug] ?? [];
+  // For the computers drilldown: if the active category is a brand-supporting
+  // slug (e.g. gaming-laptops-brand-new), fetch its brands dynamically.
+  // We check this by seeing if categorySlug has brands in the existing map
+  // or by fetching on demand.
+  const needsDynamicBrands =
+    categorySlug &&
+    !brandsMap[categorySlug] &&
+    !isDrilldownRoot(categorySlug);
+
+  const { data: dynamicBrandsData } = needsDynamicBrands
+    ? await sanityFetch({
+        query: BRANDS_BY_CATEGORY_QUERY,
+        params: { categorySlug, condition: "" },
+      })
+    : { data: [] };
+
+  if (needsDynamicBrands) {
+    brandsMap[categorySlug] = extractBrands(dynamicBrandsData);
+  }
+
+  const brands: BrandOption[] = brandsMap[categorySlug] ?? [];
 
   const { data: modelsData } = brandSlug
     ? await sanityFetch({
@@ -134,27 +166,23 @@ export default async function HomePage({ searchParams }: PageProps) {
       })
     : { data: [] };
 
-  const models: { title: string; slug: string }[] = Array.isArray(modelsData)
+  const models: BrandOption[] = Array.isArray(modelsData)
     ? modelsData
         .filter((m: any) => m?.title && m?.slug)
         .map((m: any) => ({ title: m.title as string, slug: m.slug as string }))
     : [];
 
   // ── Active tile highlight ─────────────────────────────────────
-  // For drilldown categories, highlight the root tile (e.g. "monitors")
-  // even when a deeper slug like "monitors-gaming" is active.
-  const DRILLDOWN_ROOTS = ["monitors", "content-creation-tools"];
+  type FlatCat = { slug?: string | null; parentSlug?: string | null };
 
   function getActiveTile(catSlug: string): string | undefined {
     if (!catSlug) return undefined;
-    if (DRILLDOWN_ROOTS.includes(catSlug)) return catSlug;
-    // Walk up to find drilldown root
-    type FlatCat = { slug?: string | null; parentSlug?: string | null };
+    if (isDrilldownRoot(catSlug)) return catSlug;
     let current = (categories as FlatCat[]).find((c) => c.slug === catSlug);
     while (current) {
       const parentSlug = current.parentSlug;
       if (!parentSlug) break;
-      if (DRILLDOWN_ROOTS.includes(parentSlug)) return parentSlug;
+      if (isDrilldownRoot(parentSlug)) return parentSlug;
       current = (categories as FlatCat[]).find((c) => c.slug === parentSlug);
     }
     return catSlug;
@@ -187,17 +215,14 @@ export default async function HomePage({ searchParams }: PageProps) {
   return (
     <div className="min-h-screen bg-zinc-950">
 
-      {/* Hero — homepage only */}
       {isHomepage && <HeroSection />}
 
-      {/* Featured Carousel — homepage only */}
       {isHomepage && featuredProducts.length > 0 && (
         <Suspense fallback={<FeaturedCarouselSkeleton />}>
           <FeaturedCarousel products={featuredProducts} />
         </Suspense>
       )}
 
-      {/* Page Banner + Category Tiles */}
       <div className="border-b border-zinc-800 bg-zinc-950">
         <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
           <h1 className="font-display text-2xl font-bold tracking-tight text-white">
@@ -218,7 +243,6 @@ export default async function HomePage({ searchParams }: PageProps) {
         </div>
       </div>
 
-      {/* Product Grid */}
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <ProductSection
           categories={categories}
@@ -229,10 +253,7 @@ export default async function HomePage({ searchParams }: PageProps) {
         />
       </div>
 
-      {/* Testimonials — homepage only */}
       {isHomepage && <TestimonialsCarousel />}
-
-      {/* About — homepage only */}
       {isHomepage && <AboutSection />}
 
     </div>
