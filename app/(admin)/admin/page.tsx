@@ -20,18 +20,6 @@ import { HeroSection } from "@/components/app/HeroSection";
 import { TestimonialsCarousel } from "@/components/app/TestimonialsCarousel";
 import { AboutSection } from "@/components/app/AboutSection";
 
-// Drilldown roots — keep in sync with lib/constants/drilldown.ts
-const DRILLDOWN_ROOTS = [
-  "monitors",
-  "content-creation-tools",
-  "computers",
-  "accessories",
-] as const;
-
-function isDrilldownRoot(slug: string): boolean {
-  return (DRILLDOWN_ROOTS as readonly string[]).includes(slug);
-}
-
 interface PageProps {
   searchParams: Promise<{
     q?: string;
@@ -112,6 +100,8 @@ export default async function HomePage({ searchParams }: PageProps) {
     }),
     sanityFetch({ query: ALL_CATEGORIES_QUERY }),
     sanityFetch({ query: FEATURED_PRODUCTS_QUERY }),
+    // Fetch brands for ALL brand-supporting categories upfront
+    // so hover dropdowns work on every tile without clicking first
     sanityFetch({
       query: BRANDS_BY_CATEGORY_QUERY,
       params: { categorySlug: "gaming-laptops", condition: "" },
@@ -130,35 +120,41 @@ export default async function HomePage({ searchParams }: PageProps) {
     }),
   ]);
 
-  const brandsMap: Record<string, BrandOption[]> = {
-    "gaming-laptops": extractBrands(gamingBrandsData),
-    "regular-laptops": extractBrands(regularBrandsData),
-    "monitors-professional": extractBrands(monitorProBrandsData),
-    "monitors-gaming": extractBrands(monitorGamingBrandsData),
+  // brandsMap keyed by category slug — passed to CategoryTiles hover dropdowns
+  const gamingBrands = extractBrands(gamingBrandsData);
+  const regularBrands = extractBrands(regularBrandsData);
+  const monProBrands = extractBrands(monitorProBrandsData);
+  const monGamingBrands = extractBrands(monitorGamingBrandsData);
+
+  const brandsMap: Record<string, { title: string; slug: string }[]> = {
+    "gaming-laptops":                    gamingBrands,
+    "gaming-laptops-brand-new":          gamingBrands,
+    "gaming-laptops-foreign-used":       gamingBrands,
+    "regular-laptops":                   regularBrands,
+    "regular-laptops-brand-new":         regularBrands,
+    "regular-laptops-foreign-used":      regularBrands,
+    "monitors-professional":             monProBrands,
+    "monitors-professional-brand-new":   monProBrands,
+    "monitors-professional-foreign-used": monProBrands,
+    "monitors-gaming":                   monGamingBrands,
+    "monitors-gaming-brand-new":         monGamingBrands,
+    "monitors-gaming-foreign-used":      monGamingBrands,
   };
 
-  // For the computers drilldown: if the active category is a brand-supporting
-  // slug (e.g. gaming-laptops-brand-new), fetch its brands dynamically.
-  // We check this by seeing if categorySlug has brands in the existing map
-  // or by fetching on demand.
-  const needsDynamicBrands =
-    categorySlug &&
-    !brandsMap[categorySlug] &&
-    !isDrilldownRoot(categorySlug);
+  // For sidebar filter — if a subcategory is selected (e.g. gaming-laptops-brand-new),
+  // look up its parent slug so the brand list still shows
+  const selectedCategoryData = categories.find(
+    (c: any) => c.slug === categorySlug
+  ) as any;
+  const selectedParentSlug: string = selectedCategoryData?.parentSlug ?? "";
+  const effectiveCategorySlug = brandsMap[categorySlug]
+    ? categorySlug
+    : selectedParentSlug || categorySlug;
 
-  const { data: dynamicBrandsData } = needsDynamicBrands
-    ? await sanityFetch({
-        query: BRANDS_BY_CATEGORY_QUERY,
-        params: { categorySlug, condition: "" },
-      })
-    : { data: [] };
+  const brands: { title: string; slug: string }[] =
+    brandsMap[effectiveCategorySlug] ?? [];
 
-  if (needsDynamicBrands) {
-    brandsMap[categorySlug] = extractBrands(dynamicBrandsData);
-  }
-
-  const brands: BrandOption[] = brandsMap[categorySlug] ?? [];
-
+  // Fetch models when a brand is selected
   const { data: modelsData } = brandSlug
     ? await sanityFetch({
         query: MODELS_BY_BRAND_QUERY,
@@ -166,29 +162,11 @@ export default async function HomePage({ searchParams }: PageProps) {
       })
     : { data: [] };
 
-  const models: BrandOption[] = Array.isArray(modelsData)
+  const models: { title: string; slug: string }[] = Array.isArray(modelsData)
     ? modelsData
         .filter((m: any) => m?.title && m?.slug)
         .map((m: any) => ({ title: m.title as string, slug: m.slug as string }))
     : [];
-
-  // ── Active tile highlight ─────────────────────────────────────
-  type FlatCat = { slug?: string | null; parentSlug?: string | null };
-
-  function getActiveTile(catSlug: string): string | undefined {
-    if (!catSlug) return undefined;
-    if (isDrilldownRoot(catSlug)) return catSlug;
-    let current = (categories as FlatCat[]).find((c) => c.slug === catSlug);
-    while (current) {
-      const parentSlug = current.parentSlug;
-      if (!parentSlug) break;
-      if (isDrilldownRoot(parentSlug)) return parentSlug;
-      current = (categories as FlatCat[]).find((c) => c.slug === parentSlug);
-    }
-    return catSlug;
-  }
-
-  const activeTile = getActiveTile(categorySlug);
 
   // ── Page title ────────────────────────────────────────────────
   const getPageTitle = () => {
@@ -215,14 +193,17 @@ export default async function HomePage({ searchParams }: PageProps) {
   return (
     <div className="min-h-screen bg-zinc-950">
 
+      {/* Hero — homepage only */}
       {isHomepage && <HeroSection />}
 
+      {/* Featured Carousel — homepage only */}
       {isHomepage && featuredProducts.length > 0 && (
         <Suspense fallback={<FeaturedCarouselSkeleton />}>
           <FeaturedCarousel products={featuredProducts} />
         </Suspense>
       )}
 
+      {/* Page Banner + Category Tiles */}
       <div className="border-b border-zinc-800 bg-zinc-950">
         <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
           <h1 className="font-display text-2xl font-bold tracking-tight text-white">
@@ -235,7 +216,7 @@ export default async function HomePage({ searchParams }: PageProps) {
         <div className="mt-6">
           <CategoryTiles
             categories={categories}
-            activeCategory={activeTile}
+            activeCategory={categorySlug || undefined}
             activeCondition={condition || undefined}
             activeBrand={brandSlug || undefined}
             brandsMap={brandsMap}
@@ -243,6 +224,7 @@ export default async function HomePage({ searchParams }: PageProps) {
         </div>
       </div>
 
+      {/* Product Grid */}
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <ProductSection
           categories={categories}
@@ -253,7 +235,10 @@ export default async function HomePage({ searchParams }: PageProps) {
         />
       </div>
 
+      {/* Testimonials — homepage only */}
       {isHomepage && <TestimonialsCarousel />}
+
+      {/* About — homepage only */}
       {isHomepage && <AboutSection />}
 
     </div>

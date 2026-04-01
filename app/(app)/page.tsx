@@ -14,20 +14,24 @@ import {
 } from "@/lib/sanity/queries/categories";
 import { ProductSection } from "@/components/app/ProductSection";
 import { CategoryTiles } from "@/components/app/CategoryTiles";
-import { CategoryDrilldown } from "@/components/app/CategoryDrilldown";
 import { FeaturedCarousel } from "@/components/app/FeaturedCarousel";
 import { FeaturedCarouselSkeleton } from "@/components/app/FeaturedCarouselSkeleton";
 import { HeroSection } from "@/components/app/HeroSection";
 import { TestimonialsCarousel } from "@/components/app/TestimonialsCarousel";
 import { AboutSection } from "@/components/app/AboutSection";
+import {
+  CATEGORIES_WITH_BRANDS,
+} from "@/lib/constants/filters";
 
-// ── Drilldown roots — defined here (server-safe) AND in CategoryDrilldown ──
-// These are the two top-level categories that get cascading dropdowns
-// instead of the old hover condition dropdown.
-const DRILLDOWN_ROOTS = ["monitors", "content-creation-tools"] as const;
-type DrilldownRoot = (typeof DRILLDOWN_ROOTS)[number];
+// Drilldown roots — keep in sync with lib/constants/drilldown.ts
+const DRILLDOWN_ROOTS = [
+  "monitors",
+  "content-creation-tools",
+  "computers",
+  "accessories",
+] as const;
 
-function isDrilldownRoot(slug: string): slug is DrilldownRoot {
+function isDrilldownRoot(slug: string): boolean {
   return (DRILLDOWN_ROOTS as readonly string[]).includes(slug);
 }
 
@@ -129,14 +133,61 @@ export default async function HomePage({ searchParams }: PageProps) {
     }),
   ]);
 
-  const brandsMap: Record<string, { title: string; slug: string }[]> = {
+  const brandsMap: Record<string, BrandOption[]> = {
     "gaming-laptops": extractBrands(gamingBrandsData),
     "regular-laptops": extractBrands(regularBrandsData),
     "monitors-professional": extractBrands(monitorProBrandsData),
     "monitors-gaming": extractBrands(monitorGamingBrandsData),
   };
 
-  const brands: { title: string; slug: string }[] = brandsMap[categorySlug] ?? [];
+  // ── Smart brand fetching ──────────────────────────────────────
+  // When the active category is a condition-level child (e.g. gaming-laptops-brand-new),
+  // we need to walk UP the ancestor chain to find the slug that's in
+  // CATEGORIES_WITH_BRANDS (e.g. "gaming-laptops"), then fetch brands for that.
+  //
+  // This is the core fix: previously we tried to fetch brands for the leaf slug
+  // itself, but BRANDS_BY_CATEGORY_QUERY only matches products whose category
+  // OR parent category slug equals the given slug. The leaf slug
+  // "gaming-laptops-brand-new" has no direct products — products are tagged
+  // to it but the query needs the grandparent slug to match correctly.
+
+  type FlatCat = { slug?: string | null; parentSlug?: string | null };
+
+  function findBrandSupportingAncestor(catSlug: string): string | null {
+    // Check the slug itself first
+    if ((CATEGORIES_WITH_BRANDS as readonly string[]).includes(catSlug)) return catSlug;
+    // Walk up via parentSlug
+    let current = (categories as FlatCat[]).find((c) => c.slug === catSlug);
+    while (current) {
+      const parentSlug = current.parentSlug;
+      if (!parentSlug) break;
+      if ((CATEGORIES_WITH_BRANDS as readonly string[]).includes(parentSlug)) return parentSlug;
+      current = (categories as FlatCat[]).find((c) => c.slug === parentSlug);
+    }
+    return null;
+  }
+
+  // Find the brand-supporting ancestor for the current category
+  const brandAncestorSlug = categorySlug
+    ? findBrandSupportingAncestor(categorySlug)
+    : null;
+
+  // Fetch brands if we found an ancestor that supports brands
+  // and it's not already in our pre-fetched brandsMap
+  if (brandAncestorSlug && !brandsMap[brandAncestorSlug]) {
+    const { data: ancestorBrandsData } = await sanityFetch({
+      query: BRANDS_BY_CATEGORY_QUERY,
+      params: { categorySlug: brandAncestorSlug, condition: "" },
+    });
+    brandsMap[brandAncestorSlug] = extractBrands(ancestorBrandsData);
+  }
+
+  // The brands to pass to ProductSection/ProductFilters:
+  // Use the current category slug first, then fall back to the brand ancestor slug
+  const brands: BrandOption[] =
+    brandsMap[categorySlug] ??
+    (brandAncestorSlug ? brandsMap[brandAncestorSlug] : undefined) ??
+    [];
 
   const { data: modelsData } = brandSlug
     ? await sanityFetch({
@@ -145,46 +196,27 @@ export default async function HomePage({ searchParams }: PageProps) {
       })
     : { data: [] };
 
-  const models: { title: string; slug: string }[] = Array.isArray(modelsData)
+  const models: BrandOption[] = Array.isArray(modelsData)
     ? modelsData
         .filter((m: any) => m?.title && m?.slug)
         .map((m: any) => ({ title: m.title as string, slug: m.slug as string }))
     : [];
 
-  // ── Resolve drilldown context ─────────────────────────────────
-  // Walk up the active category's ancestor chain to find if it belongs
-  // to a drilldown root (monitors or content-creation-tools).
-  // This means ?category=monitors-gaming-qdoled still activates the
-  // Monitors drilldown UI with the correct root.
-  type CatWithParent = {
-    _id: string;
-    slug: string | null;
-    parentSlug?: string | null;
-    parent?: CatWithParent | null;
-    [key: string]: unknown;
-  };
-
-  function getDrilldownRoot(
-    allCats: CatWithParent[],
-    activeSlug: string,
-  ): DrilldownRoot | null {
-    if (!activeSlug) return null;
-    if (isDrilldownRoot(activeSlug)) return activeSlug;
-
-    let current = allCats.find((c) => c.slug === activeSlug);
+  // ── Active tile highlight ─────────────────────────────────────
+  function getActiveTile(catSlug: string): string | undefined {
+    if (!catSlug) return undefined;
+    if (isDrilldownRoot(catSlug)) return catSlug;
+    let current = (categories as FlatCat[]).find((c) => c.slug === catSlug);
     while (current) {
-      const parentSlug = current.parentSlug ?? (current.parent as CatWithParent | null)?.slug;
+      const parentSlug = current.parentSlug;
       if (!parentSlug) break;
       if (isDrilldownRoot(parentSlug)) return parentSlug;
-      current = allCats.find((c) => c.slug === parentSlug);
+      current = (categories as FlatCat[]).find((c) => c.slug === parentSlug);
     }
-    return null;
+    return catSlug;
   }
 
-  const drilldownRoot = getDrilldownRoot(
-    categories as CatWithParent[],
-    categorySlug,
-  );
+  const activeTile = getActiveTile(categorySlug);
 
   // ── Page title ────────────────────────────────────────────────
   const getPageTitle = () => {
@@ -211,17 +243,14 @@ export default async function HomePage({ searchParams }: PageProps) {
   return (
     <div className="min-h-screen bg-zinc-950">
 
-      {/* Hero — homepage only */}
       {isHomepage && <HeroSection />}
 
-      {/* Featured Carousel — homepage only */}
       {isHomepage && featuredProducts.length > 0 && (
         <Suspense fallback={<FeaturedCarouselSkeleton />}>
           <FeaturedCarousel products={featuredProducts} />
         </Suspense>
       )}
 
-      {/* Page Banner + Category Tiles */}
       <div className="border-b border-zinc-800 bg-zinc-950">
         <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
           <h1 className="font-display text-2xl font-bold tracking-tight text-white">
@@ -234,24 +263,14 @@ export default async function HomePage({ searchParams }: PageProps) {
         <div className="mt-6">
           <CategoryTiles
             categories={categories}
-            activeCategory={drilldownRoot ?? (categorySlug || undefined)}
+            activeCategory={activeTile}
             activeCondition={condition || undefined}
             activeBrand={brandSlug || undefined}
             brandsMap={brandsMap}
           />
         </div>
-
-        {/* Cascading Drilldown Dropdowns — Monitors & Content Creation only */}
-        {drilldownRoot && (
-          <CategoryDrilldown
-            allCategories={categories as any}
-            rootSlug={drilldownRoot}
-            currentSlug={categorySlug}
-          />
-        )}
       </div>
 
-      {/* Product Grid */}
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <ProductSection
           categories={categories}
@@ -262,10 +281,7 @@ export default async function HomePage({ searchParams }: PageProps) {
         />
       </div>
 
-      {/* Testimonials — homepage only */}
       {isHomepage && <TestimonialsCarousel />}
-
-      {/* About — homepage only */}
       {isHomepage && <AboutSection />}
 
     </div>

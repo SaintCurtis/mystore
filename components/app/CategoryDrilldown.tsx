@@ -31,7 +31,9 @@ const LEVEL_LABELS: Record<DrilldownRoot, Record<number, string>> = {
   },
   computers: {
     0: "Type",         // Gaming Laptops / Regular Laptops / SFF etc.
-    1: "Condition",    // Brand New / Foreign Used
+    1: "Condition",  
+    2: "Brand",     
+    3: "Model"  // Brand New / Foreign Used
   },
   accessories: {
     0: "Type",         // Headsets / Keyboards / Mice / Webcams etc.

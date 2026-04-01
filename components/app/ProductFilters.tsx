@@ -199,14 +199,25 @@ export function ProductFilters({
   // a) old flow: condition is selected for a non-drilldown category, OR
   // b) computers drilldown: the current category slug itself is in CATEGORIES_WITH_BRANDS
   //    (meaning user has drilled down to e.g. "gaming-laptops-brand-new")
-  const showBrand =
-    brands.length > 0 &&
-    (
-      // old flow
-      (showCondition && (CATEGORIES_WITH_BRANDS as readonly string[]).includes(currentCategory)) ||
-      // computers drilldown flow — current slug is a brand-supporting category
-      (drilldownRoot === "computers" && (CATEGORIES_WITH_BRANDS as readonly string[]).includes(currentCategory))
-    );
+  // For computers drilldown: check if the current slug OR any of its ancestors
+// is in CATEGORIES_WITH_BRANDS (e.g. gaming-laptops-brand-new → parent is gaming-laptops)
+function isAncestorInBrands(catSlug: string): boolean {
+  let current = (categories as FlatCat[]).find((c) => c.slug === catSlug);
+  while (current) {
+    if ((CATEGORIES_WITH_BRANDS as readonly string[]).includes(current.slug ?? "")) return true;
+    const parentSlug = (current as FlatCat).parentSlug;
+    if (!parentSlug) break;
+    current = (categories as FlatCat[]).find((c) => c.slug === parentSlug);
+  }
+  return false;
+}
+
+const showBrand =
+  brands.length > 0 &&
+  (
+    (showCondition && (CATEGORIES_WITH_BRANDS as readonly string[]).includes(currentCategory)) ||
+    (drilldownRoot === "computers" && isAncestorInBrands(currentCategory))
+  );
 
   const showModel = showBrand && !!currentBrand && models.length > 0;
 
