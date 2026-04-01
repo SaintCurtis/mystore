@@ -38,6 +38,7 @@ const LEVEL_LABELS: Record<DrilldownRoot, Record<number, string>> = {
   accessories: {
     0: "Type",         // Headsets / Keyboards / Mice / Webcams etc.
   },
+  "tech-setup-gears": { 0: "Category" },
 };
 
 interface CategoryDrilldownProps {

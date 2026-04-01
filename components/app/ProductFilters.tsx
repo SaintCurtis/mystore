@@ -38,6 +38,7 @@ const DRILLDOWN_ROOTS = [
   "content-creation-tools",
   "computers",
   "accessories",
+  "tech-setup-gears"
 ] as const;
 type DrilldownRoot = (typeof DRILLDOWN_ROOTS)[number];
 
@@ -54,6 +55,7 @@ const DRILLDOWN_LABELS: Record<DrilldownRoot, string[]> = {
   // once the user lands on a condition-level slug (e.g. gaming-laptops-brand-new)
   computers: ["Type", "Condition"],
   accessories: ["Type"],
+  "tech-setup-gears": ["Category"],
 };
 
 interface ProductFiltersProps {
