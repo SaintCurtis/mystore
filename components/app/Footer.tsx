@@ -85,8 +85,8 @@ export function Footer() {
             </Link>
 
             <p className="text-sm leading-relaxed text-zinc-400 max-w-xs">
-              Premium brand-new and foreign-used tech — verified by a Computer
-              Engineer from FUTA. Warranty on everything. Shipped worldwide
+              Premium brand-new and foreign-used tech — verified by a Seasoned Computer
+              Engineer . Warranty on everything. Shipped worldwide
               since 2019.
             </p>
 
