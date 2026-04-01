@@ -59,6 +59,30 @@ export const CATEGORIES_WITH_CONDITIONS = [
   ...CATEGORIES_WITHOUT_BRANDS,
 ] as const;
 
+/**
+ * Top-level categories that show a subcategory list on hover
+ * (NOT condition — they contain subcategories as children)
+ */
+export const CATEGORIES_WITH_SUBCATEGORY_DROPDOWN = [
+  "computers",
+  "accessories",
+  "tech-setup-gears",
+  "monitors",
+  "content-creation-tools",
+] as const;
+
+/**
+ * Top-level categories whose hover shows subcategories
+ * (not condition — just the subcategory list)
+ */
+export const CATEGORIES_WITH_SUBCATEGORY_HOVER = [
+  "computers",
+  "accessories",
+  "tech-setup-gears",
+  "content-creation-tools",
+  "monitors",
+] as const;
+
 /** Content creation subcategories — no condition filter, just browse */
 export const CONTENT_CREATION_SUBCATEGORIES = [
   "cameras",

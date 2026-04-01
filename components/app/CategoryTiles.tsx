@@ -8,8 +8,8 @@ import {
   CONDITIONS,
   CATEGORIES_WITH_BRANDS,
   CATEGORIES_WITH_CONDITIONS,
+  CATEGORIES_WITH_SUBCATEGORY_DROPDOWN,
 } from "@/lib/constants/filters";
-import { isDrilldownCategory } from "@/lib/constants/drilldown";
 import type { ALL_CATEGORIES_QUERYResult } from "@/sanity.types";
 
 interface CategoryTilesProps {
@@ -41,8 +41,57 @@ function categoryHasBrands(slug: string): boolean {
   return (CATEGORIES_WITH_BRANDS as readonly string[]).includes(slug);
 }
 
-// ── Condition Dropdown ─────────────────────────────────────────────────────
-// Only shown on hover for non-drilldown categories (e.g. gaming-laptops)
+function categoryHasSubcategoryDropdown(slug: string): boolean {
+  return (CATEGORIES_WITH_SUBCATEGORY_DROPDOWN as readonly string[]).includes(slug);
+}
+
+// ── Subcategory list dropdown (Computers, Accessories, Tech Setup Gears etc) ─
+
+function SubcategoryDropdown({
+  parentSlug,
+  allCategories,
+  activeCategory,
+}: {
+  parentSlug: string;
+  allCategories: ALL_CATEGORIES_QUERYResult;
+  activeCategory?: string;
+}) {
+  const children = allCategories.filter(
+    (c) => (c as any).parentSlug === parentSlug,
+  );
+
+  if (children.length === 0) return null;
+
+  return (
+    <div className="absolute bottom-full left-0 z-50 mb-1 w-56 overflow-hidden rounded-xl border border-zinc-700/80 bg-zinc-900 shadow-2xl shadow-zinc-950/60">
+      {children.map((child) => {
+        const isActive = activeCategory === child.slug;
+        return (
+          <Link
+            key={child._id}
+            href={`/?category=${child.slug}`}
+            className={`flex items-center justify-between px-4 py-3 text-sm transition-colors ${
+              isActive
+                ? "bg-amber-500/15 text-amber-400"
+                : "text-zinc-300 hover:bg-zinc-800 hover:text-white"
+            }`}
+          >
+            <span className="font-medium">{child.title}</span>
+            {/* Show chevron hint if this child also has conditions */}
+            {categoryHasConditions(child.slug ?? "") && (
+              <ChevronRight className="h-3.5 w-3.5 text-zinc-600" />
+            )}
+            {isActive && (
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+            )}
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Condition dropdown (Gaming Laptops, Regular Laptops, MacBook, Monitors) ──
 
 function ConditionDropdown({
   categorySlug,
@@ -86,6 +135,7 @@ function ConditionDropdown({
               )}
             </Link>
 
+            {/* Brand sub-dropdown */}
             {showBrandSub && (
               <div className="absolute bottom-0 left-full z-50 ml-1 w-44 overflow-hidden rounded-xl border border-zinc-700/80 bg-zinc-900 shadow-2xl shadow-zinc-950/60">
                 {brands.map((brand) => (
@@ -115,23 +165,28 @@ function ConditionDropdown({
 function CategoryTile({
   category,
   isActive,
+  activeCategory,
   activeCondition,
   activeBrand,
   brands = [],
+  allCategories,
 }: {
   category: ALL_CATEGORIES_QUERYResult[number];
   isActive: boolean;
+  activeCategory?: string;
   activeCondition?: string;
   activeBrand?: string;
   brands?: { title: string; slug: string }[];
+  allCategories: ALL_CATEGORIES_QUERYResult;
 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const imageUrl = category.image?.asset?.url;
   const slug = category.slug ?? "";
 
-  const isDrilldown = isDrilldownCategory(slug);
-  const hasConditions = !isDrilldown && categoryHasConditions(slug);
+  const showsConditionDropdown = categoryHasConditions(slug);
+  const showsSubcategoryDropdown = !showsConditionDropdown && categoryHasSubcategoryDropdown(slug);
+  const showDropdown = showsConditionDropdown || showsSubcategoryDropdown;
 
   const handleMouseEnter = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -145,8 +200,8 @@ function CategoryTile({
   return (
     <div
       className="relative shrink-0"
-      onMouseEnter={hasConditions ? handleMouseEnter : undefined}
-      onMouseLeave={hasConditions ? handleMouseLeave : undefined}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <Link
         href={`/?category=${slug}`}
@@ -173,15 +228,12 @@ function CategoryTile({
               <span className="text-sm font-semibold text-white drop-shadow-md">
                 {category.title}
               </span>
-              {hasConditions && (
+              {showDropdown && (
                 <ChevronRight
                   className={`h-3.5 w-3.5 text-white/70 transition-transform duration-200 ${
                     dropdownOpen ? "rotate-90" : ""
                   }`}
                 />
-              )}
-              {isDrilldown && (
-                <ChevronRight className="h-3.5 w-3.5 rotate-90 text-white/50" />
               )}
             </div>
           </div>
@@ -196,12 +248,22 @@ function CategoryTile({
         </div>
       </Link>
 
-      {hasConditions && dropdownOpen && (
+      {/* Condition dropdown — Gaming Laptops, Regular Laptops, MacBook, Monitors */}
+      {showsConditionDropdown && dropdownOpen && (
         <ConditionDropdown
           categorySlug={slug}
           activeCondition={activeCondition}
           activeBrand={activeBrand}
           brands={brands}
+        />
+      )}
+
+      {/* Subcategory list — Computers, Accessories, Tech Setup Gears, Monitors, Content Creation */}
+      {showsSubcategoryDropdown && dropdownOpen && (
+        <SubcategoryDropdown
+          parentSlug={slug}
+          allCategories={allCategories}
+          activeCategory={activeCategory}
         />
       )}
     </div>
@@ -217,11 +279,8 @@ export function CategoryTiles({
   activeBrand,
   brandsMap = {},
 }: CategoryTilesProps) {
-  // Only show top-level categories (no parent)
-  // parentSlug comes from ALL_CATEGORIES_QUERY as a string field
-  const topLevel = categories.filter(
-    (c) => !(c as any).parentSlug,
-  );
+  // Only show top-level categories (no parent) in the tile row
+  const topLevel = categories.filter((c) => !(c as any).parentSlug);
 
   return (
     <div className="relative">
@@ -249,14 +308,17 @@ export function CategoryTiles({
           </div>
         </Link>
 
+        {/* Category tiles — top level only */}
         {topLevel.map((category) => (
           <CategoryTile
             key={category._id}
             category={category}
             isActive={activeCategory === category.slug}
+            activeCategory={activeCategory}
             activeCondition={activeCondition}
             activeBrand={activeBrand}
             brands={brandsMap[category.slug ?? ""] ?? []}
+            allCategories={categories}
           />
         ))}
       </div>

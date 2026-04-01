@@ -22,7 +22,12 @@ const PRODUCT_FILTER_CONDITIONS = `
     || category->parentCategory->parentCategory->slug.current == $categorySlug
     || category->parentCategory->parentCategory->parentCategory->slug.current == $categorySlug
   )
-  && ($condition == "" || condition->slug.current == $condition)
+  && (
+    $condition == ""
+    || condition->slug.current == $condition
+    || category->condition == $condition
+    || category->parentCategory->condition == $condition
+  )
   && ($brandSlug == "" || brand->slug.current == $brandSlug)
   && ($color == "" || color == $color)
   && ($material == "" || material == $material)
@@ -274,7 +279,12 @@ export const AI_SEARCH_PRODUCTS_QUERY = defineQuery(`*[
     || category->parentCategory->parentCategory->slug.current == $categorySlug
     || category->parentCategory->parentCategory->parentCategory->slug.current == $categorySlug
   )
-  && ($condition == "" || condition->slug.current == $condition)
+  && (
+    $condition == ""
+    || condition->slug.current == $condition
+    || category->condition == $condition
+    || category->parentCategory->condition == $condition
+  )
   && ($brandSlug == "" || brand->slug.current == $brandSlug)
   && ($material == "" || material == $material)
   && ($color == "" || color == $color)

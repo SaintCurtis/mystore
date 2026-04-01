@@ -60,7 +60,26 @@ export const productType = defineType({
       type: "reference",
       to: [{ type: "condition" }],
       group: "classification",
-      description: "Brand New or Foreign Used — set for all laptops and MacBooks",
+      description:
+        "Only set if NOT already encoded in the category (e.g. if category is 'Gaming Laptops — Brand New', leave this empty — condition is implied). Use this only for products where the category doesn't specify condition.",
+      hidden: ({ document }) => {
+        const categorySlug = (document?.category as any)?._ref ?? "";
+        // Hide if the selected category already encodes condition in its slug
+        const conditionEncodedSlugs = [
+          "gaming-laptops-brand-new",
+          "gaming-laptops-foreign-used",
+          "regular-laptops-brand-new",
+          "regular-laptops-foreign-used",
+          "macbook-brand-new",
+          "macbook-foreign-used",
+          "monitors-professional-brand-new",
+          "monitors-professional-foreign-used",
+          "monitors-gaming-brand-new",
+          "monitors-gaming-foreign-used",
+        ];
+        // We can't resolve slug from _ref here, so always show but clarify in description
+        return false;
+      },
     }),
     defineField({
       name: "brand",
