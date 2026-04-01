@@ -34,17 +34,22 @@ function pluralize(word: string): string {
 
 // Root categories that use the drilldown subcategory selects
 // instead of the condition → brand → model flow
-const DRILLDOWN_ROOTS = ["monitors", "content-creation-tools"] as const;
+const DRILLDOWN_ROOTS = [
+  "monitors",
+  "content-creation-tools",
+  "computers",
+] as const;
 type DrilldownRoot = (typeof DRILLDOWN_ROOTS)[number];
 
 function isDrilldownRoot(slug: string): slug is DrilldownRoot {
   return (DRILLDOWN_ROOTS as readonly string[]).includes(slug);
 }
 
-// Labels for each drilldown level
+// Labels for each drilldown level per root category
 const DRILLDOWN_LABELS: Record<DrilldownRoot, string[]> = {
   monitors: ["Type", "Condition", "Panel Type"],
   "content-creation-tools": ["Category", "Sub-category"],
+  computers: ["Type", "Condition"],
 };
 
 interface ProductFiltersProps {
@@ -88,14 +93,11 @@ export function ProductFilters({
   }, [urlMinPrice, urlMaxPrice]);
 
   // ── Drilldown logic ────────────────────────────────────────────
-  // Walk up the current category's ancestor chain to find the root
-  // and build the selection path for the cascading selects.
   type FlatCat = ALL_CATEGORIES_QUERYResult[number] & { parentSlug?: string | null };
 
   function findDrilldownRoot(catSlug: string): DrilldownRoot | null {
     if (!catSlug) return null;
     if (isDrilldownRoot(catSlug)) return catSlug;
-    // Walk up via parentSlug
     let current = (categories as FlatCat[]).find((c) => c.slug === catSlug);
     while (current) {
       const parentSlug = (current as FlatCat).parentSlug;
@@ -106,7 +108,6 @@ export function ProductFilters({
     return null;
   }
 
-  // Get the ancestor chain from root → currentCategory (excluding root itself)
   function getSelectionChain(catSlug: string, rootSlug: string): string[] {
     if (!catSlug || catSlug === rootSlug) return [];
     const chain: string[] = [];
@@ -120,7 +121,6 @@ export function ProductFilters({
     return chain.filter(Boolean);
   }
 
-  // Get children of a given parent slug from the flat categories list
   function getChildren(parentSlug: string) {
     return (categories as FlatCat[])
       .filter((c) => (c as FlatCat).parentSlug === parentSlug)
@@ -132,21 +132,17 @@ export function ProductFilters({
     ? getSelectionChain(currentCategory, drilldownRoot)
     : [];
 
-  // Levels to show: always show level 0 (children of root).
-  // Show level N+1 if user selected at level N AND there are children.
   function getDrilldownLevels(): { parentSlug: string; selectedSlug: string; label: string }[] {
     if (!drilldownRoot) return [];
     const labels = DRILLDOWN_LABELS[drilldownRoot];
     const levels: { parentSlug: string; selectedSlug: string; label: string }[] = [];
 
-    // Level 0: children of root
     levels.push({
       parentSlug: drilldownRoot,
       selectedSlug: selectionChain[0] ?? "",
       label: labels[0] ?? "Type",
     });
 
-    // Additional levels: only if previous level has a selection AND has children
     for (let i = 0; i < selectionChain.length; i++) {
       const selected = selectionChain[i];
       if (!selected) break;
@@ -165,8 +161,6 @@ export function ProductFilters({
   const drilldownLevels = getDrilldownLevels();
 
   function handleDrilldownChange(levelIndex: number, newSlug: string) {
-    // When a level changes, truncate deeper selections
-    // Navigate to the newly selected slug (or back to root if cleared)
     const target = newSlug || drilldownRoot || "";
     const params = new URLSearchParams(searchParams.toString());
     params.set("category", target);
@@ -176,8 +170,7 @@ export function ProductFilters({
     router.push(`?${params.toString()}`, { scroll: false });
   }
 
-  // ── Show/hide logic (existing) ─────────────────────────────────
-  // Only show condition/brand/model for non-drilldown categories
+  // ── Show/hide logic ────────────────────────────────────────────
   const showCondition =
     !drilldownRoot &&
     (CATEGORIES_WITH_CONDITIONS as readonly string[]).includes(currentCategory);
@@ -200,9 +193,6 @@ export function ProductFilters({
   const isPriceActive =
     searchParams.has("minPrice") || searchParams.has("maxPrice");
   const isInStockActive = currentInStock;
-  const isDrilldownActive = drilldownRoot
-    ? currentCategory !== drilldownRoot
-    : false;
 
   const activeFilters = [
     isSearchActive,
@@ -249,7 +239,6 @@ export function ProductFilters({
     } else if (key === "condition") {
       updateParams({ condition: null, brand: null });
     } else if (key === "drilldown") {
-      // Reset to the drilldown root
       updateParams({ category: drilldownRoot ?? null });
     } else {
       updateParams({ [key]: null });
@@ -342,10 +331,7 @@ export function ProductFilters({
           Category
         </FilterLabel>
         <Select
-          value={
-            // If we're inside a drilldown, show the root in this select
-            drilldownRoot ?? (currentCategory || "all")
-          }
+          value={drilldownRoot ?? (currentCategory || "all")}
           onValueChange={(value) =>
             updateParams({
               category: value === "all" ? null : value,
@@ -379,7 +365,7 @@ export function ProductFilters({
         </Select>
       </div>
 
-      {/* ── Drilldown selects (Monitors / Content Creation) ────── */}
+      {/* ── Drilldown selects ──────────────────────────────────── */}
       {drilldownRoot &&
         drilldownLevels.map((level, i) => {
           const options = getChildren(level.parentSlug);
@@ -426,7 +412,7 @@ export function ProductFilters({
           );
         })}
 
-      {/* Condition — only for laptop/MacBook categories (not drilldown) */}
+      {/* Condition — only for laptop/MacBook (not drilldown) */}
       {showCondition && (
         <div>
           <FilterLabel isActive={isConditionActive} filterKey="condition">

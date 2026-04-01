@@ -29,6 +29,12 @@ const LEVEL_LABELS: Record<DrilldownRoot, Record<number, string>> = {
     1: "Sub-category", // Digital Cameras / Lavalier Mics etc.
     2: "Type",
   },
+   computers: {
+  0: "Type",        // SFF / Custom PCs etc.
+  1: "Condition",   // Brand New / Foreign Used
+  2: "Brand",
+  3: "Model",
+},
 };
 
 interface CategoryDrilldownProps {

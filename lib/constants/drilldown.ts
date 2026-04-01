@@ -7,6 +7,7 @@
 export const DRILLDOWN_ROOTS = [
   "monitors",
   "content-creation-tools",
+  "computers",
 ] as const;
 
 export type DrilldownRoot = (typeof DRILLDOWN_ROOTS)[number];
