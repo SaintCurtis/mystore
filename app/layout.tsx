@@ -3,14 +3,12 @@ import { Syne, Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
-/** Display / heading font — bold, architectural, distinctive */
 const syne = Syne({
   variable: "--font-display",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
 });
 
-/** Body font — clean, legible, premium */
 const inter = Inter({
   variable: "--font-body",
   subsets: ["latin"],
@@ -36,6 +34,25 @@ export const metadata: Metadata = {
   },
 };
 
+// Inline script runs synchronously BEFORE any React hydration.
+// This is the only reliable way to prevent the flash of wrong theme.
+// It reads localStorage and applies .dark immediately — no React needed.
+const themeScript = `
+(function() {
+  try {
+    var stored = localStorage.getItem('theme');
+    if (stored === 'light') {
+      document.documentElement.classList.remove('dark');
+    } else {
+      // Default is dark — applies on first visit and when no preference stored
+      document.documentElement.classList.add('dark');
+    }
+  } catch(e) {
+    document.documentElement.classList.add('dark');
+  }
+})();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -45,31 +62,21 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         {/*
-          Inline script runs BEFORE React hydrates — prevents white flash.
-          Reads localStorage and immediately applies .dark class if needed.
-          Default is dark (your site's identity).
+          dangerouslySetInnerHTML is intentional here.
+          This must be an inline script (not a module) so it runs
+          synchronously before the browser paints anything.
+          This eliminates the flash of light mode on dark-preferring users.
         */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var theme = localStorage.getItem('theme');
-                  if (theme === 'light') {
-                    document.documentElement.classList.remove('dark');
-                  } else {
-                    document.documentElement.classList.add('dark');
-                  }
-                } catch(e) {
-                  document.documentElement.classList.add('dark');
-                }
-              })();
-            `,
-          }}
-        />
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body
-        className={`${syne.variable} ${inter.variable} font-body antialiased bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 transition-colors duration-300`}
+        className={`
+          ${syne.variable} ${inter.variable}
+          font-body antialiased
+          bg-white text-zinc-900
+          dark:bg-zinc-950 dark:text-zinc-100
+          transition-colors duration-300
+        `}
       >
         <ThemeProvider>
           {children}

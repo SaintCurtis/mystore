@@ -45,7 +45,7 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
   const categoryLabel = getCategoryLabel(product.category, activeCategory);
 
   return (
-    <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white dark:bg-zinc-900 ring-1 ring-zinc-200 dark:ring-zinc-800 transition-all duration-300 hover:-translate-y-1 hover:ring-zinc-300 dark:hover:ring-zinc-700 hover:shadow-2xl hover:shadow-zinc-200/60 dark:hover:shadow-zinc-950/60">
+    <div className="product-card-glow group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white dark:bg-[oklch(0.11_0.006_265)] ring-1 ring-zinc-200 dark:ring-[oklch(0.22_0.006_265)] transition-all duration-300 hover:-translate-y-1 hover:ring-zinc-300 dark:hover:ring-[oklch(0.75_0.18_50/0.3)] hover:shadow-xl hover:shadow-zinc-200/80 dark:hover:shadow-[0_8px_32px_oklch(0_0_0/0.6)]">
 
       {/* Image area */}
       <Link href={`/products/${product.slug}`} className="block">
@@ -133,7 +133,7 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
             </h3>
           </Link>
           <div className="flex items-center justify-between gap-2">
-            <p className="font-display text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
+            <p className="font-display text-xl font-bold tracking-tight text-zinc-900 dark:text-amber-400">
               {formatPrice(product.price)}
             </p>
             <StockBadge productId={product._id} stock={stock} />

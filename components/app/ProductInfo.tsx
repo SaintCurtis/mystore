@@ -15,7 +15,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const stock = product.stock ?? 0;
 
   return (
-    <div className="flex flex-col gap-0">
+    <div className="flex flex-col gap-0 bg-white dark:bg-transparent">
 
       {/* Category breadcrumb */}
       {product.category && (
@@ -69,7 +69,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
         ].map(({ icon: Icon, label, sub }) => (
           <div
             key={label}
-            className="flex flex-col items-center gap-1.5 rounded-xl border border-zinc-800 bg-zinc-900/50 py-3 text-center"
+            className="flex flex-col items-center gap-1.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 py-3 text-center"
           >
             <Icon className="h-4 w-4 text-amber-400" />
             <p className="text-xs font-semibold text-zinc-200">{label}</p>
@@ -79,13 +79,13 @@ export function ProductInfo({ product }: ProductInfoProps) {
       </div>
 
       {/* Specs table */}
-      <div className="mt-8 overflow-hidden rounded-xl border border-zinc-800">
-        <div className="border-b border-zinc-800 bg-zinc-900/80 px-4 py-2.5">
-          <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
+      <div className="mt-8 overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800">
+        <div className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900/80 px-4 py-2.5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
             Specifications
           </p>
         </div>
-        <div className="divide-y divide-zinc-800/60 bg-zinc-900/30">
+        <div className="divide-y divide-zinc-200 dark:divide-zinc-800/60 bg-zinc-50 dark:bg-zinc-900/30">
           {product.material && (
             <SpecRow label="Material" value={product.material} capitalize />
           )}

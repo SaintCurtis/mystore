@@ -53,7 +53,7 @@ export function AddToCartButton({
       <Button
         disabled
         className={cn(
-          "h-11 w-full rounded-lg bg-zinc-800 text-sm font-medium text-zinc-500 cursor-not-allowed border border-zinc-700",
+          "h-11 w-full rounded-lg bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-400 dark:text-zinc-500 cursor-not-allowed border border-zinc-200 dark:border-zinc-700",
           className,
         )}
       >
@@ -94,7 +94,7 @@ export function AddToCartButton({
   return (
     <div
       className={cn(
-        "flex h-11 w-full items-center overflow-hidden rounded-lg border border-amber-500/40 bg-amber-500/5",
+        "flex h-11 w-full items-center overflow-hidden rounded-lg border border-amber-500/50 bg-amber-500/8 dark:border-amber-500/40 dark:bg-amber-500/5",
         className,
       )}
     >

@@ -7,11 +7,13 @@ type Theme = "dark" | "light";
 interface ThemeContextValue {
   theme: Theme;
   toggleTheme: () => void;
+  setTheme: (theme: Theme) => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
   theme: "dark",
   toggleTheme: () => {},
+  setTheme: () => {},
 });
 
 export function useTheme() {
@@ -19,40 +21,49 @@ export function useTheme() {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Default to dark — your site's identity is dark-first
-  const [theme, setTheme] = useState<Theme>("dark");
-  const [mounted, setMounted] = useState(false);
-
-  // On mount, read persisted preference from localStorage
-  useEffect(() => {
-    const stored = localStorage.getItem("theme") as Theme | null;
-    if (stored === "light" || stored === "dark") {
-      setTheme(stored);
+  // Initialize from DOM state set by the inline script in layout.tsx
+  // This avoids a useState("dark") default that could conflict with what
+  // the inline script already applied — preventing any flash.
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof window !== "undefined") {
+      return document.documentElement.classList.contains("dark") ? "dark" : "light";
     }
-    setMounted(true);
-  }, []);
+    return "dark"; // SSR default — matches inline script default
+  });
 
-  // Apply/remove .dark class on <html> whenever theme changes
-  useEffect(() => {
-    if (!mounted) return;
+  const applyTheme = (next: Theme) => {
     const root = document.documentElement;
-    if (theme === "dark") {
+    if (next === "dark") {
       root.classList.add("dark");
+      root.classList.remove("light");
     } else {
       root.classList.remove("dark");
+      root.classList.add("light");
     }
-    localStorage.setItem("theme", theme);
-  }, [theme, mounted]);
+    try {
+      localStorage.setItem("theme", next);
+    } catch {}
+  };
 
-  function toggleTheme() {
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
-  }
+  const setTheme = (next: Theme) => {
+    setThemeState(next);
+    applyTheme(next);
+  };
 
-  // Prevent flash of wrong theme — render nothing until mounted
-  if (!mounted) return null;
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
+
+  // On mount, sync React state with whatever the inline script set on the DOM
+  useEffect(() => {
+    const current = document.documentElement.classList.contains("dark")
+      ? "dark"
+      : "light";
+    setThemeState(current);
+  }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );

@@ -15,7 +15,7 @@ export function Header() {
   const totalItems = useTotalItems();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white/80 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/80">
+    <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white/90 backdrop-blur-md dark:border-[oklch(0.22_0.006_265)] dark:bg-[oklch(0.07_0.005_265/0.85)]">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
         {/* Logo */}
@@ -24,19 +24,19 @@ export function Header() {
             <Cpu className="h-4 w-4 text-zinc-950" />
           </div>
           <div className="flex flex-col leading-none">
-            <span className="text-sm font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100">
+            <span className="text-sm font-extrabold tracking-tight text-zinc-900 dark:text-white">
               The Saint's TechNet
             </span>
-            <span className="text-[10px] font-medium text-amber-500 tracking-wider uppercase">
+            <span className="hidden sm:block text-[10px] font-medium text-amber-500 tracking-wider uppercase">
               Built by an Engineer. Trusted by Thousands.
             </span>
           </div>
         </Link>
 
         {/* Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
 
-          {/* My Orders - Only when signed in */}
+          {/* My Orders — signed in only */}
           <SignedIn>
             <Button
               asChild
@@ -49,7 +49,6 @@ export function Header() {
                 <span className="text-sm font-medium">My Orders</span>
               </Link>
             </Button>
-            {/* Mobile icon only */}
             <Button asChild variant="ghost" size="icon" className="sm:hidden">
               <Link href="/orders">
                 <Package className="h-5 w-5" />
@@ -66,15 +65,15 @@ export function Header() {
               className="gap-1.5 bg-linear-to-r from-amber-500 to-orange-500 text-white shadow-md shadow-amber-200/50 transition-all hover:from-amber-600 hover:to-orange-600 hover:shadow-lg hover:shadow-amber-300/50 dark:shadow-amber-900/30 dark:hover:shadow-amber-800/40"
             >
               <Sparkles className="h-3.5 w-3.5" />
-              <span className="text-sm font-medium">Ask AI</span>
+              <span className="hidden sm:inline text-sm font-medium">Ask AI</span>
             </Button>
           )}
 
-          {/* Cart Button */}
+          {/* Cart */}
           <Button
             variant="ghost"
             size="icon"
-            className="relative"
+            className="relative text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
             onClick={openCart}
           >
             <ShoppingBag className="h-5 w-5" />
@@ -86,18 +85,14 @@ export function Header() {
             <span className="sr-only">Open cart ({totalItems} items)</span>
           </Button>
 
-          {/* 🌙 / ☀️ Theme Toggle */}
+          {/* Theme Toggle — pill style, easy to tap on mobile */}
           <ThemeToggle />
 
           {/* User */}
           <SignedIn>
             <UserButton
               afterSwitchSessionUrl="/"
-              appearance={{
-                elements: {
-                  avatarBox: "h-9 w-9",
-                },
-              }}
+              appearance={{ elements: { avatarBox: "h-9 w-9" } }}
             >
               <UserButton.MenuItems>
                 <UserButton.Link
@@ -110,7 +105,7 @@ export function Header() {
           </SignedIn>
           <SignedOut>
             <SignInButton mode="modal">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100">
                 <User className="h-5 w-5" />
                 <span className="sr-only">Sign in</span>
               </Button>
