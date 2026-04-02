@@ -61,21 +61,20 @@ const POLICY_LINKS = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-zinc-800 bg-zinc-950">
+    <footer className="border-t border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-950 transition-colors duration-300">
 
-      {/* ── Main footer grid ──────────────────────────────────── */}
+      {/* Main footer grid */}
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
 
           {/* Col 1 — Brand */}
           <div className="flex flex-col gap-5 lg:col-span-1">
-            {/* Logo */}
             <Link href="/" className="flex items-center gap-2.5 w-fit group">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500 shadow-sm shadow-amber-500/30 transition-all duration-200 group-hover:bg-amber-400">
                 <Cpu className="h-4 w-4 text-zinc-950" />
               </div>
               <div className="flex flex-col leading-none">
-                <span className="text-sm font-extrabold tracking-tight text-white">
+                <span className="text-sm font-extrabold tracking-tight text-zinc-900 dark:text-white">
                   The Saint's TechNet
                 </span>
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-500">
@@ -84,10 +83,9 @@ export function Footer() {
               </div>
             </Link>
 
-            <p className="text-sm leading-relaxed text-zinc-400 max-w-xs">
+            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400 max-w-xs">
               Premium brand-new and foreign-used tech — verified by a Seasoned Computer
-              Engineer . Warranty on everything. Shipped worldwide
-              since 2019.
+              Engineer. Warranty on everything. Shipped worldwide since 2019.
             </p>
 
             {/* Social icons */}
@@ -99,7 +97,7 @@ export function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-800 text-zinc-500 transition-all duration-200 hover:border-amber-500/50 hover:bg-amber-500/10 hover:text-amber-400"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-300 dark:border-zinc-800 text-zinc-500 transition-all duration-200 hover:border-amber-500/50 hover:bg-amber-500/10 hover:text-amber-500 dark:hover:text-amber-400"
                 >
                   {icon}
                 </Link>
@@ -117,7 +115,7 @@ export function Footer() {
                 <li key={label}>
                   <Link
                     href={href}
-                    className="text-sm text-zinc-400 transition-colors hover:text-amber-400"
+                    className="text-sm text-zinc-600 dark:text-zinc-400 transition-colors hover:text-amber-500 dark:hover:text-amber-400"
                   >
                     {label}
                   </Link>
@@ -136,7 +134,7 @@ export function Footer() {
                 <li key={label}>
                   <Link
                     href={href}
-                    className="text-sm text-zinc-400 transition-colors hover:text-amber-400"
+                    className="text-sm text-zinc-600 dark:text-zinc-400 transition-colors hover:text-amber-500 dark:hover:text-amber-400"
                   >
                     {label}
                   </Link>
@@ -144,7 +142,6 @@ export function Footer() {
               ))}
             </ul>
 
-            {/* Trust badges */}
             <div className="mt-8 flex flex-col gap-2">
               {[
                 "Warranty on every product",
@@ -166,16 +163,13 @@ export function Footer() {
             </p>
             <ul className="flex flex-col gap-4">
               <li>
-                <Link
-                  href="mailto:iamsaintcurtis@gmail.com"
-                  className="group flex items-start gap-3"
-                >
-                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-500 transition-colors group-hover:border-amber-500/40 group-hover:text-amber-400">
+                <Link href="mailto:iamsaintcurtis@gmail.com" className="group flex items-start gap-3">
+                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-500 transition-colors group-hover:border-amber-500/40 group-hover:text-amber-500 dark:group-hover:text-amber-400">
                     <Mail className="h-3.5 w-3.5" />
                   </div>
                   <div>
-                    <p className="text-xs text-zinc-600">Email</p>
-                    <p className="text-sm text-zinc-300 transition-colors group-hover:text-amber-400 break-all">
+                    <p className="text-xs text-zinc-500">Email</p>
+                    <p className="text-sm text-zinc-700 dark:text-zinc-300 transition-colors group-hover:text-amber-500 dark:group-hover:text-amber-400 break-all">
                       iamsaintcurtis@gmail.com
                     </p>
                   </div>
@@ -183,18 +177,13 @@ export function Footer() {
               </li>
 
               <li>
-                <Link
-                  href="https://wa.me/2349060898951"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-start gap-3"
-                >
-                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-500 transition-colors group-hover:border-amber-500/40 group-hover:text-amber-400">
+                <Link href="https://wa.me/2349060898951" target="_blank" rel="noopener noreferrer" className="group flex items-start gap-3">
+                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-500 transition-colors group-hover:border-amber-500/40 group-hover:text-amber-500 dark:group-hover:text-amber-400">
                     <Phone className="h-3.5 w-3.5" />
                   </div>
                   <div>
-                    <p className="text-xs text-zinc-600">WhatsApp / Call</p>
-                    <p className="text-sm text-zinc-300 transition-colors group-hover:text-amber-400">
+                    <p className="text-xs text-zinc-500">WhatsApp / Call</p>
+                    <p className="text-sm text-zinc-700 dark:text-zinc-300 transition-colors group-hover:text-amber-500 dark:group-hover:text-amber-400">
                       +234 906 089 8951
                     </p>
                   </div>
@@ -202,18 +191,13 @@ export function Footer() {
               </li>
 
               <li>
-                <Link
-                  href="https://t.me/oluwasaintcurtis"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-start gap-3"
-                >
-                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-500 transition-colors group-hover:border-amber-500/40 group-hover:text-amber-400">
+                <Link href="https://t.me/oluwasaintcurtis" target="_blank" rel="noopener noreferrer" className="group flex items-start gap-3">
+                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-500 transition-colors group-hover:border-amber-500/40 group-hover:text-amber-500 dark:group-hover:text-amber-400">
                     <Send className="h-3.5 w-3.5" />
                   </div>
                   <div>
-                    <p className="text-xs text-zinc-600">Telegram</p>
-                    <p className="text-sm text-zinc-300 transition-colors group-hover:text-amber-400">
+                    <p className="text-xs text-zinc-500">Telegram</p>
+                    <p className="text-sm text-zinc-700 dark:text-zinc-300 transition-colors group-hover:text-amber-500 dark:group-hover:text-amber-400">
                       @oluwasaintcurtis
                     </p>
                   </div>
@@ -221,7 +205,6 @@ export function Footer() {
               </li>
             </ul>
 
-            {/* WhatsApp CTA */}
             <Link
               href="https://wa.me/2349060898951"
               target="_blank"
@@ -238,15 +221,15 @@ export function Footer() {
         </div>
       </div>
 
-      {/* ── Bottom bar ────────────────────────────────────────── */}
-      <div className="border-t border-zinc-800/60">
+      {/* Bottom bar */}
+      <div className="border-t border-zinc-200 dark:border-zinc-800/60">
         <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-            <p className="text-xs text-zinc-600">
+            <p className="text-xs text-zinc-500 dark:text-zinc-600">
               © {new Date().getFullYear()} The Saint's Technology Networks.
               CAC Registered. All rights reserved.
             </p>
-            <p className="text-xs text-zinc-700">
+            <p className="text-xs text-zinc-400 dark:text-zinc-700">
               Built by an Engineer. Trusted by Thousands.
             </p>
           </div>

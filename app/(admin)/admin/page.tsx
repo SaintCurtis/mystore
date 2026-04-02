@@ -12,6 +12,7 @@ import {
   BRANDS_BY_CATEGORY_QUERY,
   MODELS_BY_BRAND_QUERY,
 } from "@/lib/sanity/queries/categories";
+import { CATEGORIES_WITH_BRANDS } from "@/lib/constants/filters";
 import { ProductSection } from "@/components/app/ProductSection";
 import { CategoryTiles } from "@/components/app/CategoryTiles";
 import { FeaturedCarousel } from "@/components/app/FeaturedCarousel";
@@ -19,6 +20,17 @@ import { FeaturedCarouselSkeleton } from "@/components/app/FeaturedCarouselSkele
 import { HeroSection } from "@/components/app/HeroSection";
 import { TestimonialsCarousel } from "@/components/app/TestimonialsCarousel";
 import { AboutSection } from "@/components/app/AboutSection";
+
+const DRILLDOWN_ROOTS = [
+  "monitors",
+  "content-creation-tools",
+  "computers",
+  "accessories",
+] as const;
+
+function isDrilldownRoot(slug: string): boolean {
+  return (DRILLDOWN_ROOTS as readonly string[]).includes(slug);
+}
 
 interface PageProps {
   searchParams: Promise<{
@@ -73,7 +85,6 @@ export default async function HomePage({ searchParams }: PageProps) {
     }
   };
 
-  // ── Parallel data fetching ────────────────────────────────────
   const [
     { data: products },
     { data: categories },
@@ -85,118 +96,93 @@ export default async function HomePage({ searchParams }: PageProps) {
   ] = await Promise.all([
     sanityFetch({
       query: getQuery(),
-      params: {
-        searchQuery,
-        categorySlug,
-        condition,
-        brandSlug,
-        modelSlug,
-        color,
-        material,
-        minPrice,
-        maxPrice,
-        inStock,
-      },
+      params: { searchQuery, categorySlug, condition, brandSlug, modelSlug, color, material, minPrice, maxPrice, inStock },
     }),
     sanityFetch({ query: ALL_CATEGORIES_QUERY }),
     sanityFetch({ query: FEATURED_PRODUCTS_QUERY }),
-    // Fetch brands for ALL brand-supporting categories upfront
-    // so hover dropdowns work on every tile without clicking first
-    sanityFetch({
-      query: BRANDS_BY_CATEGORY_QUERY,
-      params: { categorySlug: "gaming-laptops", condition: "" },
-    }),
-    sanityFetch({
-      query: BRANDS_BY_CATEGORY_QUERY,
-      params: { categorySlug: "regular-laptops", condition: "" },
-    }),
-    sanityFetch({
-      query: BRANDS_BY_CATEGORY_QUERY,
-      params: { categorySlug: "monitors-professional", condition: "" },
-    }),
-    sanityFetch({
-      query: BRANDS_BY_CATEGORY_QUERY,
-      params: { categorySlug: "monitors-gaming", condition: "" },
-    }),
+    sanityFetch({ query: BRANDS_BY_CATEGORY_QUERY, params: { categorySlug: "gaming-laptops", condition: "" } }),
+    sanityFetch({ query: BRANDS_BY_CATEGORY_QUERY, params: { categorySlug: "regular-laptops", condition: "" } }),
+    sanityFetch({ query: BRANDS_BY_CATEGORY_QUERY, params: { categorySlug: "monitors-professional", condition: "" } }),
+    sanityFetch({ query: BRANDS_BY_CATEGORY_QUERY, params: { categorySlug: "monitors-gaming", condition: "" } }),
   ]);
 
-  // brandsMap keyed by category slug — passed to CategoryTiles hover dropdowns
-  const gamingBrands = extractBrands(gamingBrandsData);
-  const regularBrands = extractBrands(regularBrandsData);
-  const monProBrands = extractBrands(monitorProBrandsData);
-  const monGamingBrands = extractBrands(monitorGamingBrandsData);
-
-  const brandsMap: Record<string, { title: string; slug: string }[]> = {
-    "gaming-laptops":                    gamingBrands,
-    "gaming-laptops-brand-new":          gamingBrands,
-    "gaming-laptops-foreign-used":       gamingBrands,
-    "regular-laptops":                   regularBrands,
-    "regular-laptops-brand-new":         regularBrands,
-    "regular-laptops-foreign-used":      regularBrands,
-    "monitors-professional":             monProBrands,
-    "monitors-professional-brand-new":   monProBrands,
-    "monitors-professional-foreign-used": monProBrands,
-    "monitors-gaming":                   monGamingBrands,
-    "monitors-gaming-brand-new":         monGamingBrands,
-    "monitors-gaming-foreign-used":      monGamingBrands,
+  const brandsMap: Record<string, BrandOption[]> = {
+    "gaming-laptops": extractBrands(gamingBrandsData),
+    "regular-laptops": extractBrands(regularBrandsData),
+    "monitors-professional": extractBrands(monitorProBrandsData),
+    "monitors-gaming": extractBrands(monitorGamingBrandsData),
   };
 
-  // For sidebar filter — if a subcategory is selected (e.g. gaming-laptops-brand-new),
-  // look up its parent slug so the brand list still shows
-  const selectedCategoryData = categories.find(
-    (c: any) => c.slug === categorySlug
-  ) as any;
-  const selectedParentSlug: string = selectedCategoryData?.parentSlug ?? "";
-  const effectiveCategorySlug = brandsMap[categorySlug]
-    ? categorySlug
-    : selectedParentSlug || categorySlug;
+  type FlatCat = { slug?: string | null; parentSlug?: string | null };
 
-  const brands: { title: string; slug: string }[] =
-    brandsMap[effectiveCategorySlug] ?? [];
+  function findBrandSupportingAncestor(catSlug: string): string | null {
+    if ((CATEGORIES_WITH_BRANDS as readonly string[]).includes(catSlug)) return catSlug;
+    let current = (categories as FlatCat[]).find((c) => c.slug === catSlug);
+    while (current) {
+      const parentSlug = current.parentSlug;
+      if (!parentSlug) break;
+      if ((CATEGORIES_WITH_BRANDS as readonly string[]).includes(parentSlug)) return parentSlug;
+      current = (categories as FlatCat[]).find((c) => c.slug === parentSlug);
+    }
+    return null;
+  }
 
-  // Fetch models when a brand is selected
+  const brandAncestorSlug = categorySlug ? findBrandSupportingAncestor(categorySlug) : null;
+
+  if (brandAncestorSlug && !brandsMap[brandAncestorSlug]) {
+    const { data: ancestorBrandsData } = await sanityFetch({
+      query: BRANDS_BY_CATEGORY_QUERY,
+      params: { categorySlug: brandAncestorSlug, condition: "" },
+    });
+    brandsMap[brandAncestorSlug] = extractBrands(ancestorBrandsData);
+  }
+
+  const brands: BrandOption[] =
+    brandsMap[categorySlug] ??
+    (brandAncestorSlug ? brandsMap[brandAncestorSlug] : undefined) ??
+    [];
+
   const { data: modelsData } = brandSlug
-    ? await sanityFetch({
-        query: MODELS_BY_BRAND_QUERY,
-        params: { brandSlug },
-      })
+    ? await sanityFetch({ query: MODELS_BY_BRAND_QUERY, params: { brandSlug } })
     : { data: [] };
 
-  const models: { title: string; slug: string }[] = Array.isArray(modelsData)
-    ? modelsData
-        .filter((m: any) => m?.title && m?.slug)
-        .map((m: any) => ({ title: m.title as string, slug: m.slug as string }))
+  const models: BrandOption[] = Array.isArray(modelsData)
+    ? modelsData.filter((m: any) => m?.title && m?.slug).map((m: any) => ({ title: m.title as string, slug: m.slug as string }))
     : [];
 
-  // ── Page title ────────────────────────────────────────────────
+  function getActiveTile(catSlug: string): string | undefined {
+    if (!catSlug) return undefined;
+    if (isDrilldownRoot(catSlug)) return catSlug;
+    let current = (categories as FlatCat[]).find((c) => c.slug === catSlug);
+    while (current) {
+      const parentSlug = current.parentSlug;
+      if (!parentSlug) break;
+      if (isDrilldownRoot(parentSlug)) return parentSlug;
+      current = (categories as FlatCat[]).find((c) => c.slug === parentSlug);
+    }
+    return catSlug;
+  }
+
+  const activeTile = getActiveTile(categorySlug);
+
   const getPageTitle = () => {
     if (brandSlug) return brandSlug;
     if (condition) {
-      const label =
-        condition === "brand-new" ? "Brand New" : "Foreign Used (UK/US)";
-      const cat = categories.find(
-        (c: { slug?: string | null }) => c.slug === categorySlug,
-      );
+      const label = condition === "brand-new" ? "Brand New" : "Foreign Used (UK/US)";
+      const cat = categories.find((c: { slug?: string | null }) => c.slug === categorySlug);
       return cat ? `${cat.title} — ${label}` : label;
     }
     if (categorySlug) {
-      return (
-        categories.find(
-          (c: { slug?: string | null; title?: string | null }) =>
-            c.slug === categorySlug,
-        )?.title ?? categorySlug
-      );
+      return categories.find((c: { slug?: string | null; title?: string | null }) => c.slug === categorySlug)?.title ?? categorySlug;
     }
     return "All Products";
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 transition-colors duration-300">
 
-      {/* Hero — homepage only */}
       {isHomepage && <HeroSection />}
 
-      {/* Featured Carousel — homepage only */}
       {isHomepage && featuredProducts.length > 0 && (
         <Suspense fallback={<FeaturedCarouselSkeleton />}>
           <FeaturedCarousel products={featuredProducts} />
@@ -204,9 +190,9 @@ export default async function HomePage({ searchParams }: PageProps) {
       )}
 
       {/* Page Banner + Category Tiles */}
-      <div className="border-b border-zinc-800 bg-zinc-950">
+      <div className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 transition-colors duration-300">
         <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
-          <h1 className="font-display text-2xl font-bold tracking-tight text-white">
+          <h1 className="font-display text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
             {getPageTitle()}
           </h1>
           <p className="mt-1 text-sm text-zinc-500">
@@ -216,7 +202,7 @@ export default async function HomePage({ searchParams }: PageProps) {
         <div className="mt-6">
           <CategoryTiles
             categories={categories}
-            activeCategory={categorySlug || undefined}
+            activeCategory={activeTile}
             activeCondition={condition || undefined}
             activeBrand={brandSlug || undefined}
             brandsMap={brandsMap}
@@ -235,10 +221,7 @@ export default async function HomePage({ searchParams }: PageProps) {
         />
       </div>
 
-      {/* Testimonials — homepage only */}
       {isHomepage && <TestimonialsCarousel />}
-
-      {/* About — homepage only */}
       {isHomepage && <AboutSection />}
 
     </div>

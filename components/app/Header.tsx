@@ -6,6 +6,7 @@ import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { useCartActions, useTotalItems } from "@/lib/store/cart-store-provider";
 import { useChatActions, useIsChatOpen } from "@/lib/store/chat-store-provider";
+import { ThemeToggle } from "@/components/app/ThemeToggle";
 
 export function Header() {
   const { openCart } = useCartActions();
@@ -37,7 +38,12 @@ export function Header() {
 
           {/* My Orders - Only when signed in */}
           <SignedIn>
-            <Button asChild variant="ghost" size="sm" className="hidden sm:flex items-center gap-1.5 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100">
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="hidden sm:flex items-center gap-1.5 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+            >
               <Link href="/orders">
                 <Package className="h-4 w-4" />
                 <span className="text-sm font-medium">My Orders</span>
@@ -79,6 +85,9 @@ export function Header() {
             )}
             <span className="sr-only">Open cart ({totalItems} items)</span>
           </Button>
+
+          {/* 🌙 / ☀️ Theme Toggle */}
+          <ThemeToggle />
 
           {/* User */}
           <SignedIn>

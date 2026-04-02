@@ -19,13 +19,11 @@ export function HeroSection() {
   const [mounted, setMounted] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Mount animation
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 100);
     return () => clearTimeout(t);
   }, []);
 
-  // Word rotation
   useEffect(() => {
     intervalRef.current = setInterval(() => {
       setVisible(false);
@@ -40,12 +38,21 @@ export function HeroSection() {
   }, []);
 
   return (
-    <section className="relative overflow-hidden bg-zinc-950">
+    <section className="relative overflow-hidden bg-white dark:bg-zinc-950 transition-colors duration-300">
 
-      {/* ── Subtle dot-grid texture ───────────────────────────── */}
+      {/* Dot-grid texture */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle, rgba(0,0,0,0.04) 1px, transparent 1px)",
+          backgroundSize: "32px 32px",
+        }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 dark:block hidden"
         style={{
           backgroundImage:
             "radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)",
@@ -53,25 +60,25 @@ export function HeroSection() {
         }}
       />
 
-      {/* ── Amber radial glow — top left ─────────────────────── */}
+      {/* Amber glow — top left */}
       <div
         aria-hidden
         className="pointer-events-none absolute -top-48 -left-48 h-[600px] w-[600px] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(245,158,11,0.12) 0%, transparent 65%)",
+          background: "radial-gradient(circle, rgba(245,158,11,0.10) 0%, transparent 65%)",
         }}
       />
 
-      {/* ── Orange radial glow — bottom right ────────────────── */}
+      {/* Orange glow — bottom right */}
       <div
         aria-hidden
         className="pointer-events-none absolute -bottom-32 -right-32 h-[400px] w-[400px] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(249,115,22,0.07) 0%, transparent 65%)",
+          background: "radial-gradient(circle, rgba(249,115,22,0.06) 0%, transparent 65%)",
         }}
       />
 
-      {/* ── Content ──────────────────────────────────────────── */}
+      {/* Content */}
       <div className="relative mx-auto max-w-7xl px-4 pt-16 pb-0 sm:px-6 lg:px-8 lg:pt-20">
         <div className="flex flex-col lg:flex-row lg:items-end lg:gap-20">
 
@@ -85,21 +92,21 @@ export function HeroSection() {
               }`}
             >
               <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-              <span className="text-xs font-semibold uppercase tracking-widest text-amber-400">
+              <span className="text-xs font-semibold uppercase tracking-widest text-amber-500 dark:text-amber-400">
                 BN: 9245886 · Est. 2019 · Computer Sales & Engineering
               </span>
             </div>
 
             {/* Main headline */}
             <h1
-              className={`font-display text-[2.6rem] font-extrabold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl xl:text-7xl transition-all duration-700 delay-100 ${
+              className={`font-display text-[2.6rem] font-extrabold leading-[1.05] tracking-tight text-zinc-900 dark:text-white sm:text-5xl lg:text-6xl xl:text-7xl transition-all duration-700 delay-100 ${
                 mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
               }`}
             >
               Premium{" "}
               <span className="relative inline-block">
                 <span
-                  className={`text-amber-400 transition-all duration-350 ${
+                  className={`text-amber-500 dark:text-amber-400 transition-all duration-350 ${
                     visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3"
                   }`}
                   style={{ display: "inline-block" }}
@@ -108,11 +115,10 @@ export function HeroSection() {
                 </span>
               </span>
               <br />
-              <span className="text-zinc-300">Sold by Someone Who</span>
+              <span className="text-zinc-600 dark:text-zinc-300">Sold by Someone Who</span>
               <br />
               <span className="relative">
                 Actually Understands Them
-                {/* SVG underline */}
                 <svg
                   aria-hidden
                   className="absolute -bottom-2 left-0 w-full overflow-visible"
@@ -134,22 +140,22 @@ export function HeroSection() {
 
             {/* Tagline */}
             <p
-              className={`mt-6 text-base font-semibold text-amber-400 sm:text-lg transition-all duration-700 delay-200 ${
+              className={`mt-6 text-base font-semibold text-amber-500 dark:text-amber-400 sm:text-lg transition-all duration-700 delay-200 ${
                 mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
               }`}
             >
               Built with engineering insight. Delivered with care.
             </p>
 
-            {/* Updated Sub-copy — humble & sophisticated */}
+            {/* Sub-copy */}
             <p
-              className={`mt-3 max-w-lg text-sm leading-7 text-zinc-400 sm:text-base transition-all duration-700 delay-300 ${
+              className={`mt-3 max-w-lg text-sm leading-7 text-zinc-500 dark:text-zinc-400 sm:text-base transition-all duration-700 delay-300 ${
                 mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
               }`}
             >
-              My journey with technology started with repairing computers many years ago. 
-              Today, I personally inspect every device we offer — whether brand new or carefully selected foreign-used. 
-              All products are stored in our dedicated warehouse and come with warranty. 
+              My journey with technology started with repairing computers many years ago.
+              Today, I personally inspect every device we offer — whether brand new or carefully selected foreign-used.
+              All products are stored in our dedicated warehouse and come with warranty.
               We ship worldwide.
             </p>
 
@@ -174,7 +180,7 @@ export function HeroSection() {
                 asChild
                 variant="ghost"
                 size="lg"
-                className="h-12 border border-zinc-700/80 px-8 text-sm font-medium text-zinc-300 hover:border-zinc-500 hover:bg-zinc-800/60 hover:text-white transition-all duration-200"
+                className="h-12 border border-zinc-300 dark:border-zinc-700/80 px-8 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:border-zinc-400 dark:hover:border-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 hover:text-zinc-900 dark:hover:text-white transition-all duration-200"
               >
                 <Link href="/?category=gaming-laptops">
                   Browse Gaming Laptops
@@ -192,13 +198,13 @@ export function HeroSection() {
             {TRUST_BADGES.map(({ icon: Icon, label, sub }) => (
               <div
                 key={label}
-                className="flex items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3.5 backdrop-blur-sm"
+                className="flex items-center gap-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 px-4 py-3.5 backdrop-blur-sm transition-colors duration-300"
               >
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10">
-                  <Icon className="h-4 w-4 text-amber-400" />
+                  <Icon className="h-4 w-4 text-amber-500 dark:text-amber-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-white">{label}</p>
+                  <p className="text-sm font-semibold text-zinc-900 dark:text-white">{label}</p>
                   <p className="text-xs text-zinc-500">{sub}</p>
                 </div>
               </div>
@@ -206,18 +212,18 @@ export function HeroSection() {
           </div>
         </div>
 
-        {/* Mobile trust badges — horizontal scroll */}
+        {/* Mobile trust badges */}
         <div className="flex gap-3 overflow-x-auto pb-10 lg:hidden scrollbar-hide">
           {TRUST_BADGES.map(({ icon: Icon, label, sub }) => (
             <div
               key={label}
-              className="flex shrink-0 items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3 backdrop-blur-sm"
+              className="flex shrink-0 items-center gap-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 px-4 py-3 backdrop-blur-sm transition-colors duration-300"
             >
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/10">
-                <Icon className="h-4 w-4 text-amber-400" />
+                <Icon className="h-4 w-4 text-amber-500 dark:text-amber-400" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-white">{label}</p>
+                <p className="text-sm font-semibold text-zinc-900 dark:text-white">{label}</p>
                 <p className="text-xs text-zinc-500">{sub}</p>
               </div>
             </div>
@@ -225,13 +231,19 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* ── Seamless blend into next section ─────────────────── */}
+      {/* Blend into next section */}
       <div
         aria-hidden
         className="pointer-events-none h-24 w-full"
         style={{
-          background:
-            "linear-gradient(to bottom, transparent 0%, rgb(9,9,11) 100%)",
+          background: "linear-gradient(to bottom, transparent 0%, rgb(244,244,245) 100%)",
+        }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none h-24 w-full hidden dark:block -mt-24"
+        style={{
+          background: "linear-gradient(to bottom, transparent 0%, rgb(9,9,11) 100%)",
         }}
       />
     </section>

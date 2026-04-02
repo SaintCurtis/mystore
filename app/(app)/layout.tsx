@@ -15,7 +15,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
       <CartStoreProvider>
         <ChatStoreProvider>
           <AppShell>
-            <div className="flex min-h-screen flex-col bg-zinc-950">
+            <div className="flex min-h-screen flex-col bg-white dark:bg-zinc-950 transition-colors duration-300">
               <Header />
               <main className="flex-1">{children}</main>
               <Footer />

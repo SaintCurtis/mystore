@@ -29,25 +29,25 @@ const MILESTONES = [
 
 export function AboutSection() {
   return (
-    <section className="bg-zinc-900 py-24 sm:py-32">
+    <section className="bg-zinc-100 dark:bg-zinc-900 py-24 sm:py-32 transition-colors duration-300">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:gap-24">
 
           {/* Left — Story */}
           <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-amber-400">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-amber-500 dark:text-amber-400">
               About The Saint's TechNet
             </p>
-            <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+            <h2 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white sm:text-4xl">
               Not Just a Seller.{" "}
-              <span className="text-amber-400">An Engineer</span>{" "}
+              <span className="text-amber-500 dark:text-amber-400">An Engineer</span>{" "}
               Who Happens to Sell.
             </h2>
 
-            <div className="mt-6 space-y-5 text-sm leading-7 text-zinc-400 sm:text-base">
+            <div className="mt-6 space-y-5 text-sm leading-7 text-zinc-600 dark:text-zinc-400 sm:text-base">
               <p>
                 The Saint's Technology Networks — known as{" "}
-                <span className="font-semibold text-zinc-200">
+                <span className="font-semibold text-zinc-800 dark:text-zinc-200">
                   The Saint's TechNet
                 </span>{" "}
                 — was built on something most tech vendors don't have: real,
@@ -72,14 +72,14 @@ export function AboutSection() {
             </div>
 
             {/* Stats */}
-            <div className="mt-10 grid grid-cols-3 gap-6 border-t border-zinc-800 pt-10">
+            <div className="mt-10 grid grid-cols-3 gap-6 border-t border-zinc-300 dark:border-zinc-800 pt-10">
               {[
                 { value: "5+", label: "Years in business" },
                 { value: "1000+", label: "Happy customers" },
                 { value: "100%", label: "Verified products" },
               ].map(({ value, label }) => (
                 <div key={label}>
-                  <p className="text-3xl font-extrabold text-amber-400">
+                  <p className="text-3xl font-extrabold text-amber-500 dark:text-amber-400">
                     {value}
                   </p>
                   <p className="mt-1 text-xs text-zinc-500">{label}</p>
@@ -90,21 +90,21 @@ export function AboutSection() {
 
           {/* Right — Timeline */}
           <div className="relative">
-            <div className="absolute left-5 top-0 h-full w-px bg-zinc-800" />
+            <div className="absolute left-5 top-0 h-full w-px bg-zinc-300 dark:bg-zinc-800" />
             <div className="space-y-10">
               {MILESTONES.map(({ icon: Icon, year, title, desc }) => (
                 <div key={year} className="relative flex gap-6 pl-14">
                   <div className="absolute left-0 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-amber-500/30 bg-amber-500/10">
-                    <Icon className="h-4 w-4 text-amber-400" />
+                    <Icon className="h-4 w-4 text-amber-500 dark:text-amber-400" />
                   </div>
                   <div>
-                    <span className="mb-1 inline-block rounded-full bg-zinc-800 px-3 py-0.5 text-xs font-semibold text-amber-400">
+                    <span className="mb-1 inline-block rounded-full bg-zinc-200 dark:bg-zinc-800 px-3 py-0.5 text-xs font-semibold text-amber-500 dark:text-amber-400">
                       {year}
                     </span>
-                    <h3 className="mt-1 text-base font-bold text-white">
+                    <h3 className="mt-1 text-base font-bold text-zinc-900 dark:text-white">
                       {title}
                     </h3>
-                    <p className="mt-1.5 text-sm leading-relaxed text-zinc-400">
+                    <p className="mt-1.5 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
                       {desc}
                     </p>
                   </div>
