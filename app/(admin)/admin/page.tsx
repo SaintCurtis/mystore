@@ -21,12 +21,7 @@ import { HeroSection } from "@/components/app/HeroSection";
 import { TestimonialsCarousel } from "@/components/app/TestimonialsCarousel";
 import { AboutSection } from "@/components/app/AboutSection";
 
-const DRILLDOWN_ROOTS = [
-  "monitors",
-  "content-creation-tools",
-  "computers",
-  "accessories",
-] as const;
+const DRILLDOWN_ROOTS = ["monitors", "content-creation-tools", "computers", "accessories"] as const;
 
 function isDrilldownRoot(slug: string): boolean {
   return (DRILLDOWN_ROOTS as readonly string[]).includes(slug);
@@ -34,17 +29,9 @@ function isDrilldownRoot(slug: string): boolean {
 
 interface PageProps {
   searchParams: Promise<{
-    q?: string;
-    category?: string;
-    condition?: string;
-    brand?: string;
-    model?: string;
-    color?: string;
-    material?: string;
-    minPrice?: string;
-    maxPrice?: string;
-    sort?: string;
-    inStock?: string;
+    q?: string; category?: string; condition?: string; brand?: string;
+    model?: string; color?: string; material?: string; minPrice?: string;
+    maxPrice?: string; sort?: string; inStock?: string;
   }>;
 }
 
@@ -52,9 +39,7 @@ interface BrandOption { title: string; slug: string }
 
 function extractBrands(data: unknown): BrandOption[] {
   return Array.isArray(data)
-    ? data
-        .filter((b: any) => b?.title && b?.slug)
-        .map((b: any) => ({ title: b.title as string, slug: b.slug as string }))
+    ? data.filter((b: any) => b?.title && b?.slug).map((b: any) => ({ title: b.title as string, slug: b.slug as string }))
     : [];
 }
 
@@ -72,7 +57,6 @@ export default async function HomePage({ searchParams }: PageProps) {
   const maxPrice = Number(params.maxPrice) || 0;
   const sort = params.sort ?? "name";
   const inStock = params.inStock === "true";
-
   const isHomepage = !categorySlug && !searchQuery;
 
   const getQuery = () => {
@@ -86,18 +70,11 @@ export default async function HomePage({ searchParams }: PageProps) {
   };
 
   const [
-    { data: products },
-    { data: categories },
-    { data: featuredProducts },
-    { data: gamingBrandsData },
-    { data: regularBrandsData },
-    { data: monitorProBrandsData },
-    { data: monitorGamingBrandsData },
+    { data: products }, { data: categories }, { data: featuredProducts },
+    { data: gamingBrandsData }, { data: regularBrandsData },
+    { data: monitorProBrandsData }, { data: monitorGamingBrandsData },
   ] = await Promise.all([
-    sanityFetch({
-      query: getQuery(),
-      params: { searchQuery, categorySlug, condition, brandSlug, modelSlug, color, material, minPrice, maxPrice, inStock },
-    }),
+    sanityFetch({ query: getQuery(), params: { searchQuery, categorySlug, condition, brandSlug, modelSlug, color, material, minPrice, maxPrice, inStock } }),
     sanityFetch({ query: ALL_CATEGORIES_QUERY }),
     sanityFetch({ query: FEATURED_PRODUCTS_QUERY }),
     sanityFetch({ query: BRANDS_BY_CATEGORY_QUERY, params: { categorySlug: "gaming-laptops", condition: "" } }),
@@ -130,17 +107,11 @@ export default async function HomePage({ searchParams }: PageProps) {
   const brandAncestorSlug = categorySlug ? findBrandSupportingAncestor(categorySlug) : null;
 
   if (brandAncestorSlug && !brandsMap[brandAncestorSlug]) {
-    const { data: ancestorBrandsData } = await sanityFetch({
-      query: BRANDS_BY_CATEGORY_QUERY,
-      params: { categorySlug: brandAncestorSlug, condition: "" },
-    });
+    const { data: ancestorBrandsData } = await sanityFetch({ query: BRANDS_BY_CATEGORY_QUERY, params: { categorySlug: brandAncestorSlug, condition: "" } });
     brandsMap[brandAncestorSlug] = extractBrands(ancestorBrandsData);
   }
 
-  const brands: BrandOption[] =
-    brandsMap[categorySlug] ??
-    (brandAncestorSlug ? brandsMap[brandAncestorSlug] : undefined) ??
-    [];
+  const brands: BrandOption[] = brandsMap[categorySlug] ?? (brandAncestorSlug ? brandsMap[brandAncestorSlug] : undefined) ?? [];
 
   const { data: modelsData } = brandSlug
     ? await sanityFetch({ query: MODELS_BY_BRAND_QUERY, params: { brandSlug } })
@@ -179,7 +150,7 @@ export default async function HomePage({ searchParams }: PageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 transition-colors duration-300">
+    <div className="min-h-screen bg-zinc-50 dark:bg-[#0a0a0a] transition-colors duration-300">
 
       {isHomepage && <HeroSection />}
 
@@ -189,13 +160,13 @@ export default async function HomePage({ searchParams }: PageProps) {
         </Suspense>
       )}
 
-      {/* Page Banner + Category Tiles */}
-      <div className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 transition-colors duration-300">
+      {/* Banner + Tiles */}
+      <div className="border-b border-zinc-200 dark:border-[#1a1a1a] bg-zinc-50 dark:bg-[#0a0a0a] transition-colors duration-300">
         <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
-          <h1 className="font-display text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
+          <h1 className="font-display text-2xl font-bold tracking-tight text-zinc-900 dark:text-[#f1f1f1]">
             {getPageTitle()}
           </h1>
-          <p className="mt-1 text-sm text-zinc-500">
+          <p className="mt-1 text-sm text-zinc-500 dark:text-[#a3a3a3]">
             Premium tech — verified, warranted, shipped worldwide
           </p>
         </div>

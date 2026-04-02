@@ -34,49 +34,16 @@ export const metadata: Metadata = {
   },
 };
 
-// Inline script runs synchronously BEFORE any React hydration.
-// This is the only reliable way to prevent the flash of wrong theme.
-// It reads localStorage and applies .dark immediately — no React needed.
-const themeScript = `
-(function() {
-  try {
-    var stored = localStorage.getItem('theme');
-    if (stored === 'light') {
-      document.documentElement.classList.remove('dark');
-    } else {
-      // Default is dark — applies on first visit and when no preference stored
-      document.documentElement.classList.add('dark');
-    }
-  } catch(e) {
-    document.documentElement.classList.add('dark');
-  }
-})();
-`;
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
+    // suppressHydrationWarning is required by next-themes
     <html lang="en" suppressHydrationWarning>
-      <head>
-        {/*
-          dangerouslySetInnerHTML is intentional here.
-          This must be an inline script (not a module) so it runs
-          synchronously before the browser paints anything.
-          This eliminates the flash of light mode on dark-preferring users.
-        */}
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      </head>
       <body
-        className={`
-          ${syne.variable} ${inter.variable}
-          font-body antialiased
-          bg-white text-zinc-900
-          dark:bg-zinc-950 dark:text-zinc-100
-          transition-colors duration-300
-        `}
+        className={`${syne.variable} ${inter.variable} font-body antialiased transition-colors duration-300`}
       >
         <ThemeProvider>
           {children}
