@@ -79,7 +79,7 @@ function StarRating({ rating }: { rating: number }) {
       {Array.from({ length: 5 }).map((_, i) => (
         <svg
           key={i}
-          className={`h-4 w-4 ${i < rating ? "text-amber-400" : "text-zinc-700"}`}
+          className={`h-4 w-4 ${i < rating ? "text-amber-400" : "text-zinc-300 dark:text-zinc-700"}`}
           fill="currentColor"
           viewBox="0 0 20 20"
         >
@@ -94,7 +94,6 @@ export function TestimonialsCarousel() {
   const [current, setCurrent] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const autoplayRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
   const total = TESTIMONIALS.length;
 
   const goTo = useCallback(
@@ -110,44 +109,34 @@ export function TestimonialsCarousel() {
   const prev = useCallback(() => goTo(current - 1), [current, goTo]);
   const next = useCallback(() => goTo(current + 1), [current, goTo]);
 
-  // Autoplay
   useEffect(() => {
     autoplayRef.current = setInterval(next, 6000);
-    return () => {
-      if (autoplayRef.current) clearInterval(autoplayRef.current);
-    };
+    return () => { if (autoplayRef.current) clearInterval(autoplayRef.current); };
   }, [next]);
 
-  const pauseAutoplay = () => {
-    if (autoplayRef.current) clearInterval(autoplayRef.current);
-  };
+  const pauseAutoplay = () => { if (autoplayRef.current) clearInterval(autoplayRef.current); };
 
-  // Visible cards: prev, current, next
-  const getVisible = () => {
-    return [
-      TESTIMONIALS[(current - 1 + total) % total],
-      TESTIMONIALS[current],
-      TESTIMONIALS[(current + 1) % total],
-    ];
-  };
-
-  const [prevCard, activeCard, nextCard] = getVisible();
+  const [prevCard, activeCard, nextCard] = [
+    TESTIMONIALS[(current - 1 + total) % total],
+    TESTIMONIALS[current],
+    TESTIMONIALS[(current + 1) % total],
+  ];
 
   return (
-    <section className="bg-zinc-950 py-24 sm:py-32">
+    <section className="bg-zinc-100 dark:bg-zinc-950 py-24 sm:py-32 transition-colors duration-300">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
         {/* Header */}
         <div className="mb-16 text-center">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-amber-400">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-amber-500 dark:text-amber-400">
             What Our Customers Say
           </p>
-          <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+          <h2 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white sm:text-4xl lg:text-5xl">
             Real People.{" "}
-            <span className="text-amber-400">Real Experiences.</span>
+            <span className="text-amber-500 dark:text-amber-400">Real Experiences.</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-base text-zinc-400">
-            Over 5 years of verified sales across Nigeria and beyond. Here's
-            what buyers actually say.
+          <p className="mx-auto mt-4 max-w-xl text-base text-zinc-600 dark:text-zinc-400">
+            Over 5 years of verified sales across Nigeria and beyond. Here's what buyers actually say.
           </p>
         </div>
 
@@ -155,49 +144,34 @@ export function TestimonialsCarousel() {
         <div
           className="relative"
           onMouseEnter={pauseAutoplay}
-          onMouseLeave={() => {
-            autoplayRef.current = setInterval(next, 6000);
-          }}
+          onMouseLeave={() => { autoplayRef.current = setInterval(next, 6000); }}
         >
-          {/* Cards */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            {/* Previous card — dimmed */}
-            <div className="hidden md:block opacity-40 scale-95 transition-all duration-400 cursor-pointer"
-              onClick={prev}>
+            <div className="hidden md:block opacity-40 scale-95 transition-all duration-400 cursor-pointer" onClick={prev}>
               <TestimonialCard testimonial={prevCard} />
             </div>
-
-            {/* Active card */}
-            <div
-              className={`transition-all duration-400 ${isAnimating ? "opacity-70 scale-98" : "opacity-100 scale-100"}`}
-            >
+            <div className={`transition-all duration-400 ${isAnimating ? "opacity-70 scale-98" : "opacity-100 scale-100"}`}>
               <TestimonialCard testimonial={activeCard} isActive />
             </div>
-
-            {/* Next card — dimmed */}
-            <div className="hidden md:block opacity-40 scale-95 transition-all duration-400 cursor-pointer"
-              onClick={next}>
+            <div className="hidden md:block opacity-40 scale-95 transition-all duration-400 cursor-pointer" onClick={next}>
               <TestimonialCard testimonial={nextCard} />
             </div>
           </div>
 
-          {/* Mobile single card */}
           <div className="md:hidden">
             <TestimonialCard testimonial={activeCard} isActive />
           </div>
 
-          {/* Navigation buttons */}
+          {/* Navigation */}
           <div className="mt-10 flex items-center justify-center gap-6">
             <Button
               variant="ghost"
               size="icon"
               onClick={prev}
-              className="h-10 w-10 rounded-full border border-zinc-700 text-zinc-400 hover:border-amber-500 hover:bg-amber-500/10 hover:text-amber-400"
+              className="h-10 w-10 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-amber-500 hover:bg-amber-500/10 hover:text-amber-500 dark:hover:text-amber-400"
             >
               <ChevronLeft className="h-5 w-5" />
             </Button>
-
-            {/* Dots */}
             <div className="flex items-center gap-2">
               {TESTIMONIALS.map((_, i) => (
                 <button
@@ -205,18 +179,17 @@ export function TestimonialsCarousel() {
                   onClick={() => goTo(i)}
                   className={`rounded-full transition-all duration-300 ${
                     i === current
-                      ? "w-6 h-2 bg-amber-400"
-                      : "w-2 h-2 bg-zinc-700 hover:bg-zinc-500"
+                      ? "w-6 h-2 bg-amber-500 dark:bg-amber-400"
+                      : "w-2 h-2 bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-500"
                   }`}
                 />
               ))}
             </div>
-
             <Button
               variant="ghost"
               size="icon"
               onClick={next}
-              className="h-10 w-10 rounded-full border border-zinc-700 text-zinc-400 hover:border-amber-500 hover:bg-amber-500/10 hover:text-amber-400"
+              className="h-10 w-10 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-amber-500 hover:bg-amber-500/10 hover:text-amber-500 dark:hover:text-amber-400"
             >
               <ChevronRight className="h-5 w-5" />
             </Button>
@@ -238,40 +211,29 @@ function TestimonialCard({
     <div
       className={`relative flex h-full flex-col rounded-2xl border p-6 transition-all duration-300 ${
         isActive
-          ? "border-amber-500/40 bg-zinc-900 shadow-xl shadow-amber-500/5"
-          : "border-zinc-800 bg-zinc-900/50"
+          ? "border-amber-500/40 bg-white dark:bg-zinc-900 shadow-xl shadow-amber-500/5"
+          : "border-zinc-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/50"
       }`}
     >
-      {/* Quote icon */}
       <Quote className="mb-4 h-8 w-8 text-amber-500/40" />
-
-      {/* Stars */}
       <StarRating rating={testimonial.rating} />
-
-      {/* Review text */}
-      <p className="mt-4 flex-1 text-sm leading-relaxed text-zinc-300 sm:text-base">
+      <p className="mt-4 flex-1 text-sm leading-relaxed text-zinc-600 dark:text-zinc-300 sm:text-base">
         &ldquo;{testimonial.review}&rdquo;
       </p>
-
-      {/* Product tag */}
-      <div className="mt-4 inline-flex w-fit items-center rounded-full bg-zinc-800 px-3 py-1">
-        <span className="text-xs text-zinc-400">
+      <div className="mt-4 inline-flex w-fit items-center rounded-full bg-zinc-100 dark:bg-zinc-800 px-3 py-1">
+        <span className="text-xs text-zinc-500 dark:text-zinc-400">
           Purchased:{" "}
-          <span className="font-medium text-zinc-200">
+          <span className="font-medium text-zinc-700 dark:text-zinc-200">
             {testimonial.product}
           </span>
         </span>
       </div>
-
-      {/* Author */}
       <div className="mt-5 flex items-center gap-3">
-        <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white ${testimonial.color}`}
-        >
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white ${testimonial.color}`}>
           {testimonial.initials}
         </div>
         <div>
-          <p className="text-sm font-semibold text-white">
+          <p className="text-sm font-semibold text-zinc-900 dark:text-white">
             {testimonial.name}
           </p>
           <p className="text-xs text-zinc-500">{testimonial.location}</p>
