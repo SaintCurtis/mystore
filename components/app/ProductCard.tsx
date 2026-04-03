@@ -7,6 +7,7 @@ import { Eye } from "lucide-react";
 import { cn, formatPrice } from "@/lib/utils";
 import { AddToCartButton } from "@/components/app/AddToCartButton";
 import { StockBadge } from "@/components/app/StockBadge";
+import { WishlistButton } from "@/components/app/WishlistButton";
 import type { FILTER_PRODUCTS_BY_NAME_QUERYResult } from "@/sanity.types";
 
 type Product = FILTER_PRODUCTS_BY_NAME_QUERYResult[number];
@@ -47,12 +48,9 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
   return (
     <div
       className={cn(
-        // Base
         "group relative flex h-full flex-col overflow-hidden rounded-2xl transition-all duration-300",
-        // Light mode
         "bg-white ring-1 ring-zinc-200 hover:ring-zinc-300 hover:-translate-y-1",
         "hover:shadow-xl hover:shadow-zinc-200/80",
-        // Dark mode — layered depth
         "dark:bg-[#111111] dark:ring-1 dark:ring-[#1f1f1f]",
         "dark:hover:ring-amber-500/20 dark:hover:-translate-y-1",
         "dark:hover:shadow-[0_8px_40px_rgba(0,0,0,0.7),0_0_0_1px_rgba(245,158,11,0.12)]",
@@ -83,7 +81,7 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
             </div>
           )}
 
-          {/* Gradient overlay on hover */}
+          {/* Gradient overlay */}
           <div className="absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
           {/* Quick view pill */}
@@ -94,21 +92,34 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
             </span>
           </div>
 
-          {/* Badges */}
+          {/* Out of stock */}
           {isOutOfStock && (
-            <div className="absolute right-3 top-3 rounded-full bg-red-500/90 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm shadow-sm">
+            <div className="absolute left-3 top-3 rounded-full bg-red-500/90 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm shadow-sm">
               Out of Stock
             </div>
           )}
-          {categoryLabel && (
+
+          {/* Category badge */}
+          {categoryLabel && !isOutOfStock && (
             <span className="absolute left-3 top-3 rounded-full bg-white/85 dark:bg-black/70 px-3 py-1 text-xs font-medium text-zinc-700 dark:text-zinc-300 backdrop-blur-sm border border-zinc-200/50 dark:border-white/8">
               {categoryLabel}
             </span>
           )}
+
+          {/* ❤️ Wishlist heart — top right */}
+          <WishlistButton
+            productId={product._id}
+            name={product.name ?? ""}
+            price={product.price ?? 0}
+            image={mainImageUrl ?? undefined}
+            slug={product.slug ?? ""}
+            categoryTitle={product.category?.title ?? undefined}
+            variant="overlay"
+          />
         </div>
       </Link>
 
-      {/* Thumbnail strip */}
+      {/* Thumbnails */}
       {hasMultipleImages && (
         <div className="flex gap-2 border-t border-zinc-100 dark:border-[#1a1a1a] bg-zinc-50 dark:bg-[#0d0d0d] p-3">
           {images.map((image, index) => (
@@ -147,7 +158,6 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
             </h3>
           </Link>
           <div className="flex items-center justify-between gap-2">
-            {/* Price — amber accent in dark, strong zinc in light */}
             <p className="font-display text-xl font-bold tracking-tight text-zinc-900 dark:text-amber-400">
               {formatPrice(product.price)}
             </p>
@@ -167,9 +177,7 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
             href={`/products/${product.slug}`}
             className={cn(
               "flex h-9 w-full items-center justify-center rounded-lg text-xs font-medium transition-all duration-200",
-              // Light
               "border border-zinc-200 text-zinc-500 hover:border-zinc-400 hover:bg-zinc-50 hover:text-zinc-700",
-              // Dark
               "dark:border-[#2a2a2a] dark:text-[#a3a3a3] dark:hover:border-[#3a3a3a] dark:hover:bg-[#1a1a1a] dark:hover:text-[#f1f1f1]",
             )}
           >
