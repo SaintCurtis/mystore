@@ -28,19 +28,35 @@ export function ProductSection({
 }: ProductSectionProps) {
   const [filtersOpen, setFiltersOpen] = useState(true);
 
-  // Read the active category slug from the URL so we can pass it to
-  // ProductGrid → ProductCard for the correct category badge label.
   const searchParams = useSearchParams();
   const activeCategory = searchParams.get("category") ?? undefined;
+  const hasActiveFilters =
+    !!activeCategory ||
+    !!searchQuery ||
+    !!searchParams.get("condition") ||
+    !!searchParams.get("brand") ||
+    !!searchParams.get("color") ||
+    !!searchParams.get("material") ||
+    !!searchParams.get("minPrice") ||
+    !!searchParams.get("maxPrice");
+
+  // Only limit on the homepage (no filters, no search)
+  const limitOnHomepage = !hasActiveFilters;
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Top bar */}
       <div className="flex items-center justify-between gap-4">
-        <p className="text-sm text-zinc-400">
-          {products.length} {products.length === 1 ? "product" : "products"} found
+        <p className="text-sm text-zinc-500 dark:text-[#a3a3a3]">
+          {products.length}{" "}
+          {products.length === 1 ? "product" : "products"} found
           {searchQuery && (
             <span>
-              {" "}for &quot;<span className="font-medium text-zinc-200">{searchQuery}</span>&quot;
+              {" "}for &quot;
+              <span className="font-medium text-zinc-800 dark:text-[#f1f1f1]">
+                {searchQuery}
+              </span>
+              &quot;
             </span>
           )}
         </p>
@@ -48,7 +64,15 @@ export function ProductSection({
           variant="outline"
           size="sm"
           onClick={() => setFiltersOpen(!filtersOpen)}
-          className="flex items-center gap-2 border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+          className={`
+            flex items-center gap-2 transition-all duration-200
+            border-zinc-200 dark:border-[#2a2a2a]
+            bg-white dark:bg-[#111111]
+            text-zinc-600 dark:text-[#a3a3a3]
+            hover:border-zinc-400 dark:hover:border-[#3a3a3a]
+            hover:bg-zinc-50 dark:hover:bg-[#1a1a1a]
+            hover:text-zinc-900 dark:hover:text-[#f1f1f1]
+          `}
         >
           {filtersOpen ? (
             <>
@@ -74,8 +98,12 @@ export function ProductSection({
         >
           <ProductFilters categories={categories} brands={brands} models={models} />
         </aside>
-        <main className="flex-1">
-          <ProductGrid products={products} activeCategory={activeCategory} />
+        <main className="flex-1 min-w-0">
+          <ProductGrid
+            products={products}
+            activeCategory={activeCategory}
+            limitOnHomepage={limitOnHomepage}
+          />
         </main>
       </div>
     </div>
