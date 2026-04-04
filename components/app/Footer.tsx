@@ -37,10 +37,10 @@ const QUICK_LINKS = [
 ];
 
 const POLICY_LINKS = [
-  { label: "Warranty Policy", href: "#" },
-  { label: "Return Policy", href: "#" },
-  { label: "Shipping Info", href: "#" },
-  { label: "Privacy Policy", href: "#" },
+  { label: "Warranty Policy", href: "/policies/warranty" },
+  { label: "Return Policy", href: "/policies/returns" },
+  { label: "Shipping Info", href: "/policies/shipping" },
+  { label: "Privacy Policy", href: "/policies/privacy" },
 ];
 
 export function Footer() {
@@ -129,12 +129,16 @@ export function Footer() {
             <p className="mb-5 text-xs font-semibold uppercase tracking-widest text-zinc-400 dark:text-[#555]">Contact Us</p>
             <ul className="flex flex-col gap-4">
               {[
-                { href: "mailto:iamsaintcurtis@gmail.com", icon: Mail, label: "Email", value: "iamsaintcurtis@gmail.com" },
+                { href: "mailto:iamsaintcurtis@gmail.com", icon: Mail, label: "Email", value: "iamsaintcurtis@gmail.com", external: false },
                 { href: "https://wa.me/2349060898951", icon: Phone, label: "WhatsApp / Call", value: "+234 906 089 8951", external: true },
                 { href: "https://t.me/oluwasaintcurtis", icon: Send, label: "Telegram", value: "@oluwasaintcurtis", external: true },
               ].map(({ href, icon: Icon, label, value, external }) => (
                 <li key={label}>
-                  <Link href={href} {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})} className="group flex items-start gap-3">
+                  <Link
+                    href={href}
+                    {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    className="group flex items-start gap-3"
+                  >
                     <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-zinc-300 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] text-zinc-500 dark:text-[#a3a3a3] transition-colors group-hover:border-amber-500/40 group-hover:text-amber-600 dark:group-hover:text-amber-400">
                       <Icon className="h-3.5 w-3.5" />
                     </div>
@@ -178,6 +182,7 @@ export function Footer() {
           </div>
         </div>
       </div>
+
     </footer>
   );
 }
