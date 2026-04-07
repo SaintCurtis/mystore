@@ -9,6 +9,7 @@ import { useChatActions, useIsChatOpen } from "@/lib/store/chat-store-provider";
 import { useWishlistCount, useWishlistActions } from "@/lib/store/wishlist-store-provider";
 import { ThemeToggle } from "@/components/app/ThemeToggle";
 import { InstantSearch } from "@/components/app/InstantSearch";
+import { CurrencyToggle } from "@/components/app/CurrencyToggle";
 
 export function Header() {
   const { openCart } = useCartActions();
@@ -28,12 +29,8 @@ export function Header() {
             <Cpu className="h-4 w-4 text-zinc-950" />
           </div>
           <div className="hidden sm:flex flex-col leading-none">
-            <span className="text-sm font-extrabold tracking-tight text-zinc-900 dark:text-[#f1f1f1]">
-              The Saint's TechNet
-            </span>
-            <span className="text-[10px] font-medium text-amber-500 tracking-wider uppercase">
-              Built by an Engineer. Trusted by Thousands.
-            </span>
+            <span className="text-sm font-extrabold tracking-tight text-zinc-900 dark:text-[#f1f1f1]">The Saint's TechNet</span>
+            <span className="text-[10px] font-medium text-amber-500 tracking-wider uppercase">Built by an Engineer. Trusted by Thousands.</span>
           </div>
         </Link>
 
@@ -58,12 +55,9 @@ export function Header() {
           <SignedIn>
             <Button asChild variant="ghost" size="sm"
               className="hidden sm:flex items-center gap-1.5 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 dark:text-[#a3a3a3] dark:hover:text-[#f1f1f1] dark:hover:bg-[#1a1a1a] transition-colors">
-              <Link href="/orders">
-                <Package className="h-4 w-4" />
-                <span className="text-sm font-medium">My Orders</span>
-              </Link>
+              <Link href="/orders"><Package className="h-4 w-4" /><span className="text-sm font-medium">My Orders</span></Link>
             </Button>
-            <Button asChild variant="ghost" size="icon" className="sm:hidden dark:text-[#a3a3a3] dark:hover:text-[#f1f1f1] dark:hover:bg-[#1a1a1a]">
+            <Button asChild variant="ghost" size="icon" className="sm:hidden dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]">
               <Link href="/orders"><Package className="h-5 w-5" /></Link>
             </Button>
           </SignedIn>
@@ -101,8 +95,13 @@ export function Header() {
             )}
           </Button>
 
+          {/* Currency toggle */}
+          <CurrencyToggle />
+
+          {/* Theme */}
           <ThemeToggle />
 
+          {/* User */}
           <SignedIn>
             <UserButton afterSwitchSessionUrl="/" appearance={{ elements: { avatarBox: "h-9 w-9" } }}>
               <UserButton.MenuItems>
@@ -120,7 +119,7 @@ export function Header() {
         </div>
       </div>
 
-      {/* Mobile search row */}
+      {/* Mobile search */}
       <div className="md:hidden border-t border-zinc-100 dark:border-[#1a1a1a] px-4 py-2">
         <InstantSearch />
       </div>

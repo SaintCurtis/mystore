@@ -1,48 +1,48 @@
 import { NextResponse } from "next/server";
 import { client } from "@/sanity/lib/client";
-import { defineQuery } from "next-sanity";
 import Anthropic from "@anthropic-ai/sdk";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
 });
 
-// Fetch available products from Sanity filtered by budget
-const PRODUCTS_FOR_SETUP_QUERY = defineQuery(`
-  *[
-    _type == "product"
-    && stock > 0
-    && price >= $minPrice
-    && price <= $maxPrice
-  ] | order(price asc) [0...60] {
-    _id,
-    name,
-    "slug": slug.current,
-    price,
-    description,
-    "image": images[0].asset->url,
-    "categoryTitle": category->title,
-    "categorySlug": category->slug.current,
-    "parentCategory": category->parentCategory->title,
-    brand->{ title },
-    material,
-    color,
-  }
-`);
+// ── Plain string — NOT defineQuery ────────────────────────────────────────────
+// defineQuery() registers queries globally with Next.js's tag-sync system,
+// which dry-runs every registered query without params on each navigation.
+// API routes use client.fetch() directly and never need defineQuery.
+const PRODUCTS_FOR_SETUP_QUERY = `*[
+  _type == "product"
+  && stock > 0
+  && price >= $minPrice
+  && price <= $maxPrice
+] | order(price asc) [0...60] {
+  _id,
+  name,
+  "slug": slug.current,
+  price,
+  description,
+  "image": images[0].asset->url,
+  "categoryTitle": category->title,
+  "categorySlug": category->slug.current,
+  "parentCategory": category->parentCategory->title,
+  brand->{ title },
+  material,
+  color,
+}`;
 
 // Budget ranges in NGN
 const BUDGET_RANGES: Record<string, { min: number; max: number }> = {
-  "under-300k":   { min: 0,         max: 300000 },
-  "300k-700k":    { min: 0,         max: 700000 },
-  "700k-1.5m":    { min: 0,         max: 1500000 },
-  "1.5m-plus":    { min: 0,         max: 99999999 },
+  "under-300k": { min: 0,       max: 300000   },
+  "300k-700k":  { min: 0,       max: 700000   },
+  "700k-1.5m":  { min: 0,       max: 1500000  },
+  "1.5m-plus":  { min: 0,       max: 99999999 },
 };
 
 const USE_CASE_LABELS: Record<string, string> = {
-  gaming: "Gaming",
-  work: "Work / Business / Productivity",
+  gaming:             "Gaming",
+  work:               "Work / Business / Productivity",
   "content-creation": "Content Creation (Video, Photo, Streaming)",
-  student: "Student (Study, Assignments, Portability)",
+  student:            "Student (Study, Assignments, Portability)",
 };
 
 export async function POST(req: Request) {
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
 
     const range = BUDGET_RANGES[budget] ?? { min: 0, max: 99999999 };
 
-    // Fetch products from Sanity
+    // Fetch products from Sanity — plain client.fetch(), no sanityFetch needed
     const products = await client.fetch(PRODUCTS_FOR_SETUP_QUERY, {
       minPrice: range.min,
       maxPrice: range.max,
@@ -68,9 +68,11 @@ export async function POST(req: Request) {
       );
     }
 
-    // Build product catalog for AI
+    // Build product catalog string for the AI prompt
     const catalog = products
-      .map((p: any) => `ID:${p._id} | ${p.categoryTitle ?? p.parentCategory ?? "General"} | ${p.name} | ₦${p.price?.toLocaleString()} | ${p.description?.slice(0, 120) ?? ""}`)
+      .map((p: any) =>
+        `ID:${p._id} | ${p.categoryTitle ?? p.parentCategory ?? "General"} | ${p.name} | ₦${p.price?.toLocaleString()} | ${p.description?.slice(0, 120) ?? ""}`
+      )
       .join("\n");
 
     const budgetLabel = budget.replace(/-/g, " ").replace("k", ",000").replace("m", "M");
@@ -83,7 +85,7 @@ export async function POST(req: Request) {
       messages: [
         {
           role: "user",
-          content: `You are an expert tech advisor for The Saint's TechNet, a premium Nigerian tech store. 
+          content: `You are an expert tech advisor for The Saint's TechNet, a premium Nigerian tech store.
 A customer wants to build a complete ${useCaseLabel} setup with a budget of ${budgetLabel} NGN.
 ${preferences ? `Additional preferences: ${preferences}` : ""}
 
@@ -112,44 +114,58 @@ Respond ONLY with valid JSON in this exact format:
       ],
     });
 
-    const text = message.content[0].type === "text" ? message.content[0].text : "";
+    const text =
+      message.content[0].type === "text" ? message.content[0].text : "";
 
-    let aiResponse: { title: string; summary: string; items: { _id: string; reason: string }[] };
+    let aiResponse: {
+      title: string;
+      summary: string;
+      items: { _id: string; reason: string }[];
+    };
+
     try {
       const cleaned = text.replace(/```json|```/g, "").trim();
       aiResponse = JSON.parse(cleaned);
     } catch {
-      return NextResponse.json({ error: "AI response parsing failed" }, { status: 500 });
+      return NextResponse.json(
+        { error: "AI response parsing failed" },
+        { status: 500 }
+      );
     }
 
-    // Enrich items with full product data
+    // Enrich AI-chosen items with full product data from the fetched catalog
     const enrichedItems = aiResponse.items
       .map((aiItem) => {
         const product = products.find((p: any) => p._id === aiItem._id);
         if (!product) return null;
         return {
-          _id: product._id,
-          name: product.name,
-          slug: product.slug,
-          price: product.price,
-          image: product.image,
+          _id:           product._id,
+          name:          product.name,
+          slug:          product.slug,
+          price:         product.price,
+          image:         product.image,
           categoryTitle: product.categoryTitle ?? product.parentCategory,
-          reason: aiItem.reason,
+          reason:        aiItem.reason,
         };
       })
       .filter(Boolean);
 
-    const totalPrice = enrichedItems.reduce((sum: number, item: any) => sum + (item.price ?? 0), 0);
+    const totalPrice = enrichedItems.reduce(
+      (sum: number, item: any) => sum + (item.price ?? 0),
+      0
+    );
 
     return NextResponse.json({
-      title: aiResponse.title,
-      summary: aiResponse.summary,
-      items: enrichedItems,
+      title:      aiResponse.title,
+      summary:    aiResponse.summary,
+      items:      enrichedItems,
       totalPrice,
     });
-
   } catch (error) {
     console.error("Build setup error:", error);
-    return NextResponse.json({ error: "Failed to generate setup" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to generate setup" },
+      { status: 500 }
+    );
   }
 }
