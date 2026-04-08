@@ -11,6 +11,7 @@ import { CartSheet } from "@/components/app/CartSheet";
 import { ChatSheet } from "@/components/app/ChatSheet";
 import { WishlistSheet } from "@/components/app/WishlistSheet";
 import { CompareBar } from "@/components/app/CompareBar";
+import { PWAInstall } from "@/components/app/PWAInstall";
 import { AppShell } from "@/components/app/AppShell";
 import { Footer } from "@/components/app/Footer";
 
@@ -29,12 +30,11 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                     <Footer />
                   </div>
                 </AppShell>
-                {/* Sheets & overlays */}
                 <CartSheet />
                 <WishlistSheet />
                 <ChatSheet />
-                {/* Compare floating bar — always rendered, hides when 0 items */}
                 <CompareBar />
+                <PWAInstall />
                 <Toaster position="bottom-center" />
                 <SanityLive />
               </ChatStoreProvider>

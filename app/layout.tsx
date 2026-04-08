@@ -20,34 +20,33 @@ export const metadata: Metadata = {
   description:
     "Premium brand-new and foreign-used laptops, MacBooks, gaming PCs and accessories. CAC-registered. Warranty on every product. Worldwide shipping.",
   keywords: [
-    "laptops Nigeria",
-    "MacBook Nigeria",
-    "gaming laptops Lagos",
-    "foreign used laptops",
-    "brand new laptops Nigeria",
-    "The Saint's TechNet",
+    "laptops Nigeria", "MacBook Nigeria", "gaming laptops Lagos",
+    "foreign used laptops", "brand new laptops Nigeria", "The Saint's TechNet",
   ],
   openGraph: {
     title: "The Saint's TechNet",
     description: "Built by an Engineer. Trusted by Thousands.",
     siteName: "The Saint's TechNet",
   },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Saint's TechNet",
+  },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    // suppressHydrationWarning is required by next-themes
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${syne.variable} ${inter.variable} font-body antialiased transition-colors duration-300`}
-      >
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+      <head>
+        <meta name="theme-color" content="#f59e0b" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+      </head>
+      <body className={`${syne.variable} ${inter.variable} font-body antialiased transition-colors duration-300`}>
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

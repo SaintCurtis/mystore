@@ -4,11 +4,12 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Eye } from "lucide-react";
-import { cn, formatPrice } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { AddToCartButton } from "@/components/app/AddToCartButton";
 import { StockBadge } from "@/components/app/StockBadge";
 import { WishlistButton } from "@/components/app/WishlistButton";
 import { CompareButton } from "@/components/app/CompareButton";
+import { useCurrency } from "@/lib/store/currency-store-provider";
 import type { FILTER_PRODUCTS_BY_NAME_QUERYResult } from "@/sanity.types";
 
 type Product = FILTER_PRODUCTS_BY_NAME_QUERYResult[number];
@@ -29,6 +30,7 @@ function getCategoryLabel(category: Product["category"], activeCategory: string 
 
 export function ProductCard({ product, activeCategory }: ProductCardProps) {
   const [hoveredImageIndex, setHoveredImageIndex] = useState<number | null>(null);
+  const { formatInCurrency } = useCurrency();
 
   const images = product.images ?? [];
   const mainImageUrl = images[0]?.asset?.url;
@@ -49,11 +51,16 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
 
       {/* Image */}
       <Link href={`/products/${product.slug}`} className="block">
-        <div className={cn("relative overflow-hidden bg-zinc-100 dark:bg-[#0d0d0d]", hasMultipleImages ? "aspect-square" : "aspect-4/5")}>
+        <div className={cn(
+          "relative overflow-hidden bg-zinc-100 dark:bg-[#0d0d0d]",
+          hasMultipleImages ? "aspect-square" : "aspect-4/5",
+        )}>
           {displayedImageUrl ? (
-            <Image src={displayedImageUrl} alt={product.name ?? "Product image"} fill
+            <Image
+              src={displayedImageUrl} alt={product.name ?? "Product image"} fill
               className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw" />
+              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+            />
           ) : (
             <div className="flex h-full items-center justify-center text-zinc-400 dark:text-zinc-700">
               <svg className="h-14 w-14 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -63,6 +70,7 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
           )}
 
           <div className="absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
           <div className="absolute inset-x-0 bottom-4 flex justify-center opacity-0 translate-y-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
             <span className="flex items-center gap-1.5 rounded-full bg-black/40 px-4 py-1.5 text-xs font-semibold text-white backdrop-blur-md border border-white/10">
               <Eye className="h-3 w-3" /> View Details
@@ -70,13 +78,16 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
           </div>
 
           {isOutOfStock && (
-            <div className="absolute left-3 top-3 rounded-full bg-red-500/90 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm shadow-sm">Out of Stock</div>
+            <div className="absolute left-3 top-3 rounded-full bg-red-500/90 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm shadow-sm">
+              Out of Stock
+            </div>
           )}
           {categoryLabel && !isOutOfStock && (
             <span className="absolute left-3 top-3 rounded-full bg-white/85 dark:bg-black/70 px-3 py-1 text-xs font-medium text-zinc-700 dark:text-zinc-300 backdrop-blur-sm border border-zinc-200/50 dark:border-white/8">
               {categoryLabel}
             </span>
           )}
+
           <WishlistButton
             productId={product._id} name={product.name ?? ""} price={product.price ?? 0}
             image={mainImageUrl ?? undefined} slug={product.slug ?? ""}
@@ -90,12 +101,17 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
         <div className="flex gap-2 border-t border-zinc-100 dark:border-[#1a1a1a] bg-zinc-50 dark:bg-[#0d0d0d] p-3">
           {images.map((image, index) => (
             <button key={image._key ?? index} type="button"
-              className={cn("relative h-12 flex-1 overflow-hidden rounded-lg transition-all duration-200",
-                hoveredImageIndex === index ? "ring-2 ring-amber-500 ring-offset-1 ring-offset-white dark:ring-offset-[#111111]" : "opacity-40 hover:opacity-75"
+              className={cn(
+                "relative h-12 flex-1 overflow-hidden rounded-lg transition-all duration-200",
+                hoveredImageIndex === index
+                  ? "ring-2 ring-amber-500 ring-offset-1 ring-offset-white dark:ring-offset-[#111111]"
+                  : "opacity-40 hover:opacity-75",
               )}
               onMouseEnter={() => setHoveredImageIndex(index)}
               onMouseLeave={() => setHoveredImageIndex(null)}>
-              {image.asset?.url && <Image src={image.asset.url} alt={`${product.name} - view ${index + 1}`} fill className="object-cover" sizes="80px" />}
+              {image.asset?.url && (
+                <Image src={image.asset.url} alt={`${product.name} - view ${index + 1}`} fill className="object-cover" sizes="80px" />
+              )}
             </button>
           ))}
         </div>
@@ -110,8 +126,9 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
             </h3>
           </Link>
           <div className="flex items-center justify-between gap-2">
+            {/* ✅ Uses currency-aware formatting */}
             <p className="font-display text-xl font-bold tracking-tight text-zinc-900 dark:text-amber-400">
-              {formatPrice(product.price)}
+              {formatInCurrency(product.price)}
             </p>
             <StockBadge productId={product._id} stock={stock} />
           </div>
@@ -131,7 +148,6 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
             View Full Details
           </Link>
 
-          {/* Compare button */}
           <div className="flex justify-center pt-1">
             <CompareButton product={{
               productId: product._id,

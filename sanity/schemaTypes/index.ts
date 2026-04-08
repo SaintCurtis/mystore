@@ -8,6 +8,8 @@ import { modelType } from './modelType'
 import { brandType } from './brandType'
 import { conditionType } from './conditionType'
 import { pendingCryptoOrderType } from './pendingCryptoOrderType'
+import { notifyMeType } from './notifyMeType'
+import { referralType, referralClickType } from './referralType'
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -19,5 +21,8 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     brandType,
     modelType,
     pendingCryptoOrderType,
+    notifyMeType,
+    referralType,
+    referralClickType,
   ],
 }

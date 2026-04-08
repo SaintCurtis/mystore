@@ -2,18 +2,20 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
-import { client } from "@/sanity/lib/client";          // ← plain client, no live
-import { sanityFetch } from "@/sanity/lib/live";        // ← live only for page render
+import { client } from "@/sanity/lib/client";
+import { sanityFetch } from "@/sanity/lib/live";
 import { PRODUCT_BY_SLUG_QUERY } from "@/lib/sanity/queries/products";
 import { ProductGallery } from "@/components/app/ProductGallery";
 import { ProductInfo } from "@/components/app/ProductInfo";
 import { RecentlyViewed } from "@/components/app/RecentlyViewed";
+import { ProductRecommendations } from "@/components/app/ProductRecommendations";
+import { NotifyMe } from "@/components/app/NotifyMe";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
 
-// ── Metadata — uses plain client (no SanityLive, no $slug param issue) ────
+// ── SEO Metadata ───────────────────────────────────────────────────────────
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
   if (!slug) return { title: "The Saint's TechNet" };
@@ -52,8 +54,6 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 // ── Page ───────────────────────────────────────────────────────────────────
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
-
-  // Guard: if slug is somehow empty, 404 immediately
   if (!slug) notFound();
 
   const { data: product } = await sanityFetch({
@@ -65,7 +65,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const p = product as any;
   const imageUrl = p.images?.[0]?.asset?.url;
+  const stock = p.stock ?? 0;
+  const isOutOfStock = stock <= 0;
 
+  // JSON-LD structured data
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -78,7 +81,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       priceCurrency: "NGN",
       price: p.price?.toString() ?? "0",
       availability:
-        (p.stock ?? 0) > 0
+        stock > 0
           ? "https://schema.org/InStock"
           : "https://schema.org/OutOfStock",
       seller: {
@@ -113,11 +116,23 @@ export default async function ProductPage({ params }: ProductPageProps) {
       {/* Main product area */}
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
         <div className="grid gap-10 lg:grid-cols-2 lg:gap-16 xl:gap-24">
+
+          {/* Gallery */}
           <div className="lg:sticky lg:top-24 lg:self-start">
             <ProductGallery images={product.images} productName={product.name} />
           </div>
-          <div className="flex flex-col gap-8">
+
+          {/* Info + NotifyMe */}
+          <div className="flex flex-col gap-6">
             <ProductInfo product={product} />
+
+            {/* Notify Me — only when out of stock */}
+            {isOutOfStock && (
+              <NotifyMe
+                productId={p._id}
+                productName={p.name ?? "this product"}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -128,8 +143,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {[
               { title: "Warranty Included", sub: "Every product comes with warranty" },
-              { title: "7-Day Returns", sub: "Not satisfied? Return it, no questions" },
-              { title: "Worldwide Shipping", sub: "We ship to any country" },
+              { title: "7-Day Returns",     sub: "Not satisfied? Return it, no questions" },
+              { title: "Worldwide Shipping",sub: "We ship to any country" },
             ].map(({ title, sub }) => (
               <div key={title} className="flex flex-col gap-1 text-center sm:text-left">
                 <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{title}</p>
@@ -140,6 +155,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </div>
       </div>
 
+      {/* AI Recommendations */}
+      <ProductRecommendations
+        productId={p._id}
+        productName={p.name ?? ""}
+        categorySlug={p.category?.slug ?? undefined}
+        parentSlug={p.category?.parentSlug ?? undefined}
+        description={p.description ?? undefined}
+        price={p.price ?? undefined}
+      />
+
+      {/* Recently Viewed */}
       <RecentlyViewed excludeId={product._id} />
     </div>
   );

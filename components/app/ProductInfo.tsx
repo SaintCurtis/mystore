@@ -10,7 +10,7 @@ import { StockUrgency } from "@/components/app/StockUrgency";
 import { WhatsAppShare } from "@/components/app/WhatsAppShare";
 import { WishlistButton } from "@/components/app/WishlistButton";
 import { recordView } from "@/lib/hooks/useRecentlyViewed";
-import { formatPrice } from "@/lib/utils";
+import { useCurrency } from "@/lib/store/currency-store-provider";
 import type { PRODUCT_BY_SLUG_QUERYResult } from "@/sanity.types";
 
 interface ProductInfoProps {
@@ -20,6 +20,7 @@ interface ProductInfoProps {
 export function ProductInfo({ product }: ProductInfoProps) {
   const imageUrl = product.images?.[0]?.asset?.url;
   const stock = product.stock ?? 0;
+  const { formatInCurrency } = useCurrency();
 
   // Record this product as recently viewed
   useEffect(() => {
@@ -33,7 +34,6 @@ export function ProductInfo({ product }: ProductInfoProps) {
     });
   }, [product._id, product.name, product.slug, product.price, imageUrl, product.category?.title]);
 
-  // Build product URL for sharing
   const productUrl =
     typeof window !== "undefined"
       ? window.location.href
@@ -61,12 +61,12 @@ export function ProductInfo({ product }: ProductInfoProps) {
       {/* Price + stock */}
       <div className="mt-5 flex items-center gap-4">
         <p className="font-display text-3xl font-bold tracking-tight text-zinc-900 dark:text-amber-400">
-          {formatPrice(product.price)}
+          {formatInCurrency(product.price)}
         </p>
         <StockBadge productId={product._id} stock={stock} />
       </div>
 
-      {/* Stock urgency — low stock warning + viewers */}
+      {/* Stock urgency */}
       <div className="mt-4">
         <StockUrgency stock={stock} productId={product._id} />
       </div>
@@ -78,7 +78,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
         </p>
       )}
 
-      {/* CTA block */}
+      {/* CTAs */}
       <div className="mt-8 flex flex-col gap-3">
         <AddToCartButton
           productId={product._id}
@@ -88,7 +88,6 @@ export function ProductInfo({ product }: ProductInfoProps) {
           stock={stock}
         />
 
-        {/* Wishlist + AI row */}
         <div className="grid grid-cols-2 gap-2">
           <WishlistButton
             productId={product._id}
@@ -102,11 +101,10 @@ export function ProductInfo({ product }: ProductInfoProps) {
           <AskAISimilarButton productName={product.name ?? "this product"} />
         </div>
 
-        {/* WhatsApp — ask + share */}
         <WhatsAppShare
           productName={product.name ?? ""}
           productUrl={productUrl}
-          price={formatPrice(product.price)}
+          price={formatInCurrency(product.price)}
           variant="both"
         />
       </div>
@@ -115,8 +113,8 @@ export function ProductInfo({ product }: ProductInfoProps) {
       <div className="mt-8 grid grid-cols-3 gap-3">
         {[
           { icon: ShieldCheck, label: "Warranty", sub: "Included" },
-          { icon: RotateCcw, label: "7-Day", sub: "Returns" },
-          { icon: Globe, label: "Ships", sub: "Worldwide" },
+          { icon: RotateCcw,   label: "7-Day",    sub: "Returns"  },
+          { icon: Globe,       label: "Ships",    sub: "Worldwide"},
         ].map(({ icon: Icon, label, sub }) => (
           <div
             key={label}
@@ -130,7 +128,8 @@ export function ProductInfo({ product }: ProductInfoProps) {
       </div>
 
       {/* Specs table */}
-      {(product.material || product.color || product.dimensions || product.assemblyRequired !== null) && (
+      {(product.material || product.color || product.dimensions ||
+        product.assemblyRequired !== null) && (
         <div className="mt-8 overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800">
           <div className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900/80 px-4 py-2.5">
             <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
@@ -138,8 +137,8 @@ export function ProductInfo({ product }: ProductInfoProps) {
             </p>
           </div>
           <div className="divide-y divide-zinc-200 dark:divide-zinc-800/60 bg-zinc-50 dark:bg-zinc-900/30">
-            {product.material && <SpecRow label="Material" value={product.material} capitalize />}
-            {product.color && <SpecRow label="Color" value={product.color} capitalize />}
+            {product.material && <SpecRow label="Material"   value={product.material}   capitalize />}
+            {product.color    && <SpecRow label="Color"      value={product.color}      capitalize />}
             {product.dimensions && <SpecRow label="Dimensions" value={product.dimensions} />}
             {product.assemblyRequired !== null && product.assemblyRequired !== undefined && (
               <SpecRow label="Assembly" value={product.assemblyRequired ? "Required" : "Not required"} />
