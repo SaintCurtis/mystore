@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import { writeClient, client } from "@/sanity/lib/client";
 import { defineQuery } from "next-sanity";
-import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
+// ✅ Lazy getter — only instantiated when a request is made, not at build time
+function getResend() {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) throw new Error("RESEND_API_KEY is not set");
+  const { Resend } = require("resend");
+  return new Resend(apiKey);
+}
 
 const EXISTING_SUB_QUERY = defineQuery(`
   *[_type == "notifyMe" && email == $email && product._ref == $productId && notified == false][0]{ _id }
@@ -40,28 +45,34 @@ export async function POST(req: Request) {
       createdAt: new Date().toISOString(),
     });
 
-    // Confirmation email to subscriber
-    await resend.emails.send({
-      from: "The Saint's TechNet <noreply@saintstechnet.com>",
-      to: email,
-      subject: `You're on the waitlist for ${productName}`,
-      html: `
-        <div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:24px;">
-          <div style="background:#f59e0b;border-radius:12px;padding:4px 16px;display:inline-block;margin-bottom:16px;">
-            <span style="color:#000;font-weight:800;font-size:14px;">THE SAINT'S TECHNET</span>
+    // Send confirmation email
+    try {
+      const resend = getResend();
+      await resend.emails.send({
+        from: "The Saint's TechNet <noreply@saintstechnet.com>",
+        to: email,
+        subject: `You're on the waitlist for ${productName}`,
+        html: `
+          <div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:24px;">
+            <div style="background:#f59e0b;border-radius:12px;padding:4px 16px;display:inline-block;margin-bottom:16px;">
+              <span style="color:#000;font-weight:800;font-size:14px;">THE SAINT'S TECHNET</span>
+            </div>
+            <h2 style="font-size:22px;font-weight:800;margin:0 0 8px;">You're on the waitlist! 🎉</h2>
+            <p style="color:#555;margin:0 0 16px;">
+              We'll email you the moment <strong>${productName}</strong> is back in stock.
+              You'll be first to know!
+            </p>
+            <p style="color:#999;font-size:12px;">
+              — The Saint's TechNet Team<br/>
+              Built by an Engineer. Trusted by Thousands.
+            </p>
           </div>
-          <h2 style="font-size:22px;font-weight:800;margin:0 0 8px;">You're on the waitlist! 🎉</h2>
-          <p style="color:#555;margin:0 0 16px;">
-            We'll email you the moment <strong>${productName}</strong> is back in stock.
-            You'll be first to know!
-          </p>
-          <p style="color:#999;font-size:12px;">
-            — The Saint's TechNet Team<br/>
-            Built by an Engineer. Trusted by Thousands.
-          </p>
-        </div>
-      `,
-    });
+        `,
+      });
+    } catch (emailErr) {
+      // Email failure shouldn't block the subscription from being saved
+      console.error("Confirmation email failed:", emailErr);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -70,14 +81,12 @@ export async function POST(req: Request) {
   }
 }
 
-// GET /api/notify-me?productId=xxx — trigger notifications when stock is restored
-// Call this from your Sanity webhook when stock > 0
+// GET /api/notify-me?productId=xxx&secret=xxx — trigger notifications when stock is restored
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const productId = searchParams.get("productId");
   const secret = searchParams.get("secret");
 
-  // Simple secret check — add NOTIFY_SECRET to your .env
   if (secret !== process.env.NOTIFY_SECRET) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -92,7 +101,6 @@ export async function GET(req: Request) {
       return NextResponse.json({ message: "Product still out of stock" });
     }
 
-    // Get all unnotified subscribers
     const subscribers = await client.fetch(
       `*[_type == "notifyMe" && product._ref == $productId && notified == false]{ _id, email }`,
       { productId }
@@ -102,8 +110,9 @@ export async function GET(req: Request) {
       return NextResponse.json({ message: "No subscribers" });
     }
 
-    // Send emails
     const productUrl = `https://mystore-drab-nine.vercel.app/products/${product.slug}`;
+    const resend = getResend();
+
     const results = await Promise.allSettled(
       subscribers.map(async (sub: { _id: string; email: string }) => {
         await resend.emails.send({
@@ -132,7 +141,6 @@ export async function GET(req: Request) {
           `,
         });
 
-        // Mark as notified
         await writeClient
           .patch(sub._id)
           .set({ notified: true, notifiedAt: new Date().toISOString() })
