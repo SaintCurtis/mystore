@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@ai-sdk/anthropic':
+        specifier: 3.0.0-beta.44
+        version: 3.0.0-beta.44(zod@4.1.13)
       '@ai-sdk/cohere':
         specifier: 3.0.0-beta.44
         version: 3.0.0-beta.44(zod@4.1.13)
@@ -204,6 +207,12 @@ packages:
   '@actions/io@1.1.3':
     resolution: {integrity: sha512-wi9JjgKLYS7U/z8PPbco+PvTb/nRWjeoFlJ1Qer83k/3C5PHQi28hiVdeE2kHXmIL99mQFawx8qt/JPjZilJ8Q==}
 
+  '@ai-sdk/anthropic@3.0.0-beta.44':
+    resolution: {integrity: sha512-QJdr4ki/un4JBS88O3nFxSEWZOtJnGC0N63qaE73YPvHG+09juH2LrFy/QsJh+IIdX38zDO6VwPNc+gWvaBBVQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
   '@ai-sdk/cohere@3.0.0-beta.44':
     resolution: {integrity: sha512-xXY8ZcueNUfPuIlBiMCGt9i2rlfUgGCR0DE+oMY2Q7E2kjdya19GLgMeAQCCKd6FC8eofdHYxVwNenWc/MIr/g==}
     engines: {node: '>=18'}
@@ -215,6 +224,22 @@ packages:
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/provider-utils@4.0.0-beta.26':
+    resolution: {integrity: sha512-s+SBYUbXm/BD8w5jXEJpZ7dOUpazp8B8WxQg1nUc/ObHAnf5ynVocNuKYDcKHhYbh75fwbCauMl9G1P1ZZkvhg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@valibot/to-json-schema': ^1.3.0
+      arktype: ^2.1.22
+      effect: ^3.18.4
+      zod: ^3.25.76 || ^4.1.8
+    peerDependenciesMeta:
+      '@valibot/to-json-schema':
+        optional: true
+      arktype:
+        optional: true
+      effect:
+        optional: true
 
   '@ai-sdk/provider-utils@4.0.0-beta.43':
     resolution: {integrity: sha512-Lp3G7mQ/ruwg9PnhPz5enR9zuE6sjPnczoZhdX+O8senHWdmiJ1vAY9Tqijd9DEbZV5J11DVowniVRBeQSXCiw==}
@@ -231,6 +256,10 @@ packages:
         optional: true
       effect:
         optional: true
+
+  '@ai-sdk/provider@3.0.0-beta.12':
+    resolution: {integrity: sha512-Fd99yLeJ0Idh4TZ2UeVzyedhHBbekAzhnkY0o8Eqb5abzi0wiS8i7yyiC9PRVPra6lxfUgQcqxk+yf9xnn2k2A==}
+    engines: {node: '>=18'}
 
   '@ai-sdk/provider@3.0.0-beta.24':
     resolution: {integrity: sha512-lYBjT2+8+2auq1mUs5oMrQs4O9COzHty/QukjrjBLRjkmeb9WeTQVVi0oeEGXf3yTdeY2eSwYOdz+H4zRHsacg==}
@@ -2950,6 +2979,9 @@ packages:
 
   '@standard-schema/spec@1.0.0':
     resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
+
+  '@standard-schema/spec@1.1.0':
+    resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
   '@surma/rollup-plugin-off-main-thread@2.2.3':
     resolution: {integrity: sha512-lR8q/9W7hZpMWweNiAKU7NQerBnzQQLvi8qnTDU/fxItPhtZVMbPV3lbCwjhIlNBe9Bbr5V+KHshvWmVSG9cxQ==}
@@ -7512,6 +7544,16 @@ snapshots:
 
   '@actions/io@1.1.3': {}
 
+  '@ai-sdk/anthropic@3.0.0-beta.44(zod@4.1.13)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.0-beta.12
+      '@ai-sdk/provider-utils': 4.0.0-beta.26(zod@4.1.13)
+      zod: 4.1.13
+    transitivePeerDependencies:
+      - '@valibot/to-json-schema'
+      - arktype
+      - effect
+
   '@ai-sdk/cohere@3.0.0-beta.44(zod@4.1.13)':
     dependencies:
       '@ai-sdk/provider': 3.0.0-beta.24
@@ -7533,12 +7575,23 @@ snapshots:
       - arktype
       - effect
 
+  '@ai-sdk/provider-utils@4.0.0-beta.26(zod@4.1.13)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.0-beta.12
+      '@standard-schema/spec': 1.1.0
+      eventsource-parser: 3.0.6
+      zod: 4.1.13
+
   '@ai-sdk/provider-utils@4.0.0-beta.43(zod@4.1.13)':
     dependencies:
       '@ai-sdk/provider': 3.0.0-beta.24
       '@standard-schema/spec': 1.0.0
       eventsource-parser: 3.0.6
       zod: 4.1.13
+
+  '@ai-sdk/provider@3.0.0-beta.12':
+    dependencies:
+      json-schema: 0.4.0
 
   '@ai-sdk/provider@3.0.0-beta.24':
     dependencies:
@@ -10575,6 +10628,8 @@ snapshots:
   '@stablelib/base64@1.0.1': {}
 
   '@standard-schema/spec@1.0.0': {}
+
+  '@standard-schema/spec@1.1.0': {}
 
   '@surma/rollup-plugin-off-main-thread@2.2.3':
     dependencies:

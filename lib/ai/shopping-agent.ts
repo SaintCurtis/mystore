@@ -1,6 +1,16 @@
-import { gateway, type Tool, ToolLoopAgent } from "ai";
+import { type Tool, ToolLoopAgent, type LanguageModel } from "ai";
+import { createAnthropic } from "@ai-sdk/anthropic";
 import { searchProductsTool } from "./tools/search-products";
 import { createGetMyOrdersTool } from "./tools/get-my-orders";
+
+// ✅ Direct Anthropic provider — no Vercel AI Gateway needed
+const anthropic = createAnthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY!,
+});
+
+// Cast to LanguageModel to fix pnpm peer dependency version mismatch
+// between @ai-sdk/provider@3.0.8 and @ai-sdk/provider@3.0.0-beta.24
+const model = anthropic("claude-sonnet-4-5") as unknown as LanguageModel;
 
 interface ShoppingAgentOptions {
   userId: string | null;
@@ -179,17 +189,16 @@ The user is not signed in. If they ask about orders, politely let them know they
 "To check your orders, you'll need to sign in first. Click the user icon in the top right to sign in or create an account."`;
 
 /**
- * Creates a shopping agent with tools based on user authentication status
+ * Creates a shopping agent with tools based on user authentication status.
+ * Uses @ai-sdk/anthropic directly instead of Vercel AI Gateway.
  */
 export function createShoppingAgent({ userId }: ShoppingAgentOptions) {
   const isAuthenticated = !!userId;
 
-  // Build instructions based on authentication
   const instructions = isAuthenticated
     ? baseInstructions + ordersInstructions
     : baseInstructions + notAuthenticatedInstructions;
 
-  // Build tools - only include orders tool if authenticated
   const getMyOrdersTool = createGetMyOrdersTool(userId);
 
   const tools: Record<string, Tool> = {
@@ -201,7 +210,7 @@ export function createShoppingAgent({ userId }: ShoppingAgentOptions) {
   }
 
   return new ToolLoopAgent({
-    model: gateway("anthropic/claude-sonnet-4.5"),
+    model,
     instructions,
     tools,
   });
