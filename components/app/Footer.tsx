@@ -25,15 +25,16 @@ const SOCIAL_LINKS = [
 ];
 
 const QUICK_LINKS = [
-  { label: "All Products", href: "/" },
-  { label: "Computers", href: "/?category=computers" },
-  { label: "Accessories", href: "/?category=accessories" },
-  { label: "Tech Setup Gears", href: "/?category=tech-setup-gears" },
-  { label: "Monitors", href: "/?category=monitors" },
+  { label: "All Products",           href: "/" },
+  { label: "Computers",              href: "/?category=computers" },
+  { label: "Accessories",            href: "/?category=accessories" },
+  { label: "Tech Setup Gears",       href: "/?category=tech-setup-gears" },
+  { label: "Monitors",               href: "/?category=monitors" },
   { label: "Content Creation Tools", href: "/?category=content-creation-tools" },
-  { label: "Custom PCs", href: "/?category=custom-pcs" },
-  { label: "EcoFlow", href: "/?category=ecoflow" },
-  { label: "Starlink", href: "/?category=starlink" },
+  { label: "Custom PCs",             href: "/?category=computers" },  // ← moved under Computers
+  { label: "EcoFlow",                href: "/?category=ecoflow" },
+  { label: "Starlink",               href: "/?category=starlink" },
+  { label: "Build My Setup ✨",       href: "/build-my-setup" },       // ← new
 ];
 
 const POLICY_LINKS = [

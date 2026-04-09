@@ -56,11 +56,9 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
           hasMultipleImages ? "aspect-square" : "aspect-4/5",
         )}>
           {displayedImageUrl ? (
-            <Image
-              src={displayedImageUrl} alt={product.name ?? "Product image"} fill
+            <Image src={displayedImageUrl} alt={product.name ?? "Product image"} fill
               className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-            />
+              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw" />
           ) : (
             <div className="flex h-full items-center justify-center text-zinc-400 dark:text-zinc-700">
               <svg className="h-14 w-14 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -70,7 +68,6 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
           )}
 
           <div className="absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-
           <div className="absolute inset-x-0 bottom-4 flex justify-center opacity-0 translate-y-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
             <span className="flex items-center gap-1.5 rounded-full bg-black/40 px-4 py-1.5 text-xs font-semibold text-white backdrop-blur-md border border-white/10">
               <Eye className="h-3 w-3" /> View Details
@@ -101,33 +98,30 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
         <div className="flex gap-2 border-t border-zinc-100 dark:border-[#1a1a1a] bg-zinc-50 dark:bg-[#0d0d0d] p-3">
           {images.map((image, index) => (
             <button key={image._key ?? index} type="button"
-              className={cn(
-                "relative h-12 flex-1 overflow-hidden rounded-lg transition-all duration-200",
+              className={cn("relative h-12 flex-1 overflow-hidden rounded-lg transition-all duration-200",
                 hoveredImageIndex === index
                   ? "ring-2 ring-amber-500 ring-offset-1 ring-offset-white dark:ring-offset-[#111111]"
-                  : "opacity-40 hover:opacity-75",
-              )}
+                  : "opacity-40 hover:opacity-75")}
               onMouseEnter={() => setHoveredImageIndex(index)}
               onMouseLeave={() => setHoveredImageIndex(null)}>
-              {image.asset?.url && (
-                <Image src={image.asset.url} alt={`${product.name} - view ${index + 1}`} fill className="object-cover" sizes="80px" />
-              )}
+              {image.asset?.url && <Image src={image.asset.url} alt={`${product.name} - view ${index + 1}`} fill className="object-cover" sizes="80px" />}
             </button>
           ))}
         </div>
       )}
 
       {/* Info */}
-      <div className="flex flex-1 flex-col gap-4 p-5">
+      <div className="flex flex-1 flex-col gap-3 p-4">
         <div className="flex flex-col gap-1.5">
           <Link href={`/products/${product.slug}`} className="block">
-            <h3 className="font-display line-clamp-2 text-base font-semibold leading-snug text-zinc-900 dark:text-[#f1f1f1] transition-colors group-hover:text-zinc-700 dark:group-hover:text-white">
+            <h3 className="font-display line-clamp-2 text-sm font-semibold leading-snug text-zinc-900 dark:text-[#f1f1f1] transition-colors group-hover:text-zinc-700 dark:group-hover:text-white">
               {product.name}
             </h3>
           </Link>
-          <div className="flex items-center justify-between gap-2">
-            {/* ✅ Uses currency-aware formatting */}
-            <p className="font-display text-xl font-bold tracking-tight text-zinc-900 dark:text-amber-400">
+
+          {/* ✅ flex-wrap so price + badge never overflow on small screens */}
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <p className="font-display text-lg font-bold tracking-tight text-zinc-900 dark:text-amber-400 shrink-0">
               {formatInCurrency(product.price)}
             </p>
             <StockBadge productId={product._id} stock={stock} />
@@ -148,14 +142,11 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
             View Full Details
           </Link>
 
-          <div className="flex justify-center pt-1">
+          <div className="flex justify-center pt-0.5">
             <CompareButton product={{
-              productId: product._id,
-              name: product.name ?? "",
-              price: product.price ?? 0,
-              image: mainImageUrl ?? undefined,
-              slug: product.slug ?? "",
-              categoryTitle: product.category?.title ?? undefined,
+              productId: product._id, name: product.name ?? "",
+              price: product.price ?? 0, image: mainImageUrl ?? undefined,
+              slug: product.slug ?? "", categoryTitle: product.category?.title ?? undefined,
             }} />
           </div>
         </div>
