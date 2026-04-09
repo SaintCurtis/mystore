@@ -42,6 +42,10 @@ export const structure: StructureResolver = (S) =>
                       S.listItem().title("SFF Computers").child(
                         S.documentTypeList("product").title("SFF Computers").filter(DEEP_FILTER("sff-computers")),
                       ),
+                      // ✅ Custom PCs moved under Computers
+                      S.listItem().title("Custom PCs").child(
+                        S.documentTypeList("product").title("Custom PCs").filter(DEEP_FILTER("custom-pcs")),
+                      ),
                       S.listItem().title("eGPU & Enclosures").child(
                         S.documentTypeList("product").title("eGPU & Enclosures").filter(DEEP_FILTER("egpu-enclosures")),
                       ),
@@ -139,9 +143,6 @@ export const structure: StructureResolver = (S) =>
 
               S.divider(),
 
-              S.listItem().title("Custom PCs").child(
-                S.documentTypeList("product").title("Custom PCs").filter(DEEP_FILTER("custom-pcs")),
-              ),
               S.listItem().title("EcoFlow").child(
                 S.documentTypeList("product").title("EcoFlow").filter(DEEP_FILTER("ecoflow")),
               ),
