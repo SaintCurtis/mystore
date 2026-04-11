@@ -7,23 +7,22 @@ import {
   Zap, Satellite, Video, ShoppingBag, Gamepad2, Home, Heart,
 } from "lucide-react";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
-import { CurrencyToggle } from "@/components/app/CurrencyToggle";
 import { ThemeToggle } from "@/components/app/ThemeToggle";
 import { useTotalItems, useCartActions } from "@/lib/store/cart-store-provider";
 import { useWishlistCount, useWishlistActions } from "@/lib/store/wishlist-store-provider";
 
 const NAV_ITEMS = [
-  { label: "Build My Setup ✨",       href: "/build-my-setup",                  icon: Wand2,       highlight: true  },
-  { label: "All Products",             href: "/",                                icon: ShoppingBag, highlight: false },
-  { label: "Computers",                href: "/?category=computers",             icon: Cpu,         highlight: false },
-  { label: "Accessories",              href: "/?category=accessories",           icon: Headphones,  highlight: false },
-  { label: "Monitors",                 href: "/?category=monitors",              icon: Monitor,     highlight: false },
-  { label: "Gaming Laptops",           href: "/?category=gaming-laptops",        icon: Gamepad2,    highlight: false },
-  { label: "Content Creation",         href: "/?category=content-creation-tools",icon: Video,       highlight: false },
-  { label: "Tech Setup Gears",         href: "/?category=tech-setup-gears",      icon: Home,        highlight: false },
-  { label: "EcoFlow",                  href: "/?category=ecoflow",               icon: Zap,         highlight: false },
-  { label: "Starlink",                 href: "/?category=starlink",              icon: Satellite,   highlight: false },
-  { label: "ACASIS",                   href: "/?category=acasis",                icon: Zap,         highlight: false },
+  { label: "Build My Setup ✨",        href: "/build-my-setup",                   icon: Wand2,       highlight: true  },
+  { label: "All Products",              href: "/",                                 icon: ShoppingBag, highlight: false },
+  { label: "Computers",                 href: "/?category=computers",              icon: Cpu,         highlight: false },
+  { label: "Accessories",               href: "/?category=accessories",            icon: Headphones,  highlight: false },
+  { label: "Monitors",                  href: "/?category=monitors",               icon: Monitor,     highlight: false },
+  { label: "Gaming Laptops",            href: "/?category=gaming-laptops",         icon: Gamepad2,    highlight: false },
+  { label: "Content Creation",          href: "/?category=content-creation-tools", icon: Video,       highlight: false },
+  { label: "Tech Setup Gears",          href: "/?category=tech-setup-gears",       icon: Home,        highlight: false },
+  { label: "EcoFlow",                   href: "/?category=ecoflow",                icon: Zap,         highlight: false },
+  { label: "Starlink",                  href: "/?category=starlink",               icon: Satellite,   highlight: false },
+  { label: "ACASIS",                    href: "/?category=acasis",                 icon: Zap,         highlight: false },
 ];
 
 export function MobileNav() {
@@ -43,7 +42,7 @@ export function MobileNav() {
 
   return (
     <>
-      {/* Hamburger trigger */}
+      {/* ☰ Hamburger trigger */}
       <button
         type="button"
         onClick={() => setOpen(true)}
@@ -53,32 +52,31 @@ export function MobileNav() {
         <Menu className="h-5 w-5" />
       </button>
 
-      {/* Backdrop — semi-transparent black */}
+      {/* ── Backdrop — clicking it closes the drawer ─────────────
+          This is what was missing before! onClick={close} here
+          means tapping anywhere outside the drawer closes it.
+      ──────────────────────────────────────────────────────────── */}
       {open && (
         <div
           className="fixed inset-0 z-60 bg-black/70"
           onClick={close}
-          aria-hidden
+          aria-hidden="true"
         />
       )}
 
-      {/* ── Drawer ────────────────────────────────────────────
-          Key fix: solid background, NO backdrop-blur, NO opacity
-          bg-white and dark:bg-[#0f0f0f] are 100% opaque
-      ──────────────────────────────────────────────────────── */}
-      <div
-        className={`
-          fixed left-0 top-0 z-70 h-full w-[80vw] max-w-[300px]
-          flex flex-col
-          bg-white dark:bg-[#0f0f0f]
-          border-r border-zinc-200 dark:border-[#222]
-          shadow-2xl
-          transition-transform duration-300 ease-in-out
-          ${open ? "translate-x-0" : "-translate-x-full"}
-        `}
-      >
-        {/* Drawer header */}
-        <div className="flex items-center justify-between bg-white dark:bg-[#0f0f0f] border-b border-zinc-100 dark:border-[#1a1a1a] px-5 py-4">
+      {/* ── Drawer — fully solid, no transparency ─────────────── */}
+      <div className={`
+        fixed left-0 top-0 z-70 h-full w-[80vw] max-w-[300px]
+        flex flex-col
+        bg-white dark:bg-[#0f0f0f]
+        border-r border-zinc-200 dark:border-[#222222]
+        shadow-2xl
+        transition-transform duration-300 ease-in-out
+        ${open ? "translate-x-0" : "-translate-x-full"}
+      `}>
+
+        {/* Header */}
+        <div className="flex items-center justify-between bg-white dark:bg-[#0f0f0f] border-b border-zinc-100 dark:border-[#1a1a1a] px-5 py-4 shrink-0">
           <div>
             <p className="text-sm font-extrabold text-zinc-900 dark:text-white">
               The Saint's TechNet
@@ -87,6 +85,7 @@ export function MobileNav() {
               Built by an Engineer
             </p>
           </div>
+          {/* X button also closes */}
           <button
             type="button"
             onClick={close}
@@ -117,7 +116,6 @@ export function MobileNav() {
             </Link>
           ))}
 
-          {/* Divider */}
           <div className="mx-5 my-2 border-t border-zinc-100 dark:border-[#1a1a1a]" />
 
           {/* My Orders */}
@@ -130,8 +128,7 @@ export function MobileNav() {
           </SignedIn>
 
           {/* Wishlist */}
-          <button type="button"
-            onClick={() => { openWishlist(); close(); }}
+          <button type="button" onClick={() => { openWishlist(); close(); }}
             className="flex w-full items-center gap-3 px-5 py-4 text-sm font-medium border-l-2 border-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1a1a1a] transition-colors">
             <Heart className={`h-4 w-4 shrink-0 ${wishlistCount > 0 ? "fill-red-500 text-red-500" : "text-zinc-400 dark:text-zinc-500"}`} />
             Wishlist
@@ -143,8 +140,7 @@ export function MobileNav() {
           </button>
 
           {/* Cart */}
-          <button type="button"
-            onClick={() => { openCart(); close(); }}
+          <button type="button" onClick={() => { openCart(); close(); }}
             className="flex w-full items-center gap-3 px-5 py-4 text-sm font-medium border-l-2 border-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1a1a1a] transition-colors">
             <ShoppingBag className="h-4 w-4 text-zinc-400 dark:text-zinc-500" />
             Cart
@@ -156,17 +152,14 @@ export function MobileNav() {
           </button>
         </nav>
 
-        {/* Bottom controls — solid bg */}
-        <div className="bg-white dark:bg-[#0f0f0f] border-t border-zinc-100 dark:border-[#1a1a1a] px-5 py-4 space-y-4">
-          {/* Currency + Theme */}
+        {/* Bottom controls */}
+        <div className="bg-white dark:bg-[#0f0f0f] border-t border-zinc-100 dark:border-[#1a1a1a] px-5 py-4 space-y-4 shrink-0">
+          {/* Theme only — currency is already in the main header */}
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
-              Display
+              Theme
             </span>
-            <div className="flex items-center gap-2">
-              <CurrencyToggle />
-              <ThemeToggle />
-            </div>
+            <ThemeToggle />
           </div>
 
           {/* Account */}
