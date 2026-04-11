@@ -19,14 +19,31 @@ import { Footer } from "@/components/app/Footer";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider>
+    /*
+      Fix for issue #1 — "having to sign back in after Paystack payment":
+      
+      What was happening: Paystack redirects to /checkout/success?reference=xxx
+      Clerk was treating this as an unauthenticated route and showing the sign-in
+      wall because the session cookie wasn't being recognized on the redirect.
+      
+      Fix: Set afterSignInUrl="/" and afterSignUpUrl="/" on ClerkProvider so Clerk
+      always redirects to home after auth flows, never interrupting the payment
+      success page. Also set signInFallbackRedirectUrl so Clerk doesn't override
+      the Paystack callback URL.
+    */
+    <ClerkProvider
+      afterSignInUrl="/"
+      afterSignUpUrl="/"
+      signInFallbackRedirectUrl="/"
+      signUpFallbackRedirectUrl="/"
+    >
       <CartStoreProvider>
         <WishlistStoreProvider>
           <CompareStoreProvider>
             <CurrencyProvider>
               <ChatStoreProvider>
                 <AppShell>
-                  <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#0a0a0a] transition-colors duration-300">
+                  <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#0a0a0a] transition-colors duration-200">
                     <Header />
                     <main className="flex-1">{children}</main>
                     <Footer />
@@ -38,7 +55,6 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                 <CompareBar />
                 <PWAInstall />
                 <WhatsAppFAB />
-                {/* 👋 Welcome popup — shows 1.8s after page load, once per 24h */}
                 <WelcomePopup />
                 <Toaster position="bottom-center" />
                 <SanityLive />
