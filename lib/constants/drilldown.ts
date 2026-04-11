@@ -14,7 +14,8 @@ export const DRILLDOWN_ROOTS = [
   "content-creation-tools",
   "computers",
   "accessories",
-  "tech-setup-gears"
+  "tech-setup-gears",
+  "acasis",
 ] as const;
 
 export type DrilldownRoot = (typeof DRILLDOWN_ROOTS)[number];

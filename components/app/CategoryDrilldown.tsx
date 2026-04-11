@@ -30,15 +30,20 @@ const LEVEL_LABELS: Record<DrilldownRoot, Record<number, string>> = {
     2: "Type",
   },
   computers: {
-    0: "Type",         // Gaming Laptops / Regular Laptops / SFF etc.
-    1: "Condition",  
-    2: "Brand",     
-    3: "Model"  // Brand New / Foreign Used
+    0: "Type",       // Gaming Laptops / Regular Laptops / SFF etc.
+    1: "Condition",
+    2: "Brand",
+    3: "Model",
   },
   accessories: {
-    0: "Type",         // Headsets / Keyboards / Mice / Webcams etc.
+    0: "Type",       // Headsets / Keyboards / Mice / Webcams etc.
   },
-  "tech-setup-gears": { 0: "Category" },
+  "tech-setup-gears": {
+    0: "Category",   // Gaming Chairs / Ergonomic Chairs / Tables & Desks
+  },
+  acasis: {
+    0: "Sub-category",// Enclosures / Docking Stations / USB Hubs / Cables / Capture Cards / Spare Parts
+  },
 };
 
 interface CategoryDrilldownProps {
@@ -112,7 +117,7 @@ export function CategoryDrilldown({
   // Determine which depth levels to render
   const depthsToShow: number[] = [0];
   for (let i = 0; i < selections.length; i++) {
-    if (i + 1 >= maxDepth) break; // don't exceed defined levels
+    if (i + 1 >= maxDepth) break;
     const childrenAtNext = getOptionsAtLevel(i + 1);
     if (childrenAtNext.length > 0) depthsToShow.push(i + 1);
     else break;
@@ -129,7 +134,7 @@ export function CategoryDrilldown({
   if (tree.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap items-end gap-3 border-t border-zinc-800 bg-zinc-950 px-4 py-4 sm:px-6 lg:px-8">
+    <div className="flex flex-wrap items-end gap-3 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-4 py-4 sm:px-6 lg:px-8 transition-colors duration-300">
       {depthsToShow.map((level) => {
         const options = getOptionsAtLevel(level);
         if (options.length === 0) return null;
@@ -139,7 +144,7 @@ export function CategoryDrilldown({
 
         return (
           <div key={level} className="flex flex-col gap-1.5 min-w-[180px]">
-            <label className="text-[11px] font-semibold uppercase tracking-widest text-zinc-500">
+            <label className="text-[11px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-500">
               {label}
             </label>
             <div className="relative">
@@ -147,8 +152,11 @@ export function CategoryDrilldown({
                 value={value}
                 onChange={(e) => handleChange(level, e.target.value)}
                 className="
-                  w-full appearance-none rounded-lg border border-zinc-700 bg-zinc-900
-                  px-3 py-2 pr-8 text-sm text-zinc-200
+                  w-full appearance-none rounded-lg
+                  border border-zinc-300 dark:border-zinc-700
+                  bg-white dark:bg-zinc-900
+                  px-3 py-2 pr-8 text-sm
+                  text-zinc-800 dark:text-zinc-200
                   focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500
                   transition-colors cursor-pointer
                 "

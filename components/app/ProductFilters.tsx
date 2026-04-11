@@ -38,7 +38,8 @@ const DRILLDOWN_ROOTS = [
   "content-creation-tools",
   "computers",
   "accessories",
-  "tech-setup-gears"
+  "tech-setup-gears",
+  "acasis",
 ] as const;
 type DrilldownRoot = (typeof DRILLDOWN_ROOTS)[number];
 
@@ -56,7 +57,9 @@ const DRILLDOWN_LABELS: Record<DrilldownRoot, string[]> = {
   computers: ["Type", "Condition"],
   accessories: ["Type"],
   "tech-setup-gears": ["Category"],
+  acasis: ["Category"],
 };
+
 
 interface ProductFiltersProps {
   categories: ALL_CATEGORIES_QUERYResult;

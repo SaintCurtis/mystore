@@ -10,11 +10,6 @@ import type { FILTER_PRODUCTS_BY_NAME_QUERYResult } from "@/sanity.types";
 interface ProductGridProps {
   products: FILTER_PRODUCTS_BY_NAME_QUERYResult;
   activeCategory?: string;
-  /**
-   * When true (homepage with no filters), limits initial display to
-   * INITIAL_LIMIT and shows a "Load More" button.
-   * When false (category/search page), shows all products.
-   */
   limitOnHomepage?: boolean;
 }
 
@@ -30,14 +25,13 @@ export function ProductGrid({ products, activeCategory, limitOnHomepage = false 
         <EmptyState
           icon={PackageSearch}
           title="No products found"
-          description="Try adjusting your search or filters to find what you're looking for"
+          description="Try adjusting your search or filters"
           size="lg"
         />
       </div>
     );
   }
 
-  // Apply limit only on homepage with no active filters
   const shouldLimit = limitOnHomepage;
   const visibleProducts = shouldLimit ? products.slice(0, displayLimit) : products;
   const hasMore = shouldLimit && displayLimit < products.length;
@@ -45,8 +39,15 @@ export function ProductGrid({ products, activeCategory, limitOnHomepage = false 
 
   return (
     <div className="flex flex-col gap-8">
+      {/*
+        Mobile: 1 column (fingers need space, cards are detailed)
+        sm (640px+): 2 columns
+        lg (1024px+): 3 columns
+        2xl: 4 columns
+        Using @container for the inner grid so it responds to sidebar width
+      */}
       <div className="@container">
-        <div className="grid grid-cols-1 gap-5 @md:grid-cols-2 @xl:grid-cols-3 @6xl:grid-cols-4 @md:gap-6 @xl:gap-7">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 @xl:grid-cols-3 @6xl:grid-cols-4 sm:gap-5 @xl:gap-6">
           {visibleProducts.map((product) => (
             <ProductCard
               key={product._id}
@@ -57,7 +58,7 @@ export function ProductGrid({ products, activeCategory, limitOnHomepage = false 
         </div>
       </div>
 
-      {/* Load More button */}
+      {/* Load More */}
       {hasMore && (
         <div className="flex flex-col items-center gap-3">
           <Button
@@ -72,12 +73,11 @@ export function ProductGrid({ products, activeCategory, limitOnHomepage = false 
               hover:border-amber-500/50 dark:hover:border-amber-500/40
               hover:bg-amber-50 dark:hover:bg-[#1a1a1a]
               hover:text-amber-700 dark:hover:text-amber-400
-              hover:shadow-md dark:hover:shadow-amber-500/5
             `}
           >
-            <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:translate-y-0.5" />
+            <ChevronDown className="h-4 w-4 transition-transform group-hover:translate-y-0.5" />
             Load More
-            <span className="rounded-full bg-zinc-100 dark:bg-[#1a1a1a] px-2 py-0.5 text-xs font-medium text-zinc-500 dark:text-[#a3a3a3]">
+            <span className="rounded-full bg-zinc-100 dark:bg-[#1a1a1a] px-2 py-0.5 text-xs font-medium">
               {remaining} more
             </span>
           </Button>
@@ -87,7 +87,6 @@ export function ProductGrid({ products, activeCategory, limitOnHomepage = false 
         </div>
       )}
 
-      {/* All loaded indicator */}
       {shouldLimit && !hasMore && products.length > INITIAL_LIMIT && (
         <p className="text-center text-xs text-zinc-400 dark:text-[#555]">
           All {products.length} products shown

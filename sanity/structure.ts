@@ -42,7 +42,6 @@ export const structure: StructureResolver = (S) =>
                       S.listItem().title("SFF Computers").child(
                         S.documentTypeList("product").title("SFF Computers").filter(DEEP_FILTER("sff-computers")),
                       ),
-                      // ✅ Custom PCs moved under Computers
                       S.listItem().title("Custom PCs").child(
                         S.documentTypeList("product").title("Custom PCs").filter(DEEP_FILTER("custom-pcs")),
                       ),
@@ -149,6 +148,36 @@ export const structure: StructureResolver = (S) =>
               S.listItem().title("Starlink").child(
                 S.documentTypeList("product").title("Starlink").filter(DEEP_FILTER("starlink")),
               ),
+
+              S.divider(),
+
+              // ── Acasis ────────────────────────────────────────
+              S.listItem()
+                .title("Acasis")
+                .child(
+                  S.list()
+                    .title("Acasis")
+                    .items([
+                      S.listItem().title("Enclosures").child(
+                        S.documentTypeList("product").title("Enclosures").filter(DEEP_FILTER("acasis-enclosures")),
+                      ),
+                      S.listItem().title("Docking Stations").child(
+                        S.documentTypeList("product").title("Docking Stations").filter(DEEP_FILTER("acasis-docks")),
+                      ),
+                      S.listItem().title("USB Hubs").child(
+                        S.documentTypeList("product").title("USB Hubs").filter(DEEP_FILTER("acasis-hubs")),
+                      ),
+                      S.listItem().title("Cables & Adapters").child(
+                        S.documentTypeList("product").title("Cables & Adapters").filter(DEEP_FILTER("acasis-cables")),
+                      ),
+                      S.listItem().title("Capture Cards").child(
+                        S.documentTypeList("product").title("Capture Cards").filter(DEEP_FILTER("acasis-capture-cards")),
+                      ),
+                      S.listItem().title("Spare Parts & Accessories").child(
+                        S.documentTypeList("product").title("Spare Parts & Accessories").filter(DEEP_FILTER("acasis-spare-parts")),
+                      ),
+                    ]),
+                ),
 
               S.divider(),
 

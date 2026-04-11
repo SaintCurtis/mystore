@@ -69,6 +69,7 @@ export const CATEGORIES_WITH_SUBCATEGORY_DROPDOWN = [
   "tech-setup-gears",
   "monitors",
   "content-creation-tools",
+  "acasis",
 ] as const;
 
 /**
@@ -81,6 +82,7 @@ export const CATEGORIES_WITH_SUBCATEGORY_HOVER = [
   "tech-setup-gears",
   "content-creation-tools",
   "monitors",
+  "acasis",
 ] as const;
 
 /** Content creation subcategories — no condition filter, just browse */
