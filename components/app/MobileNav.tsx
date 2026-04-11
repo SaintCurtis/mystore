@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   X, Menu, Wand2, Package, Monitor, Cpu, Headphones,
@@ -31,11 +31,39 @@ export function MobileNav() {
   const wishlistCount = useWishlistCount();
   const { openCart } = useCartActions();
   const { openWishlist } = useWishlistActions();
+  const scrollYRef = useRef(0);
 
   // Lock body scroll when open
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
+  }, [open]);
+
+  // Close on scroll — captures the Y position when drawer opens,
+  // closes if user scrolls more than 40px from that position
+  useEffect(() => {
+    if (!open) return;
+
+    scrollYRef.current = window.scrollY;
+
+    function handleScroll() {
+      if (Math.abs(window.scrollY - scrollYRef.current) > 40) {
+        setOpen(false);
+      }
+    }
+
+    // touchmove fires before scroll on mobile — gives instant feel
+    function handleTouchMove() {
+      setOpen(false);
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("touchmove", handleTouchMove);
+    };
   }, [open]);
 
   function close() { setOpen(false); }
@@ -52,19 +80,17 @@ export function MobileNav() {
         <Menu className="h-5 w-5" />
       </button>
 
-      {/* ── Backdrop — clicking it closes the drawer ─────────────
-          This is what was missing before! onClick={close} here
-          means tapping anywhere outside the drawer closes it.
-      ──────────────────────────────────────────────────────────── */}
+      {/* Backdrop — click or touch outside closes drawer */}
       {open && (
         <div
           className="fixed inset-0 z-60 bg-black/70"
           onClick={close}
+          onTouchStart={close}
           aria-hidden="true"
         />
       )}
 
-      {/* ── Drawer — fully solid, no transparency ─────────────── */}
+      {/* Drawer */}
       <div className={`
         fixed left-0 top-0 z-70 h-full w-[80vw] max-w-[300px]
         flex flex-col
@@ -85,7 +111,6 @@ export function MobileNav() {
               Built by an Engineer
             </p>
           </div>
-          {/* X button also closes */}
           <button
             type="button"
             onClick={close}
@@ -154,7 +179,6 @@ export function MobileNav() {
 
         {/* Bottom controls */}
         <div className="bg-white dark:bg-[#0f0f0f] border-t border-zinc-100 dark:border-[#1a1a1a] px-5 py-4 space-y-4 shrink-0">
-          {/* Theme only — currency is already in the main header */}
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
               Theme
@@ -162,7 +186,6 @@ export function MobileNav() {
             <ThemeToggle />
           </div>
 
-          {/* Account */}
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
               Account

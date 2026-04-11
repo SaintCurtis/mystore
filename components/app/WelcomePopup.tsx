@@ -83,7 +83,7 @@ export function WelcomePopup() {
       <div className="relative rounded-2xl border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] shadow-2xl dark:shadow-black/60 overflow-hidden">
 
         {/* Amber accent top bar */}
-        <div className="h-1 w-full bg-gradient-to-r from-amber-400 via-orange-500 to-amber-400" />
+        <div className="h-1 w-full bg-linear-to-r from-amber-400 via-orange-500 to-amber-400" />
 
         <div className="p-5">
           {/* Dismiss */}
