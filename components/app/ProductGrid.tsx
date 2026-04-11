@@ -32,30 +32,32 @@ export function ProductGrid({ products, activeCategory, limitOnHomepage = false 
     );
   }
 
-  const shouldLimit = limitOnHomepage;
-  const visibleProducts = shouldLimit ? products.slice(0, displayLimit) : products;
-  const hasMore = shouldLimit && displayLimit < products.length;
+  const visibleProducts = limitOnHomepage ? products.slice(0, displayLimit) : products;
+  const hasMore = limitOnHomepage && displayLimit < products.length;
   const remaining = products.length - displayLimit;
 
   return (
     <div className="flex flex-col gap-8">
       {/*
-        Mobile: 1 column (fingers need space, cards are detailed)
-        sm (640px+): 2 columns
-        lg (1024px+): 3 columns
-        2xl: 4 columns
-        Using @container for the inner grid so it responds to sidebar width
+        Grid breakpoints use direct Tailwind classes (not @container)
+        because @container checks the container width, not viewport —
+        and with a 288px sidebar the main area never reaches @xl (80rem).
+
+        Breakpoints:
+        - Mobile  (<640px):  2 columns — tight but usable, shows more products
+        - Tablet  (640-1023px): 2 columns
+        - Desktop (1024px+): 3 columns (with sidebar open)
+        - Wide    (1280px+): 3 columns (sidebar takes space)
+        - XL      (1536px+): 4 columns
       */}
-      <div className="@container">
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 @xl:grid-cols-3 @6xl:grid-cols-4 sm:gap-5 @xl:gap-6">
-          {visibleProducts.map((product) => (
-            <ProductCard
-              key={product._id}
-              product={product}
-              activeCategory={activeCategory}
-            />
-          ))}
-        </div>
+      <div className="grid gap-3 grid-cols-2 sm:gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
+        {visibleProducts.map((product) => (
+          <ProductCard
+            key={product._id}
+            product={product}
+            activeCategory={activeCategory}
+          />
+        ))}
       </div>
 
       {/* Load More */}
@@ -65,7 +67,7 @@ export function ProductGrid({ products, activeCategory, limitOnHomepage = false 
             variant="outline"
             size="lg"
             onClick={() => setDisplayLimit((prev) => prev + LOAD_MORE_COUNT)}
-            className={`
+            className="
               group h-12 min-w-[200px] gap-2 font-semibold transition-all duration-200
               border-zinc-300 dark:border-[#2a2a2a]
               bg-white dark:bg-[#111111]
@@ -73,7 +75,7 @@ export function ProductGrid({ products, activeCategory, limitOnHomepage = false 
               hover:border-amber-500/50 dark:hover:border-amber-500/40
               hover:bg-amber-50 dark:hover:bg-[#1a1a1a]
               hover:text-amber-700 dark:hover:text-amber-400
-            `}
+            "
           >
             <ChevronDown className="h-4 w-4 transition-transform group-hover:translate-y-0.5" />
             Load More
@@ -87,7 +89,7 @@ export function ProductGrid({ products, activeCategory, limitOnHomepage = false 
         </div>
       )}
 
-      {shouldLimit && !hasMore && products.length > INITIAL_LIMIT && (
+      {limitOnHomepage && !hasMore && products.length > INITIAL_LIMIT && (
         <p className="text-center text-xs text-zinc-400 dark:text-[#555]">
           All {products.length} products shown
         </p>
