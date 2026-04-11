@@ -13,6 +13,7 @@ import { WishlistSheet } from "@/components/app/WishlistSheet";
 import { CompareBar } from "@/components/app/CompareBar";
 import { PWAInstall } from "@/components/app/PWAInstall";
 import { WhatsAppFAB } from "@/components/app/WhatsAppFAB";
+import { WelcomePopup } from "@/components/app/WelcomePopup";
 import { AppShell } from "@/components/app/AppShell";
 import { Footer } from "@/components/app/Footer";
 
@@ -36,8 +37,9 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                 <ChatSheet />
                 <CompareBar />
                 <PWAInstall />
-                {/* 📱 Floating WhatsApp button — appears after scroll on mobile */}
                 <WhatsAppFAB />
+                {/* 👋 Welcome popup — shows 1.8s after page load, once per 24h */}
+                <WelcomePopup />
                 <Toaster position="bottom-center" />
                 <SanityLive />
               </ChatStoreProvider>
