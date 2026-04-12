@@ -1,8 +1,0 @@
-{"_id": "category-acasis", "_type": "category", "title": "Acasis", "slug": {"_type": "slug", "current": "acasis"}, "order": 18}
-{"_id": "category-acasis-enclosures", "_type": "category", "title": "Enclosures", "slug": {"_type": "slug", "current": "acasis-enclosures"}, "order": 1, "parentCategory": {"_type": "reference", "_ref": "category-acasis"}}
-{"_id": "category-acasis-docks", "_type": "category", "title": "Docking Stations", "slug": {"_type": "slug", "current": "acasis-docks"}, "order": 2, "parentCategory": {"_type": "reference", "_ref": "category-acasis"}}
-{"_id": "category-acasis-hubs", "_type": "category", "title": "USB Hubs", "slug": {"_type": "slug", "current": "acasis-hubs"}, "order": 3, "parentCategory": {"_type": "reference", "_ref": "category-acasis"}}
-{"_id": "category-acasis-cables", "_type": "category", "title": "Cables & Adapters", "slug": {"_type": "slug", "current": "acasis-cables"}, "order": 4, "parentCategory": {"_type": "reference", "_ref": "category-acasis"}}
-{"_id": "category-acasis-capture-cards", "_type": "category", "title": "Capture Cards", "slug": {"_type": "slug", "current": "acasis-capture-cards"}, "order": 5, "parentCategory": {"_type": "reference", "_ref": "category-acasis"}}
-{"_id": "category-acasis-spare-parts", "_type": "category", "title": "Spare Parts & Accessories", "slug": {"_type": "slug", "current": "acasis-spare-parts"}, "order": 6, "parentCategory": {"_type": "reference", "_ref": "category-acasis"}}
-{"_id": "brand-acasis", "_type": "brand", "title": "Acasis", "slug": {"_type": "slug", "current": "acasis"}}

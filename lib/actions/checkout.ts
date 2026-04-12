@@ -52,7 +52,7 @@ interface PaystackVerifyResponse {
   data: {
     reference: string;
     status: string;
-    amount: number; // in kobo
+    amount: number;
     currency: string;
     customer: {
       email: string;
@@ -65,16 +65,13 @@ interface PaystackVerifyResponse {
 
 // ── Create Checkout ────────────────────────────────────────────────────────
 
-/**
- * Initializes a Paystack transaction from cart items.
- * Validates stock and prices against Sanity before initializing.
- */
 export async function createCheckoutSession(
   items: CartItem[],
-  shippingAddress: ShippingAddress
+  shippingAddress: ShippingAddress,
+  shippingFee: number = 0,        // ← PATCH 1: added shippingFee param
+  shippingMethod: string = ""     // ← PATCH 1: added shippingMethod param
 ): Promise<CheckoutResult> {
   try {
-    // 1. Verify user is authenticated
     const { userId } = await auth();
     const user = await currentUser();
 
@@ -82,43 +79,29 @@ export async function createCheckoutSession(
       return { success: false, error: "Please sign in to checkout" };
     }
 
-    // 2. Validate cart is not empty
     if (!items || items.length === 0) {
       return { success: false, error: "Your cart is empty" };
     }
 
-    // 3. Fetch current product data from Sanity to validate prices/stock
     const productIds = items.map((item) => item.productId);
-    const products = await client.fetch(PRODUCTS_BY_IDS_QUERY, {
-      ids: productIds,
-    });
+    const products = await client.fetch(PRODUCTS_BY_IDS_QUERY, { ids: productIds });
 
-    // 4. Validate each item
     const validationErrors: string[] = [];
-    const validatedItems: {
-      product: (typeof products)[number];
-      quantity: number;
-    }[] = [];
+    const validatedItems: { product: (typeof products)[number]; quantity: number }[] = [];
 
     for (const item of items) {
-      const product = products.find(
-        (p: { _id: string }) => p._id === item.productId
-      );
+      const product = products.find((p: { _id: string }) => p._id === item.productId);
 
       if (!product) {
         validationErrors.push(`Product "${item.name}" is no longer available`);
         continue;
       }
-
       if ((product.stock ?? 0) === 0) {
         validationErrors.push(`"${product.name}" is out of stock`);
         continue;
       }
-
       if (item.quantity > (product.stock ?? 0)) {
-        validationErrors.push(
-          `Only ${product.stock} of "${product.name}" available`
-        );
+        validationErrors.push(`Only ${product.stock} of "${product.name}" available`);
         continue;
       }
 
@@ -129,62 +112,53 @@ export async function createCheckoutSession(
       return { success: false, error: validationErrors.join(". ") };
     }
 
-    // 5. Calculate total in kobo (₦1 = 100 kobo)
-    const totalKobo = validatedItems.reduce(
-      (sum, { product, quantity }) =>
-        sum + Math.round((product.price ?? 0) * 100) * quantity,
+    // ── PATCH 2: include shipping fee in total ─────────────────────────────
+    const totalNGN = validatedItems.reduce(
+      (sum, { product, quantity }) => sum + (product.price ?? 0) * quantity,
       0
     );
+    const totalNGNWithShipping = totalNGN + shippingFee;
+    const totalKobo = Math.round(totalNGNWithShipping * 100);
+    // ──────────────────────────────────────────────────────────────────────
 
-    // 6. Get or create customer in Sanity
     const userEmail = user.emailAddresses[0]?.emailAddress ?? "";
-    const userName =
-      `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || userEmail;
+    const userName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || userEmail;
 
-    const { sanityCustomerId } = await getOrCreatePaystackCustomer(
-      userEmail,
-      userName,
-      userId
-    );
+    const { sanityCustomerId } = await getOrCreatePaystackCustomer(userEmail, userName, userId);
 
-    // 7. Build base URL
     const baseUrl =
       process.env.NEXT_PUBLIC_BASE_URL ||
       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
       "http://localhost:3000";
 
-    // 8. Prepare metadata — passed through to webhook
+    // ── PATCH 3: add shippingFee + shippingMethod to metadata ─────────────
     const metadata = {
       clerkUserId: userId,
       userEmail,
       sanityCustomerId: sanityCustomerId ?? "",
       productIds: validatedItems.map((i) => i.product._id).join(","),
       quantities: validatedItems.map((i) => i.quantity).join(","),
-      prices: validatedItems
-        .map((i) => Math.round((i.product.price ?? 0) * 100))
-        .join(","),
-      // Shipping address stored in metadata since Paystack doesn't collect it
+      prices: validatedItems.map((i) => Math.round((i.product.price ?? 0) * 100)).join(","),
+      shippingFee: shippingFee.toString(),
+      shippingMethod: shippingMethod,
       shippingAddress: JSON.stringify(shippingAddress),
     };
+    // ──────────────────────────────────────────────────────────────────────
 
-    // 9. Initialize Paystack transaction
-    const response = await fetch(
-      "https://api.paystack.co/transaction/initialize",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: userEmail,
-          amount: totalKobo,
-          currency: "NGN",
-          callback_url: `${baseUrl}/checkout/success`,
-          metadata,
-        }),
-      }
-    );
+    const response = await fetch("https://api.paystack.co/transaction/initialize", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: userEmail,
+        amount: totalKobo,
+        currency: "NGN",
+        callback_url: `${baseUrl}/checkout/success`,
+        metadata,
+      }),
+    });
 
     const data = (await response.json()) as PaystackInitResponse;
 
@@ -196,19 +170,12 @@ export async function createCheckoutSession(
     return { success: true, url: data.data.authorization_url };
   } catch (error) {
     console.error("Checkout error:", error);
-    return {
-      success: false,
-      error: "Something went wrong. Please try again.",
-    };
+    return { success: false, error: "Something went wrong. Please try again." };
   }
 }
 
-// ── Verify Payment (for success page) ─────────────────────────────────────
+// ── Verify Payment ─────────────────────────────────────────────────────────
 
-/**
- * Verifies a Paystack transaction by reference.
- * Paystack redirects to callback_url with ?reference=xxx after payment.
- */
 export async function getCheckoutSession(reference: string) {
   try {
     const { userId } = await auth();
@@ -219,11 +186,7 @@ export async function getCheckoutSession(reference: string) {
 
     const response = await fetch(
       `https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`,
-      {
-        headers: {
-          Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
-        },
-      }
+      { headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` } }
     );
 
     const data = (await response.json()) as PaystackVerifyResponse;
@@ -234,12 +197,10 @@ export async function getCheckoutSession(reference: string) {
 
     const tx = data.data;
 
-    // Verify this transaction belongs to the current user
     if (tx.metadata?.clerkUserId !== userId) {
       return { success: false, error: "Transaction not found" };
     }
 
-    // Parse shipping address from metadata if available
     let shippingAddress = null;
     if (tx.metadata?.shippingAddress) {
       try {
@@ -262,11 +223,12 @@ export async function getCheckoutSession(reference: string) {
         id: tx.reference,
         customerEmail: tx.customer?.email,
         customerName:
-          [tx.customer?.first_name, tx.customer?.last_name]
-            .filter(Boolean)
-            .join(" ") || tx.customer?.email,
-        amountTotal: tx.amount, // in kobo
+          [tx.customer?.first_name, tx.customer?.last_name].filter(Boolean).join(" ") ||
+          tx.customer?.email,
+        amountTotal: tx.amount,
         paymentStatus: tx.status,
+        shippingFee: tx.metadata?.shippingFee ? Number(tx.metadata.shippingFee) : 0,
+        shippingMethod: tx.metadata?.shippingMethod ?? "",
         shippingAddress: shippingAddress
           ? {
               line1: shippingAddress.line1,

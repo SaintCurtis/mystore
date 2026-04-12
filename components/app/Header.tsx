@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ShoppingBag, Sparkles, Cpu, Heart, Search, X } from "lucide-react";
+import { ShoppingBag, Sparkles, Cpu, Heart, Search, X, User } from "lucide-react";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { useCartActions, useTotalItems } from "@/lib/store/cart-store-provider";
@@ -127,12 +127,14 @@ export function Header() {
             </UserButton>
           </SignedIn>
           <SignedOut>
-            <SignInButton mode="modal">
-              <Button variant="ghost" size="icon" className="h-9 w-9">
-                <Search className="h-[18px] w-[18px]" />
-              </Button>
-            </SignInButton>
-          </SignedOut>
+  <SignInButton mode="modal">
+    <Button variant="ghost" size="icon"
+      className="h-9 w-9 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 dark:text-[#a3a3a3] dark:hover:text-[#f1f1f1] dark:hover:bg-[#1a1a1a] transition-colors"
+      title="Sign in">
+      <User className="h-[18px] w-[18px]" />
+    </Button>
+  </SignInButton>
+</SignedOut>
         </div>
 
         {/* ── Mobile right — just search + cart + ask AI ─────── */}
