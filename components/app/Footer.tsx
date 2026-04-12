@@ -60,7 +60,7 @@ export function Footer() {
               </div>
               <div className="flex flex-col leading-none">
                 <span className="text-sm font-extrabold tracking-tight text-zinc-900 dark:text-[#f1f1f1]">
-                  The Saint\'s TechNet
+                  The Saint's TechNet
                 </span>
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-500">
                   CAC Registered
@@ -176,7 +176,7 @@ export function Footer() {
         <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
             <p className="text-xs text-zinc-500 dark:text-[#555]">
-              © {new Date().getFullYear()} The Saint\'s Technology Networks. CAC Registered. All rights reserved.
+              © {new Date().getFullYear()} The Saint's Technology Networks. CAC Registered. All rights reserved.
             </p>
             <p className="text-xs text-zinc-400 dark:text-[#444]">
               Built by an Engineer. Trusted by Thousands.
