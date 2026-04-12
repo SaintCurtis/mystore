@@ -24,15 +24,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const stored = localStorage.getItem("theme") as Theme | null;
-
     if (stored === "light" || stored === "dark") {
-      // User has explicitly chosen before — respect that
+      // User has manually toggled before — respect their choice
       setTheme(stored);
-    } else {
-      // First visit — check system preference
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      setTheme(prefersDark ? "dark" : "light");
     }
+    // No stored value = first visit = light mode (default, no system check)
     setMounted(true);
   }, []);
 

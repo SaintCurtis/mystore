@@ -43,13 +43,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         {/*
-          This inline script runs SYNCHRONOUSLY before React hydrates.
-          It prevents ANY flash — users see the correct theme immediately.
-
+          Runs BEFORE React hydrates — zero flash guaranteed.
           Logic:
-          1. If user has previously chosen a theme → use that
-          2. If first visit → check OS/browser system preference
-          3. Fallback → light mode (per user feedback)
+          - If user previously chose dark → apply dark
+          - If user previously chose light → stay light
+          - First visit (nothing stored) → light mode, no system check
         */}
         <script
           dangerouslySetInnerHTML={{
@@ -59,19 +57,9 @@ export default function RootLayout({
                   var stored = localStorage.getItem('theme');
                   if (stored === 'dark') {
                     document.documentElement.classList.add('dark');
-                  } else if (stored === 'light') {
-                    document.documentElement.classList.remove('dark');
-                  } else {
-                    // First visit — respect system preference
-                    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                    if (prefersDark) {
-                      document.documentElement.classList.add('dark');
-                    }
-                    // else: no class = light mode (default)
                   }
-                } catch(e) {
-                  // localStorage blocked — default to light
-                }
+                  // light or nothing = no class = light mode (default)
+                } catch(e) {}
               })();
             `,
           }}

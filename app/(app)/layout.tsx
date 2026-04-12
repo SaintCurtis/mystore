@@ -16,21 +16,10 @@ import { WhatsAppFAB } from "@/components/app/WhatsAppFAB";
 import { WelcomePopup } from "@/components/app/WelcomePopup";
 import { AppShell } from "@/components/app/AppShell";
 import { Footer } from "@/components/app/Footer";
+import { MobileBottomBar } from "@/components/app/MobileBottomBar";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    /*
-      Fix for issue #1 — "having to sign back in after Paystack payment":
-      
-      What was happening: Paystack redirects to /checkout/success?reference=xxx
-      Clerk was treating this as an unauthenticated route and showing the sign-in
-      wall because the session cookie wasn't being recognized on the redirect.
-      
-      Fix: Set afterSignInUrl="/" and afterSignUpUrl="/" on ClerkProvider so Clerk
-      always redirects to home after auth flows, never interrupting the payment
-      success page. Also set signInFallbackRedirectUrl so Clerk doesn't override
-      the Paystack callback URL.
-    */
     <ClerkProvider
       afterSignInUrl="/"
       afterSignUpUrl="/"
@@ -49,6 +38,10 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                     <Footer />
                   </div>
                 </AppShell>
+
+                {/* Mobile sticky bottom navigation bar */}
+                <MobileBottomBar />
+
                 <CartSheet />
                 <WishlistSheet />
                 <ChatSheet />
