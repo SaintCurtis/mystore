@@ -73,7 +73,7 @@ export function HeroSection() {
                 </span>
               </span>
               <br />
-              <span className="text-zinc-500 dark:text-[#a3a3a3] sm:hidden">By Someone Who Gets It.</span>
+              <span className="text-zinc-500 dark:text-[#a3a3a3] sm:hidden">For People Who Knows Them.</span>
               <span className="text-zinc-500 dark:text-[#a3a3a3] hidden sm:inline">Sold by Someone Who</span>
               <br className="hidden sm:block" />
               <span className="hidden sm:inline relative">
