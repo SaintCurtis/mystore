@@ -27,7 +27,10 @@ export function HeroSection() {
   useEffect(() => {
     intervalRef.current = setInterval(() => {
       setVisible(false);
-      setTimeout(() => { setWordIndex((i) => (i + 1) % ROTATING_WORDS.length); setVisible(true); }, 350);
+      setTimeout(() => {
+        setWordIndex((i) => (i + 1) % ROTATING_WORDS.length);
+        setVisible(true);
+      }, 350);
     }, 2800);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, []);
@@ -64,29 +67,57 @@ export function HeroSection() {
               </span>
             </div>
 
-            {/* Headline */}
-            <h1 className={`font-display font-extrabold leading-[1.05] tracking-tight text-zinc-900 dark:text-[#f1f1f1] text-[2.2rem] sm:text-5xl lg:text-6xl xl:text-7xl transition-all duration-700 delay-100 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
-              Premium{" "}
+            {/* ── Headline ──────────────────────────────────────────────────
+                Friend's notes:
+                - "Premium" stays as-is (extrabold)
+                - Rotating word → font-bold (was already amber but now explicitly bold)
+                - "Sold by Someone Who" → stays zinc-500 (subdued)
+                - "Actually Understands Them." → font-semibold (friend's request)
+            ──────────────────────────────────────────────────────────────── */}
+            <h1 className={`font-display leading-[1.05] tracking-tight text-zinc-900 dark:text-[#f1f1f1]
+              text-[2.2rem] sm:text-5xl lg:text-6xl xl:text-7xl
+              transition-all duration-700 delay-100
+              ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+
+              {/* "Premium" — extrabold */}
+              <span className="font-extrabold">Premium </span>
+
+              {/* Rotating word — bold + amber */}
               <span className="relative inline-block">
-                <span className={`text-amber-500 dark:text-amber-400 transition-all duration-350 ${visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3"}`} style={{ display: "inline-block" }}>
+                <span
+                  className={`font-bold text-amber-500 dark:text-amber-400 transition-all duration-350 ${
+                    visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3"
+                  }`}
+                  style={{ display: "inline-block" }}
+                >
                   {ROTATING_WORDS[wordIndex]}
                 </span>
               </span>
+
               <br />
-              <span className="text-zinc-500 dark:text-[#a3a3a3] sm:hidden">For People Who Knows Them.</span>
-              <span className="text-zinc-500 dark:text-[#a3a3a3] hidden sm:inline">Sold by Someone Who</span>
+
+              {/* Mobile line */}
+              <span className="font-semibold text-zinc-500 dark:text-[#a3a3a3] sm:hidden">
+                By Someone Who Gets It.
+              </span>
+
+              {/* Desktop lines */}
+              <span className="hidden sm:inline font-normal text-zinc-400 dark:text-[#6b6b6b]">
+                Sold by Someone Who
+              </span>
               <br className="hidden sm:block" />
-              <span className="hidden sm:inline relative">
+              {/* ✅ "Actually Understands Them" → font-semibold (friend's request) */}
+              <span className="hidden sm:inline font-semibold text-zinc-600 dark:text-[#a3a3a3] relative">
                 Actually Understands Them
                 <svg aria-hidden className="absolute -bottom-2 left-0 w-full overflow-visible" viewBox="0 0 500 10" fill="none" preserveAspectRatio="none">
                   <path d="M0 8 Q125 2 250 6 Q375 10 500 4" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" fill="none" />
                 </svg>
               </span>
-              <span className="hidden sm:inline">.</span>
+              <span className="hidden sm:inline font-semibold text-zinc-600 dark:text-[#a3a3a3]">.</span>
             </h1>
 
-            {/* Tagline */}
-            <p className={`mt-5 text-sm font-semibold text-amber-600 dark:text-amber-400 sm:text-lg transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
+            {/* ✅ Tagline — italic for elegance */}
+            <p className={`mt-5 text-sm font-semibold italic text-amber-600 dark:text-amber-400 sm:text-lg transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
               Built with engineering insight. Delivered with care.
             </p>
 
@@ -103,10 +134,10 @@ export function HeroSection() {
               CAC-registered. Engineer-verified. Warranty on everything. Ships worldwide.
             </p>
 
-            {/* ── CTA block ────────────────────────────────── */}
+            {/* CTAs */}
             <div className={`mt-7 space-y-3 transition-all duration-700 delay-400 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
 
-              {/* Row 1 — primary buttons */}
+              {/* Row 1 */}
               <div className="flex flex-wrap items-center gap-3">
                 <Button asChild size="lg"
                   className="group h-12 bg-amber-500 px-6 sm:px-8 font-display text-sm font-bold tracking-wide text-zinc-950 shadow-lg shadow-amber-500/25 hover:bg-amber-400 transition-all duration-200">
@@ -121,10 +152,10 @@ export function HeroSection() {
                 </Button>
               </div>
 
-              {/* Row 2 — action cards (Build My Setup + ACASIS) */}
+              {/* Row 2 — action cards */}
               <div className="flex flex-col sm:flex-row gap-3">
 
-                {/* Build My Setup card */}
+                {/* Build My Setup */}
                 <Link href="/build-my-setup"
                   className="group flex items-center gap-4 rounded-2xl border border-amber-200 dark:border-amber-500/20 bg-linear-to-r from-amber-50 to-orange-50 dark:from-amber-500/8 dark:to-orange-500/5 px-4 py-3.5 transition-all duration-200 hover:border-amber-400 dark:hover:border-amber-500/40 hover:shadow-md hover:shadow-amber-500/10 flex-1">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/15 dark:bg-amber-500/10 group-hover:bg-amber-500/25 transition-colors">
@@ -144,7 +175,7 @@ export function HeroSection() {
                   <ArrowRight className="h-4 w-4 shrink-0 text-amber-500 dark:text-amber-400 transition-transform group-hover:translate-x-1" />
                 </Link>
 
-                {/* ACASIS promo card */}
+                {/* ACASIS */}
                 <Link href="/?category=acasis"
                   className="group flex items-center gap-4 rounded-2xl border border-blue-200 dark:border-blue-500/20 bg-linear-to-r from-blue-50 to-indigo-50 dark:from-blue-500/8 dark:to-indigo-500/5 px-4 py-3.5 transition-all duration-200 hover:border-blue-400 dark:hover:border-blue-500/40 hover:shadow-md hover:shadow-blue-500/10 flex-1">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/15 dark:bg-blue-500/10 group-hover:bg-blue-500/25 transition-colors">
@@ -163,7 +194,6 @@ export function HeroSection() {
                   </div>
                   <ArrowRight className="h-4 w-4 shrink-0 text-blue-500 dark:text-blue-400 transition-transform group-hover:translate-x-1" />
                 </Link>
-
               </div>
             </div>
           </div>
