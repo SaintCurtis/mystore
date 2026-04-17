@@ -92,10 +92,9 @@ export const metadata: Metadata = {
     canonical: BASE_URL,
   },
 
-  // Uncomment after setting up Google Search Console:
-  // verification: {
-  //   google: "your-google-verification-token",
-  // },
+verification: {
+     google: "m6WpxTeR-fT5fhcmMur735a4oJ3SH2N1EfwD2EKFGRA"
+    },
 
   manifest: "/manifest.json",
 
