@@ -60,7 +60,7 @@ export function HeroSection() {
             <div className={`mb-5 inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/8 px-3 py-1.5 transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
               <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
               <span className="text-xs font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400 sm:hidden">
-                Since 2019 · CAC Registered
+                 BN: 9245886 · Est. 2019
               </span>
               <span className="text-xs font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400 hidden sm:inline">
                 BN: 9245886 · Est. 2019 · Computer Sales & Engineering
@@ -98,7 +98,7 @@ export function HeroSection() {
 
               {/* Mobile line */}
               <span className="font-semibold text-zinc-500 dark:text-[#a3a3a3] sm:hidden">
-                By Someone Who Gets It.
+                For People Who Value It.
               </span>
 
               {/* Desktop lines */}
