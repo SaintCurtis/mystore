@@ -7,11 +7,13 @@ type Theme = "dark" | "light";
 interface ThemeContextValue {
   theme: Theme;
   toggleTheme: () => void;
+  setTheme: (theme: Theme) => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
   theme: "light",
   toggleTheme: () => {},
+  setTheme: () => {},
 });
 
 export function useTheme() {
@@ -19,38 +21,41 @@ export function useTheme() {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("light");
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    const stored = localStorage.getItem("theme") as Theme | null;
-    if (stored === "light" || stored === "dark") {
-      // User has manually toggled before — respect their choice
-      setTheme(stored);
+  // Read the DOM state set by the inline script — default is now LIGHT
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof window !== "undefined") {
+      return document.documentElement.classList.contains("dark") ? "dark" : "light";
     }
-    // No stored value = first visit = light mode (default, no system check)
-    setMounted(true);
-  }, []);
+    return "light"; // SSR default — matches inline script default
+  });
 
-  useEffect(() => {
-    if (!mounted) return;
+  const applyTheme = (next: Theme) => {
     const root = document.documentElement;
-    if (theme === "dark") {
+    if (next === "dark") {
       root.classList.add("dark");
+      root.classList.remove("light");
     } else {
       root.classList.remove("dark");
+      root.classList.add("light");
     }
-    localStorage.setItem("theme", theme);
-  }, [theme, mounted]);
+    try { localStorage.setItem("theme", next); } catch {}
+  };
 
-  function toggleTheme() {
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
-  }
+  const setTheme = (next: Theme) => {
+    setThemeState(next);
+    applyTheme(next);
+  };
 
-  if (!mounted) return null;
+  const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
+
+  // On mount, sync React state with whatever the inline script set on the DOM
+  useEffect(() => {
+    const current = document.documentElement.classList.contains("dark") ? "dark" : "light";
+    setThemeState(current);
+  }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );
