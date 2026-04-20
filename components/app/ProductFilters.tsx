@@ -51,15 +51,11 @@ function isDrilldownRoot(slug: string): slug is DrilldownRoot {
 const DRILLDOWN_LABELS: Record<DrilldownRoot, string[]> = {
   monitors: ["Type", "Condition", "Panel Type"],
   "content-creation-tools": ["Category", "Sub-category"],
-  // computers: Type → Condition only via drilldown.
-  // Brand + Model appear separately below via existing CATEGORIES_WITH_BRANDS logic
-  // once the user lands on a condition-level slug (e.g. gaming-laptops-brand-new)
   computers: ["Type", "Condition"],
   accessories: ["Type"],
   "tech-setup-gears": ["Category"],
   acasis: ["Category"],
 };
-
 
 interface ProductFiltersProps {
   categories: ALL_CATEGORIES_QUERYResult;
@@ -101,20 +97,21 @@ export function ProductFilters({
     setPriceRange([urlMinPrice, urlMaxPrice]);
   }, [urlMinPrice, urlMaxPrice]);
 
-  // ── Drilldown logic ────────────────────────────────────────────
-  type FlatCat = ALL_CATEGORIES_QUERYResult[number] & {
-    parentSlug?: string | null;
-  };
+  // ── Helpers — cast to any[] so parentSlug is always accessible ─
+  // The generated ALL_CATEGORIES_QUERYResult type doesn't always
+  // surface parentSlug on the item type, but the runtime data
+  // always has it from the GROQ query. Using any[] here is safe.
+  const cats = categories as any[];
 
   function findDrilldownRoot(catSlug: string): DrilldownRoot | null {
     if (!catSlug) return null;
     if (isDrilldownRoot(catSlug)) return catSlug;
-    let current = (categories as FlatCat[]).find((c) => c.slug === catSlug);
+    let current = cats.find((c) => c.slug === catSlug);
     while (current) {
-      const parentSlug = (current as FlatCat).parentSlug;
+      const parentSlug = current.parentSlug;
       if (!parentSlug) break;
       if (isDrilldownRoot(parentSlug)) return parentSlug;
-      current = (categories as FlatCat[]).find((c) => c.slug === parentSlug);
+      current = cats.find((c) => c.slug === parentSlug);
     }
     return null;
   }
@@ -122,21 +119,24 @@ export function ProductFilters({
   function getSelectionChain(catSlug: string, rootSlug: string): string[] {
     if (!catSlug || catSlug === rootSlug) return [];
     const chain: string[] = [];
-    let current = (categories as FlatCat[]).find((c) => c.slug === catSlug);
+    let current = cats.find((c) => c.slug === catSlug);
     while (current && current.slug !== rootSlug) {
       chain.unshift(current.slug ?? "");
-      const parentSlug = (current as FlatCat).parentSlug;
+      const parentSlug = current.parentSlug;
       if (!parentSlug) break;
-      current = (categories as FlatCat[]).find((c) => c.slug === parentSlug);
+      current = cats.find((c) => c.slug === parentSlug);
     }
     return chain.filter(Boolean);
   }
 
   function getChildren(parentSlug: string) {
-    return (categories as FlatCat[])
-      .filter((c) => (c as FlatCat).parentSlug === parentSlug)
-      .sort((a, b) => ((a as any).order ?? 0) - ((b as any).order ?? 0));
+    return cats
+      .filter((c) => c.parentSlug === parentSlug)
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   }
+
+  // Top-level categories have no parentSlug
+  const topLevelCategories = cats.filter((c) => !c.parentSlug);
 
   const drilldownRoot = findDrilldownRoot(currentCategory);
   const selectionChain = drilldownRoot
@@ -167,8 +167,6 @@ export function ProductFilters({
       if (!selected) break;
       const children = getChildren(selected);
       if (children.length === 0) break;
-      // For computers: stop drilldown after condition level (depth 2).
-      // Brand/Model are handled separately below via CATEGORIES_WITH_BRANDS.
       if (drilldownRoot === "computers" && i >= labels.length - 1) break;
       levels.push({
         parentSlug: selected,
@@ -193,36 +191,27 @@ export function ProductFilters({
   }
 
   // ── Brand / Model logic ────────────────────────────────────────
-  // For non-drilldown categories AND for computers once a condition-
-  // level slug is active (e.g. gaming-laptops-brand-new which is in
-  // CATEGORIES_WITH_BRANDS).
   const showCondition =
     !drilldownRoot &&
     (CATEGORIES_WITH_CONDITIONS as readonly string[]).includes(currentCategory);
 
-  // Show brand when:
-  // a) old flow: condition is selected for a non-drilldown category, OR
-  // b) computers drilldown: the current category slug itself is in CATEGORIES_WITH_BRANDS
-  //    (meaning user has drilled down to e.g. "gaming-laptops-brand-new")
-  // For computers drilldown: check if the current slug OR any of its ancestors
-// is in CATEGORIES_WITH_BRANDS (e.g. gaming-laptops-brand-new → parent is gaming-laptops)
-function isAncestorInBrands(catSlug: string): boolean {
-  let current = (categories as FlatCat[]).find((c) => c.slug === catSlug);
-  while (current) {
-    if ((CATEGORIES_WITH_BRANDS as readonly string[]).includes(current.slug ?? "")) return true;
-    const parentSlug = (current as FlatCat).parentSlug;
-    if (!parentSlug) break;
-    current = (categories as FlatCat[]).find((c) => c.slug === parentSlug);
+  function isAncestorInBrands(catSlug: string): boolean {
+    let current = cats.find((c) => c.slug === catSlug);
+    while (current) {
+      if ((CATEGORIES_WITH_BRANDS as readonly string[]).includes(current.slug ?? "")) return true;
+      const parentSlug = current.parentSlug;
+      if (!parentSlug) break;
+      current = cats.find((c) => c.slug === parentSlug);
+    }
+    return false;
   }
-  return false;
-}
 
-const showBrand =
-  brands.length > 0 &&
-  (
-    (showCondition && (CATEGORIES_WITH_BRANDS as readonly string[]).includes(currentCategory)) ||
-    (drilldownRoot === "computers" && isAncestorInBrands(currentCategory))
-  );
+  const showBrand =
+    brands.length > 0 &&
+    (
+      (showCondition && (CATEGORIES_WITH_BRANDS as readonly string[]).includes(currentCategory)) ||
+      (drilldownRoot === "computers" && isAncestorInBrands(currentCategory))
+    );
 
   const showModel = showBrand && !!currentBrand && models.length > 0;
 
@@ -288,10 +277,6 @@ const showBrand =
       updateParams({ [key]: null });
     }
   };
-
-  const topLevelCategories = (categories as FlatCat[]).filter(
-    (c) => !c.parentSlug,
-  );
 
   const FilterLabel = ({
     children,
@@ -460,7 +445,7 @@ const showBrand =
           );
         })}
 
-      {/* Condition — only for non-drilldown categories (e.g. standalone gaming-laptops tile) */}
+      {/* Condition */}
       {showCondition && (
         <div>
           <FilterLabel isActive={isConditionActive} filterKey="condition">
@@ -502,7 +487,7 @@ const showBrand =
         </div>
       )}
 
-      {/* Brand — shown for both old flow and computers drilldown */}
+      {/* Brand */}
       {showBrand && (
         <div>
           <FilterLabel isActive={isBrandActive} filterKey="brand">
