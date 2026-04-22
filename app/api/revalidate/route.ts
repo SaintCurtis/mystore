@@ -1,22 +1,16 @@
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   const secret = req.nextUrl.searchParams.get("secret");
 
-  // Verify the secret matches
   if (secret !== process.env.SANITY_REVALIDATE_SECRET) {
-    return NextResponse.json(
-      { message: "Invalid secret" },
-      { status: 401 }
-    );
+    return NextResponse.json({ message: "Invalid secret" }, { status: 401 });
   }
 
   try {
-    // Revalidate all pages that use Sanity data
-    revalidatePath("/", "layout");        // homepage + all layouts
-    revalidatePath("/products", "layout"); // all product pages
-    revalidateTag("sanity");              // any fetch tagged with "sanity"
+    revalidatePath("/", "layout");
+    revalidatePath("/products", "layout");
 
     return NextResponse.json({
       revalidated: true,
@@ -31,7 +25,6 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Also handle GET for easy manual testing
 export async function GET(req: NextRequest) {
   const secret = req.nextUrl.searchParams.get("secret");
 
@@ -42,7 +35,6 @@ export async function GET(req: NextRequest) {
   try {
     revalidatePath("/", "layout");
     revalidatePath("/products", "layout");
-    revalidateTag("sanity");
 
     return NextResponse.json({
       revalidated: true,
