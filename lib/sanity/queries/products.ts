@@ -140,7 +140,20 @@ export const PRODUCT_BY_SLUG_QUERY = defineQuery(`*[
   dimensions,
   stock,
   featured,
-  assemblyRequired
+  assemblyRequired,
+ 
+  // ── Variants ──────────────────────────────────────────────
+  "variantGroups": variantGroups[]{
+    type,
+    label,
+    "options": options[]{
+      label,
+      priceAdjustment,
+      isDefault,
+      inStock,
+      hexColor
+    }
+  }
 }`);
 
 // ============================================

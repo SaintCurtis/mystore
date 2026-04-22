@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ShieldCheck, RotateCcw, Globe, Tag } from "lucide-react";
 import { AddToCartButton } from "@/components/app/AddToCartButton";
@@ -9,30 +9,52 @@ import { StockBadge } from "@/components/app/StockBadge";
 import { StockUrgency } from "@/components/app/StockUrgency";
 import { WhatsAppShare } from "@/components/app/WhatsAppShare";
 import { WishlistButton } from "@/components/app/WishlistButton";
+import { VariantSelector } from "@/components/app/VariantSelector";
 import { recordView } from "@/lib/hooks/useRecentlyViewed";
 import { useCurrency } from "@/lib/store/currency-store-provider";
-import type { PRODUCT_BY_SLUG_QUERYResult } from "@/sanity.types";
+import {
+  buildDefaultSelections,
+  computeVariantPrice,
+  type VariantGroup,
+  type SelectedVariant,
+} from "@/types/variants";
+import type { PRODUCT_BY_SLUG_QUERY_RESULT } from "@/sanity.types";
 
 interface ProductInfoProps {
-  product: NonNullable<PRODUCT_BY_SLUG_QUERYResult>;
+  product: NonNullable<PRODUCT_BY_SLUG_QUERY_RESULT>;
 }
 
 export function ProductInfo({ product }: ProductInfoProps) {
   const imageUrl = product.images?.[0]?.asset?.url;
-  const stock = product.stock ?? 0;
+  const stock    = product.stock ?? 0;
   const { formatInCurrency } = useCurrency();
 
-  // Record this product as recently viewed
+  // ── Variants ─────────────────────────────────────────────────────────────
+  const variantGroups = (product.variantGroups ?? []) as VariantGroup[];
+  const hasVariants   = variantGroups.length > 0;
+
+  const [selectedVariants, setSelectedVariants] = useState<SelectedVariant[]>(
+    () => buildDefaultSelections(variantGroups),
+  );
+
+  const basePrice    = product.price ?? 0;
+  const displayPrice = hasVariants
+    ? computeVariantPrice(basePrice, selectedVariants)
+    : basePrice;
+
+  const priceChanged = hasVariants && displayPrice !== basePrice;
+
+  // ── Recently viewed ───────────────────────────────────────────────────────
   useEffect(() => {
     recordView({
-      productId: product._id,
-      name: product.name ?? "",
-      slug: product.slug ?? "",
-      price: product.price ?? 0,
-      image: imageUrl ?? undefined,
+      productId:     product._id,
+      name:          product.name ?? "",
+      slug:          product.slug ?? "",
+      price:         basePrice,
+      image:         imageUrl ?? undefined,
       categoryTitle: product.category?.title ?? undefined,
     });
-  }, [product._id, product.name, product.slug, product.price, imageUrl, product.category?.title]);
+  }, [product._id, product.name, product.slug, basePrice, imageUrl, product.category?.title]);
 
   const productUrl =
     typeof window !== "undefined"
@@ -60,9 +82,17 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
       {/* Price + stock */}
       <div className="mt-5 flex items-center gap-4">
-        <p className="font-display text-3xl font-bold tracking-tight text-zinc-900 dark:text-amber-400">
-          {formatInCurrency(product.price)}
-        </p>
+        <div className="flex flex-col gap-0.5">
+          <p className="font-display text-3xl font-bold tracking-tight text-zinc-900 dark:text-amber-400">
+            {formatInCurrency(displayPrice)}
+          </p>
+          {/* Show base price as strikethrough only when variants push price UP */}
+          {priceChanged && displayPrice > basePrice && (
+            <p className="text-xs text-zinc-400 dark:text-zinc-500">
+              Base: {formatInCurrency(basePrice)}
+            </p>
+          )}
+        </div>
         <StockBadge productId={product._id} stock={stock} />
       </div>
 
@@ -78,21 +108,33 @@ export function ProductInfo({ product }: ProductInfoProps) {
         </p>
       )}
 
+      {/* ── Variant selector ── inserted between description and CTAs */}
+      {hasVariants && (
+        <div className="mt-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/40 p-4">
+          <VariantSelector
+            groups={variantGroups}
+            selected={selectedVariants}
+            onChange={setSelectedVariants}
+          />
+        </div>
+      )}
+
       {/* CTAs */}
       <div className="mt-8 flex flex-col gap-3">
         <AddToCartButton
           productId={product._id}
           name={product.name ?? "Unknown Product"}
-          price={product.price ?? 0}
+          price={displayPrice}
           image={imageUrl ?? undefined}
           stock={stock}
+          selectedVariants={selectedVariants}
         />
 
         <div className="grid grid-cols-2 gap-2">
           <WishlistButton
             productId={product._id}
             name={product.name ?? ""}
-            price={product.price ?? 0}
+            price={displayPrice}
             image={imageUrl ?? undefined}
             slug={product.slug ?? ""}
             categoryTitle={product.category?.title ?? undefined}
@@ -104,7 +146,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
         <WhatsAppShare
           productName={product.name ?? ""}
           productUrl={productUrl}
-          price={formatInCurrency(product.price)}
+          price={formatInCurrency(displayPrice)}
           variant="both"
         />
       </div>
@@ -112,9 +154,9 @@ export function ProductInfo({ product }: ProductInfoProps) {
       {/* Trust signals */}
       <div className="mt-8 grid grid-cols-3 gap-3">
         {[
-          { icon: ShieldCheck, label: "Warranty", sub: "Included" },
-          { icon: RotateCcw,   label: "7-Day",    sub: "Returns"  },
-          { icon: Globe,       label: "Ships",    sub: "Worldwide"},
+          { icon: ShieldCheck, label: "Warranty", sub: "Included"  },
+          { icon: RotateCcw,   label: "7-Day",    sub: "Returns"   },
+          { icon: Globe,       label: "Ships",    sub: "Worldwide" },
         ].map(({ icon: Icon, label, sub }) => (
           <div
             key={label}
@@ -137,9 +179,9 @@ export function ProductInfo({ product }: ProductInfoProps) {
             </p>
           </div>
           <div className="divide-y divide-zinc-200 dark:divide-zinc-800/60 bg-zinc-50 dark:bg-zinc-900/30">
-            {product.material && <SpecRow label="Material"   value={product.material}   capitalize />}
-            {product.color    && <SpecRow label="Color"      value={product.color}      capitalize />}
-            {product.dimensions && <SpecRow label="Dimensions" value={product.dimensions} />}
+            {product.material    && <SpecRow label="Material"   value={product.material}   capitalize />}
+            {product.color       && <SpecRow label="Color"      value={product.color}      capitalize />}
+            {product.dimensions  && <SpecRow label="Dimensions" value={product.dimensions} />}
             {product.assemblyRequired !== null && product.assemblyRequired !== undefined && (
               <SpecRow label="Assembly" value={product.assemblyRequired ? "Required" : "Not required"} />
             )}
@@ -150,11 +192,23 @@ export function ProductInfo({ product }: ProductInfoProps) {
   );
 }
 
-function SpecRow({ label, value, capitalize = false }: { label: string; value: string; capitalize?: boolean }) {
+function SpecRow({
+  label,
+  value,
+  capitalize = false,
+}: {
+  label: string;
+  value: string;
+  capitalize?: boolean;
+}) {
   return (
     <div className="flex items-center justify-between px-4 py-3">
       <span className="text-sm text-zinc-500">{label}</span>
-      <span className={`text-sm font-medium text-zinc-800 dark:text-zinc-200 ${capitalize ? "capitalize" : ""}`}>
+      <span
+        className={`text-sm font-medium text-zinc-800 dark:text-zinc-200 ${
+          capitalize ? "capitalize" : ""
+        }`}
+      >
         {value}
       </span>
     </div>

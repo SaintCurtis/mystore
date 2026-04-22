@@ -8,10 +8,11 @@ export const productType = defineType({
   type: "document",
   icon: PackageIcon,
   groups: [
-    { name: "details", title: "Details", default: true },
+    { name: "details",        title: "Details",        default: true },
     { name: "classification", title: "Classification" },
-    { name: "media", title: "Media" },
-    { name: "inventory", title: "Inventory" },
+    { name: "media",          title: "Media" },
+    { name: "inventory",      title: "Inventory" },
+    { name: "variants",       title: "Variants" },   // ← NEW group
   ],
   fields: [
     // ── Core Details ───────────────────────────────────────────
@@ -38,7 +39,7 @@ export const productType = defineType({
       name: "price",
       type: "number",
       group: "details",
-      description: "Price in NGN (e.g., 1950000)",
+      description: "Base price in NGN — variants add/subtract from this",
       validation: (rule) => [
         rule.required().error("Price is required"),
         rule.positive().error("Price must be positive"),
@@ -64,7 +65,6 @@ export const productType = defineType({
         "Only set if NOT already encoded in the category (e.g. if category is 'Gaming Laptops — Brand New', leave this empty — condition is implied). Use this only for products where the category doesn't specify condition.",
       hidden: ({ document }) => {
         const categorySlug = (document?.category as any)?._ref ?? "";
-        // Hide if the selected category already encodes condition in its slug
         const conditionEncodedSlugs = [
           "gaming-laptops-brand-new",
           "gaming-laptops-foreign-used",
@@ -77,7 +77,6 @@ export const productType = defineType({
           "monitors-gaming-brand-new",
           "monitors-gaming-foreign-used",
         ];
-        // We can't resolve slug from _ref here, so always show but clarify in description
         return false;
       },
     }),
@@ -149,6 +148,130 @@ export const productType = defineType({
       type: "boolean",
       group: "inventory",
       initialValue: false,
+    }),
+
+    // ── Variants ───────────────────────────────────────────────
+    // Each variant group = one spec axis (RAM, SSD, GPU, Color, Touchscreen).
+    // Options within a group are presented as chips/toggles on the product page.
+    // The displayed price = product.price + sum of all selected priceAdjustment values.
+    defineField({
+      name: "variantGroups",
+      title: "Variant groups",
+      type: "array",
+      group: "variants",
+      description:
+        "Add spec axes that affect price (RAM, SSD, GPU, Color, Touchscreen). Leave empty for products with no variants.",
+      of: [
+        {
+          type: "object",
+          name: "variantGroup",
+          title: "Variant group",
+          // Sanity Studio preview for each group row
+          preview: {
+            select: { title: "label", subtitle: "type" },
+            prepare: ({ title, subtitle }) => ({
+              title: title ?? "Unnamed group",
+              subtitle: subtitle ?? "",
+            }),
+          },
+          fields: [
+            defineField({
+              name: "type",
+              title: "Spec type",
+              type: "string",
+              description: "Machine-readable key — used in cart & order records",
+              options: {
+                list: [
+                  { title: "RAM",         value: "ram" },
+                  { title: "SSD Storage", value: "ssd" },
+                  { title: "GPU",         value: "gpu" },
+                  { title: "Color",       value: "color" },
+                  { title: "Touchscreen", value: "touchscreen" },
+                ],
+                layout: "dropdown",
+              },
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "label",
+              title: "Display label",
+              type: "string",
+              description: 'Shown above the chips, e.g. "RAM" or "Storage"',
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "options",
+              title: "Options",
+              type: "array",
+              of: [
+                {
+                  type: "object",
+                  name: "variantOption",
+                  title: "Option",
+                  preview: {
+                    select: {
+                      title: "label",
+                      subtitle: "priceAdjustment",
+                    },
+                    prepare: ({ title, subtitle }) => ({
+                      title: title ?? "Unnamed",
+                      subtitle:
+                        subtitle === 0 || subtitle == null
+                          ? "Base price"
+                          : subtitle > 0
+                          ? `+₦${subtitle.toLocaleString()}`
+                          : `-₦${Math.abs(subtitle).toLocaleString()}`,
+                    }),
+                  },
+                  fields: [
+                    defineField({
+                      name: "label",
+                      title: "Label",
+                      type: "string",
+                      description: 'e.g. "16GB", "1TB", "RTX 5090", "Moonlight White"',
+                      validation: (rule) => rule.required(),
+                    }),
+                    defineField({
+                      name: "priceAdjustment",
+                      title: "Price adjustment (NGN)",
+                      type: "number",
+                      description:
+                        "Positive = surcharge, negative = discount, 0 = included in base price",
+                      initialValue: 0,
+                      validation: (rule) => rule.required(),
+                    }),
+                    defineField({
+                      name: "isDefault",
+                      title: "Default selection?",
+                      type: "boolean",
+                      description:
+                        "Pre-selected when the page loads. Only one option per group should be default.",
+                      initialValue: false,
+                    }),
+                    defineField({
+                      name: "inStock",
+                      title: "In stock?",
+                      type: "boolean",
+                      description: "Uncheck to show this option as unavailable (greyed out)",
+                      initialValue: true,
+                    }),
+                    // Only relevant for color type — hex code for the colour dot
+                    defineField({
+                      name: "hexColor",
+                      title: "Hex colour code",
+                      type: "string",
+                      description:
+                        'Only for Color variants — e.g. "#1a1a1a". Leave empty for other types.',
+                      hidden: ({ parent }) => (parent as any)?.type !== "color",
+                    }),
+                  ],
+                },
+              ],
+              validation: (rule) => rule.min(1).error("Add at least one option"),
+            }),
+          ],
+        },
+      ],
     }),
   ],
 
