@@ -10,6 +10,18 @@ const REFERRAL_BY_CODE_QUERY = defineQuery(
   `*[_type == "referral" && code == $code][0]`
 );
 
+type ReferralDoc = {
+  _id: string;
+  clerkUserId?: string;
+  email?: string;
+  name?: string;
+  code?: string;
+  clicks?: number;
+  conversions?: number;
+  totalEarned?: number;
+  createdAt?: string;
+};
+
 // Generate a unique 8-char code from user ID
 function generateCode(userId: string, name: string): string {
   const base = (name.split(" ")[0] ?? "REF").toUpperCase().slice(0, 4);
@@ -57,7 +69,7 @@ export async function POST(req: Request) {
     const { code } = await req.json();
     if (!code) return NextResponse.json({ error: "No code" }, { status: 400 });
 
-    const referral = await client.fetch(REFERRAL_BY_CODE_QUERY, { code });
+    const referral = await client.fetch(REFERRAL_BY_CODE_QUERY, { code }) as ReferralDoc | null;
     if (!referral) return NextResponse.json({ error: "Invalid code" }, { status: 404 });
 
     // Increment clicks
