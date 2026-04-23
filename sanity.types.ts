@@ -351,9 +351,9 @@ export type ADMIN_STATS_QUERY_RESULT = {
 };
 
 // Source: app/(admin)/admin/page.tsx
-// Variable: RECENT_ORDERS_QUERY
+// Variable: ADMIN_RECENT_ORDERS_QUERY
 // Query: *[_type == "order"] | order(_createdAt desc) [0...8] {  _id,  _createdAt,  orderNumber,  status,  totalAmount,  "customerName": customer->name,  "customerEmail": customer->email,}
-export type RECENT_ORDERS_QUERY_RESULT = Array<{
+export type ADMIN_RECENT_ORDERS_QUERY_RESULT = Array<{
   _id: string;
   _createdAt: string;
   orderNumber: string | null;
@@ -580,6 +580,77 @@ export type CUSTOMER_BY_STRIPE_ID_QUERY_RESULT = {
   clerkUserId: string | null;
   stripeCustomerId: string | null;
   createdAt: string | null;
+} | null;
+
+// Source: lib/sanity/queries/orders.ts
+// Variable: ORDERS_BY_USER_QUERY
+// Query: *[  _type == "order"  && clerkUserId == $clerkUserId] | order(createdAt desc) {  _id,  orderNumber,  total,  status,  createdAt,  "itemCount": count(items),  "itemNames": items[].product->name,  "itemImages": items[].product->images[0].asset->url}
+export type ORDERS_BY_USER_QUERY_RESULT = Array<{
+  _id: string;
+  orderNumber: string | null;
+  total: number | null;
+  status: "cancelled" | "delivered" | "paid" | "shipped" | null;
+  createdAt: string | null;
+  itemCount: number | null;
+  itemNames: Array<string | null> | null;
+  itemImages: Array<string | null> | null;
+}>;
+
+// Source: lib/sanity/queries/orders.ts
+// Variable: ORDER_BY_ID_QUERY
+// Query: *[  _type == "order"  && _id == $id][0] {  _id,  orderNumber,  clerkUserId,  email,  items[]{    _key,    quantity,    priceAtPurchase,    product->{      _id,      name,      "slug": slug.current,      "image": images[0]{        asset->{          _id,          url        }      }    }  },  total,  status,  address{    name,    line1,    line2,    city,    postcode,    country  },  paystackReference,  createdAt}
+export type ORDER_BY_ID_QUERY_RESULT = {
+  _id: string;
+  orderNumber: string | null;
+  clerkUserId: string | null;
+  email: string | null;
+  items: Array<{
+    _key: string;
+    quantity: number | null;
+    priceAtPurchase: number | null;
+    product: {
+      _id: string;
+      name: string | null;
+      slug: string | null;
+      image: {
+        asset: {
+          _id: string;
+          url: string | null;
+        } | null;
+      } | null;
+    } | null;
+  }> | null;
+  total: number | null;
+  status: "cancelled" | "delivered" | "paid" | "shipped" | null;
+  address: {
+    name: string | null;
+    line1: string | null;
+    line2: string | null;
+    city: string | null;
+    postcode: string | null;
+    country: string | null;
+  } | null;
+  paystackReference: null;
+  createdAt: string | null;
+} | null;
+
+// Source: lib/sanity/queries/orders.ts
+// Variable: RECENT_ORDERS_QUERY
+// Query: *[  _type == "order"] | order(createdAt desc) [0...$limit] {  _id,  orderNumber,  email,  total,  status,  createdAt}
+export type RECENT_ORDERS_QUERY_RESULT = Array<{
+  _id: string;
+  orderNumber: string | null;
+  email: string | null;
+  total: number | null;
+  status: "cancelled" | "delivered" | "paid" | "shipped" | null;
+  createdAt: string | null;
+}>;
+
+// Source: lib/sanity/queries/orders.ts
+// Variable: ORDER_BY_PAYSTACK_REFERENCE_QUERY
+// Query: *[  _type == "order"  && paystackReference == $paystackReference][0]{ _id }
+export type ORDER_BY_PAYSTACK_REFERENCE_QUERY_RESULT = {
+  _id: string;
 } | null;
 
 // Source: lib/sanity/queries/products.ts
@@ -1201,7 +1272,7 @@ import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
     '{\n  "totalProducts": count(*[_type == "product"]),\n  "inStock": count(*[_type == "product" && stock > 0]),\n  "outOfStock": count(*[_type == "product" && stock == 0]),\n  "featured": count(*[_type == "product" && featured == true]),\n  "totalOrders": count(*[_type == "order"]),\n  "pendingOrders": count(*[_type == "order" && status == "pending"]),\n  "completedOrders": count(*[_type == "order" && status == "completed"]),\n  "totalCategories": count(*[_type == "category"]),\n}': ADMIN_STATS_QUERY_RESULT;
-    '*[_type == "order"] | order(_createdAt desc) [0...8] {\n  _id,\n  _createdAt,\n  orderNumber,\n  status,\n  totalAmount,\n  "customerName": customer->name,\n  "customerEmail": customer->email,\n}': RECENT_ORDERS_QUERY_RESULT;
+    '*[_type == "order"] | order(_createdAt desc) [0...8] {\n  _id,\n  _createdAt,\n  orderNumber,\n  status,\n  totalAmount,\n  "customerName": customer->name,\n  "customerEmail": customer->email,\n}': ADMIN_RECENT_ORDERS_QUERY_RESULT;
     '*[_type == "product" && stock > 0 && stock <= 3] | order(stock asc) [0...8] {\n  _id,\n  name,\n  stock,\n  price,\n  "slug": slug.current,\n  "category": category->title,\n}': LOW_STOCK_QUERY_RESULT;
     '\n  *[_type == "notifyMe" && email == $email && product._ref == $productId && notified == false][0]{ _id }\n': EXISTING_SUB_QUERY_RESULT;
     '\n  *[_type == "product" && _id == $id][0]{\n    _id, name, "slug": slug.current, price, stock, "image": images[0].asset->url\n  }\n': PRODUCT_QUERY_RESULT;
@@ -1221,6 +1292,10 @@ declare module "@sanity/client" {
     '*[\n  _type == "model"\n  && brand->slug.current == $brandSlug\n] | order(title asc) {\n  _id,\n  "title": coalesce(title, name),\n  "slug": slug.current\n}': MODELS_BY_BRAND_QUERY_RESULT;
     '*[\n  _type == "customer"\n  && email == $email\n][0]{\n  _id,\n  email,\n  name,\n  clerkUserId,\n  stripeCustomerId,\n  createdAt\n}': CUSTOMER_BY_EMAIL_QUERY_RESULT;
     '*[\n  _type == "customer"\n  && stripeCustomerId == $stripeCustomerId\n][0]{\n  _id,\n  email,\n  name,\n  clerkUserId,\n  stripeCustomerId,\n  createdAt\n}': CUSTOMER_BY_STRIPE_ID_QUERY_RESULT;
+    '*[\n  _type == "order"\n  && clerkUserId == $clerkUserId\n] | order(createdAt desc) {\n  _id,\n  orderNumber,\n  total,\n  status,\n  createdAt,\n  "itemCount": count(items),\n  "itemNames": items[].product->name,\n  "itemImages": items[].product->images[0].asset->url\n}': ORDERS_BY_USER_QUERY_RESULT;
+    '*[\n  _type == "order"\n  && _id == $id\n][0] {\n  _id,\n  orderNumber,\n  clerkUserId,\n  email,\n  items[]{\n    _key,\n    quantity,\n    priceAtPurchase,\n    product->{\n      _id,\n      name,\n      "slug": slug.current,\n      "image": images[0]{\n        asset->{\n          _id,\n          url\n        }\n      }\n    }\n  },\n  total,\n  status,\n  address{\n    name,\n    line1,\n    line2,\n    city,\n    postcode,\n    country\n  },\n  paystackReference,\n  createdAt\n}': ORDER_BY_ID_QUERY_RESULT;
+    '*[\n  _type == "order"\n] | order(createdAt desc) [0...$limit] {\n  _id,\n  orderNumber,\n  email,\n  total,\n  status,\n  createdAt\n}': RECENT_ORDERS_QUERY_RESULT;
+    '*[\n  _type == "order"\n  && paystackReference == $paystackReference\n][0]{ _id }': ORDER_BY_PAYSTACK_REFERENCE_QUERY_RESULT;
     '*[\n  _type == "product"\n] | order(name asc) {\n  _id,\n  name,\n  "slug": slug.current,\n  description,\n  price,\n  "condition": condition->{ _id, title, "slug": slug.current },\n  "brand": brand->{ _id, title, "slug": slug.current },\n  "model": model->{ _id, title, "slug": slug.current },\n  "images": images[]{ _key, asset->{ _id, url }, hotspot },\n  category->{ _id, title, "slug": slug.current },\n  material,\n  color,\n  dimensions,\n  stock,\n  featured,\n  assemblyRequired\n}': ALL_PRODUCTS_QUERY_RESULT;
     '*[\n  _type == "product"\n  && featured == true\n  && stock > 0\n] | order(name asc) [0...6] {\n  _id,\n  name,\n  "slug": slug.current,\n  description,\n  price,\n  "images": images[]{ _key, asset->{ _id, url }, hotspot },\n  category->{ _id, title, "slug": slug.current },\n  stock\n}': FEATURED_PRODUCTS_QUERY_RESULT;
     '*[\n  _type == "product"\n  && slug.current == $slug\n][0] {\n  _id,\n  name,\n  "slug": slug.current,\n  description,\n  price,\n  "condition": condition->{ _id, title, "slug": slug.current },\n  "brand": brand->{ _id, title, "slug": slug.current },\n  "model": model->{ _id, title, "slug": slug.current },\n  "images": images[]{ _key, asset->{ _id, url }, hotspot },\n  category->{\n    _id,\n    title,\n    "slug": slug.current,\n    "parentSlug": parentCategory->slug.current,\n    "parentTitle": parentCategory->title\n  },\n  material,\n  color,\n  dimensions,\n  stock,\n  featured,\n  assemblyRequired,\n \n  // \u2500\u2500 Variants \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  "variantGroups": variantGroups[]{\n    type,\n    label,\n    "options": options[]{\n      label,\n      priceAdjustment,\n      isDefault,\n      inStock,\n      hexColor\n    }\n  }\n}': PRODUCT_BY_SLUG_QUERY_RESULT;

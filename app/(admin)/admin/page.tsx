@@ -6,7 +6,7 @@ import {
   ArrowRight, CheckCircle, Clock, XCircle,
 } from "lucide-react";
 
-// ── Quick queries ─────────────────────────────────────────────────────────
+// ── Quick queries (local to this page — not exported, no conflict with orders.ts) ──
 
 const ADMIN_STATS_QUERY = groq`{
   "totalProducts": count(*[_type == "product"]),
@@ -19,7 +19,9 @@ const ADMIN_STATS_QUERY = groq`{
   "totalCategories": count(*[_type == "category"]),
 }`;
 
-const RECENT_ORDERS_QUERY = groq`*[_type == "order"] | order(_createdAt desc) [0...8] {
+// Renamed from RECENT_ORDERS_QUERY → ADMIN_RECENT_ORDERS_QUERY to avoid
+// duplicate with the exported RECENT_ORDERS_QUERY in lib/sanity/queries/orders.ts
+const ADMIN_RECENT_ORDERS_QUERY = groq`*[_type == "order"] | order(_createdAt desc) [0...8] {
   _id,
   _createdAt,
   orderNumber,
@@ -42,9 +44,9 @@ const LOW_STOCK_QUERY = groq`*[_type == "product" && stock > 0 && stock <= 3] | 
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; className: string; icon: React.ReactNode }> = {
-    pending:   { label: "Pending",   className: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",   icon: <Clock className="h-3 w-3" /> },
+    pending:   { label: "Pending",   className: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",        icon: <Clock className="h-3 w-3" /> },
     completed: { label: "Completed", className: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400", icon: <CheckCircle className="h-3 w-3" /> },
-    cancelled: { label: "Cancelled", className: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400", icon: <XCircle className="h-3 w-3" /> },
+    cancelled: { label: "Cancelled", className: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",                icon: <XCircle className="h-3 w-3" /> },
   };
   const s = map[status] ?? map["pending"];
   return (
@@ -60,7 +62,7 @@ export default async function AdminDashboardPage() {
   const [{ data: stats }, { data: recentOrders }, { data: lowStock }] =
     await Promise.all([
       sanityFetch({ query: ADMIN_STATS_QUERY }),
-      sanityFetch({ query: RECENT_ORDERS_QUERY }),
+      sanityFetch({ query: ADMIN_RECENT_ORDERS_QUERY }),  // ← updated
       sanityFetch({ query: LOW_STOCK_QUERY }),
     ]);
 
@@ -84,10 +86,10 @@ export default async function AdminDashboardPage() {
       {/* ── Stat cards ─────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {[
-          { label: "Total Products", value: s?.totalProducts ?? 0, icon: Package, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/20" },
-          { label: "In Stock",       value: s?.inStock ?? 0,        icon: CheckCircle, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
-          { label: "Out of Stock",   value: s?.outOfStock ?? 0,     icon: AlertTriangle, color: "text-red-600 dark:text-red-400", bg: "bg-red-50 dark:bg-red-900/20" },
-          { label: "Total Orders",   value: s?.totalOrders ?? 0,    icon: ShoppingCart, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-900/20" },
+          { label: "Total Products", value: s?.totalProducts ?? 0, icon: Package,       color: "text-blue-600 dark:text-blue-400",     bg: "bg-blue-50 dark:bg-blue-900/20"     },
+          { label: "In Stock",       value: s?.inStock ?? 0,       icon: CheckCircle,   color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
+          { label: "Out of Stock",   value: s?.outOfStock ?? 0,    icon: AlertTriangle, color: "text-red-600 dark:text-red-400",       bg: "bg-red-50 dark:bg-red-900/20"       },
+          { label: "Total Orders",   value: s?.totalOrders ?? 0,   icon: ShoppingCart,  color: "text-amber-600 dark:text-amber-400",   bg: "bg-amber-50 dark:bg-amber-900/20"   },
         ].map(({ label, value, icon: Icon, color, bg }) => (
           <div key={label} className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
             <div className="flex items-center justify-between">
@@ -104,9 +106,9 @@ export default async function AdminDashboardPage() {
       {/* ── Secondary stats ────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {[
-          { label: "Pending Orders",    value: s?.pendingOrders ?? 0 },
+          { label: "Pending Orders",    value: s?.pendingOrders ?? 0   },
           { label: "Completed Orders",  value: s?.completedOrders ?? 0 },
-          { label: "Featured Products", value: s?.featured ?? 0 },
+          { label: "Featured Products", value: s?.featured ?? 0        },
           { label: "Categories",        value: s?.totalCategories ?? 0 },
         ].map(({ label, value }) => (
           <div key={label} className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
@@ -204,10 +206,10 @@ export default async function AdminDashboardPage() {
         <h2 className="mb-4 font-semibold text-zinc-900 dark:text-zinc-100">Quick Actions</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
-            { label: "Add Product",     href: "/studio/structure/products", icon: Package,      desc: "via Sanity Studio" },
-            { label: "View Inventory",  href: "/admin/inventory",            icon: TrendingUp,   desc: "Manage stock" },
-            { label: "View Orders",     href: "/admin/orders",               icon: ShoppingCart, desc: "Process orders" },
-            { label: "Open Studio",     href: "/studio",                     icon: ArrowRight,   desc: "Full CMS" },
+            { label: "Add Product",    href: "/studio/structure/products", icon: Package,      desc: "via Sanity Studio" },
+            { label: "View Inventory", href: "/admin/inventory",            icon: TrendingUp,   desc: "Manage stock"      },
+            { label: "View Orders",    href: "/admin/orders",               icon: ShoppingCart, desc: "Process orders"    },
+            { label: "Open Studio",    href: "/studio",                     icon: ArrowRight,   desc: "Full CMS"          },
           ].map(({ label, href, icon: Icon, desc }) => (
             <Link
               key={label}

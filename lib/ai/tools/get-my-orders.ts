@@ -7,7 +7,7 @@ import {
   getOrderStatusEmoji,
 } from "@/lib/constants/orderStatus";
 import { formatPrice } from "@/lib/utils";
-import type { ORDERS_BY_USER_QUERYResult } from "@/sanity.types";
+import type { ORDERS_BY_USER_QUERY_RESULT } from "@/sanity.types";
 
 const getMyOrdersSchema = z.object({
   status: z
@@ -53,9 +53,7 @@ export function createGetMyOrdersTool(userId: string | null) {
       "Get the current user's orders. Can optionally filter by order status. Only works for authenticated users.",
     inputSchema: getMyOrdersSchema,
     execute: async ({ status }) => {
-      console.log("[GetMyOrders] Fetching orders for user:", userId, {
-        status,
-      });
+      console.log("[GetMyOrders] Fetching orders for user:", userId, { status });
 
       try {
         const { data: orders } = await sanityFetch({
@@ -66,10 +64,10 @@ export function createGetMyOrdersTool(userId: string | null) {
         console.log("[GetMyOrders] Orders found:", orders.length);
 
         // Filter by status if provided
-        let filteredOrders = orders as ORDERS_BY_USER_QUERYResult;
+        let filteredOrders = orders as ORDERS_BY_USER_QUERY_RESULT;
         if (status) {
           filteredOrders = filteredOrders.filter(
-            (order) => order.status === status
+            (order: ORDERS_BY_USER_QUERY_RESULT[number]) => order.status === status
           );
         }
 
@@ -85,23 +83,25 @@ export function createGetMyOrdersTool(userId: string | null) {
           } satisfies GetMyOrdersResult;
         }
 
-        const formattedOrders: OrderSummary[] = filteredOrders.map((order) => ({
-          id: order._id,
-          orderNumber: order.orderNumber,
-          total: order.total,
-          totalFormatted: order.total ? formatPrice(order.total) : null,
-          status: order.status,
-          statusDisplay: getOrderStatusEmoji(order.status),
-          itemCount: order.itemCount ?? 0,
-          itemNames: (order.itemNames ?? []).filter(
-            (name): name is string => name !== null
-          ),
-          itemImages: (order.itemImages ?? []).filter(
-            (url): url is string => url !== null
-          ),
-          createdAt: order.createdAt,
-          orderUrl: `/orders/${order._id}`,
-        }));
+        const formattedOrders: OrderSummary[] = filteredOrders.map(
+          (order: ORDERS_BY_USER_QUERY_RESULT[number]) => ({
+            id: order._id,
+            orderNumber: order.orderNumber ?? null,
+            total: order.total ?? null,
+            totalFormatted: order.total ? formatPrice(order.total) : null,
+            status: order.status ?? null,
+            statusDisplay: getOrderStatusEmoji(order.status),
+            itemCount: order.itemCount ?? 0,
+            itemNames: (order.itemNames ?? []).filter(
+              (name: string | null): name is string => name !== null
+            ),
+            itemImages: (order.itemImages ?? []).filter(
+              (url: string | null): url is string => url !== null
+            ),
+            createdAt: order.createdAt ?? null,
+            orderUrl: `/orders/${order._id}`,
+          })
+        );
 
         return {
           found: true,
