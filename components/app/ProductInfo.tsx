@@ -33,9 +33,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const variantGroups = (product.variantGroups ?? []) as VariantGroup[];
   const hasVariants   = variantGroups.length > 0;
 
-  const [selectedVariants, setSelectedVariants] = useState<SelectedVariant[]>(
-    () => buildDefaultSelections(variantGroups),
-  );
+  const [selectedVariants, setSelectedVariants] = useState<SelectedVariant[]>([]);
 
   const basePrice    = product.price ?? 0;
   const displayPrice = hasVariants

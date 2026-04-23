@@ -1,6 +1,25 @@
 import { PackageIcon } from "@sanity/icons";
 import { defineField, defineType } from "sanity";
-import { MATERIALS_SANITY_LIST, COLORS_SANITY_LIST } from "@/lib/constants/filters";
+
+// Inlined to avoid @/ Next.js path imports which break Sanity Studio build
+const COLORS_SANITY_LIST = [
+  { title: "Black",       value: "black"       },
+  { title: "White",       value: "white"       },
+  { title: "Silver",      value: "silver"      },
+  { title: "Grey",        value: "grey"        },
+  { title: "Blue",        value: "blue"        },
+  { title: "Space Black", value: "space-black" },
+  { title: "Midnight",    value: "midnight"    },
+  { title: "Starlight",   value: "starlight"   },
+  { title: "Graphite",    value: "graphite"    },
+];
+
+const MATERIALS_SANITY_LIST = [
+  { title: "Metal",    value: "metal"    },
+  { title: "Plastic",  value: "plastic"  },
+  { title: "Aluminum", value: "aluminum" },
+  { title: "Glass",    value: "glass"    },
+];
 
 export const productType = defineType({
   name: "product",
