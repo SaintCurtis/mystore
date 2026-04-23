@@ -10,9 +10,9 @@ import { StockBadge } from "@/components/app/StockBadge";
 import { WishlistButton } from "@/components/app/WishlistButton";
 import { CompareButton } from "@/components/app/CompareButton";
 import { useCurrency } from "@/lib/store/currency-store-provider";
-import type { FILTER_PRODUCTS_BY_NAME_QUERYResult } from "@/sanity.types";
+import type { FILTER_PRODUCTS_BY_NAME_QUERY_RESULT } from "@/sanity.types";
 
-type Product = FILTER_PRODUCTS_BY_NAME_QUERYResult[number];
+type Product = FILTER_PRODUCTS_BY_NAME_QUERY_RESULT[number];
 
 interface ProductCardProps {
   product: Product;
