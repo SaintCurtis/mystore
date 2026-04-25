@@ -19,6 +19,7 @@ import { Footer } from "@/components/app/Footer";
 import { MobileBottomBar } from "@/components/app/MobileBottomBar";
 import { MobileCategoryPills } from "@/components/app/MobileCategoryPills";
 import { BuildMySetupFAB } from "@/components/app/BuildMySetupFAB";
+import { ReferralTracker } from "@/components/app/ReferralTracker"; // ← NEW
 import { Suspense } from "react";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -56,6 +57,10 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                 <WelcomePopup />
                 <Toaster position="bottom-center" />
                 <SanityLive />
+                {/* Tracks ?ref=CODE clicks silently */}
+                <Suspense fallback={null}>
+                  <ReferralTracker />
+                </Suspense>
               </ChatStoreProvider>
             </CurrencyProvider>
           </CompareStoreProvider>

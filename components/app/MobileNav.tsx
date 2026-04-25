@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   X, Menu, Wand2, Package, Monitor, Cpu, Headphones,
-  Zap, Satellite, Video, ShoppingBag, Gamepad2, Home, Heart,
+  Zap, Satellite, Video, ShoppingBag, Gamepad2, Home,
+  Heart, Gift,
 } from "lucide-react";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { ThemeToggle } from "@/components/app/ThemeToggle";
@@ -33,33 +34,20 @@ export function MobileNav() {
   const { openWishlist } = useWishlistActions();
   const scrollYRef = useRef(0);
 
-  // Lock body scroll when open
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
-  // Close on scroll — captures the Y position when drawer opens,
-  // closes if user scrolls more than 40px from that position
   useEffect(() => {
     if (!open) return;
-
     scrollYRef.current = window.scrollY;
-
     function handleScroll() {
-      if (Math.abs(window.scrollY - scrollYRef.current) > 40) {
-        setOpen(false);
-      }
+      if (Math.abs(window.scrollY - scrollYRef.current) > 40) setOpen(false);
     }
-
-    // touchmove fires before scroll on mobile — gives instant feel
-    function handleTouchMove() {
-      setOpen(false);
-    }
-
+    function handleTouchMove() { setOpen(false); }
     window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("touchmove", handleTouchMove, { passive: true });
-
     return () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("touchmove", handleTouchMove);
@@ -70,7 +58,7 @@ export function MobileNav() {
 
   return (
     <>
-      {/* ☰ Hamburger trigger */}
+      {/* Hamburger trigger */}
       <button
         type="button"
         onClick={() => setOpen(true)}
@@ -80,7 +68,7 @@ export function MobileNav() {
         <Menu className="h-5 w-5" />
       </button>
 
-      {/* Backdrop — click or touch outside closes drawer */}
+      {/* Backdrop */}
       {open && (
         <div
           className="fixed inset-0 z-60 bg-black/70"
@@ -120,7 +108,7 @@ export function MobileNav() {
           </button>
         </div>
 
-        {/* Nav items — scrollable */}
+        {/* Nav items */}
         <nav className="flex-1 overflow-y-auto bg-white dark:bg-[#0f0f0f]">
           {NAV_ITEMS.map(({ label, href, icon: Icon, highlight }) => (
             <Link
@@ -149,6 +137,16 @@ export function MobileNav() {
               className="flex items-center gap-3 px-5 py-4 text-sm font-medium border-l-2 border-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1a1a1a] hover:text-zinc-900 dark:hover:text-white transition-colors">
               <Package className="h-4 w-4 text-zinc-400 dark:text-zinc-500" />
               My Orders
+            </Link>
+
+            {/* ── Refer & Earn — highlighted in green to stand out ── */}
+            <Link href="/referral" onClick={close}
+              className="flex items-center gap-3 px-5 py-4 text-sm font-medium border-l-2 border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 transition-colors">
+              <Gift className="h-4 w-4 shrink-0 text-emerald-500 dark:text-emerald-400" />
+              Refer & Earn 🎁
+              <span className="ml-auto rounded-full bg-emerald-500 px-2 py-0.5 text-[9px] font-black text-white uppercase tracking-wide">
+                New
+              </span>
             </Link>
           </SignedIn>
 
