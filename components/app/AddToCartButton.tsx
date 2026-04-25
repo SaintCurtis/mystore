@@ -11,11 +11,11 @@ import type { SelectedVariant } from "@/types/variants";
 interface AddToCartButtonProps {
   productId: string;
   name: string;
-  price: number;                        // already computed (base + variant deltas)
+  price: number;
   image?: string;
   stock: number;
   className?: string;
-  selectedVariants?: SelectedVariant[]; // ← NEW (optional — non-variant products pass nothing)
+  selectedVariants?: SelectedVariant[];
 }
 
 export function AddToCartButton({
@@ -29,41 +29,36 @@ export function AddToCartButton({
 }: AddToCartButtonProps) {
   const { addItem, updateQuantity } = useCartActions();
 
-  // Cart key = productId + variant combo so that e.g. 16GB and 32GB versions
-  // sit as separate line items in the cart.
   const variantKey =
     selectedVariants.length > 0
       ? selectedVariants.map((v) => `${v.type}:${v.label}`).join("|")
       : "";
   const cartItemId = variantKey ? `${productId}__${variantKey}` : productId;
 
-  const cartItem        = useCartItem(cartItemId);
+  const cartItem = useCartItem(cartItemId);
   const [justAdded, setJustAdded] = useState(false);
 
   const quantityInCart = cartItem?.quantity ?? 0;
-  const isOutOfStock   = stock <= 0;
-  const isAtMax        = quantityInCart >= stock;
+  const isOutOfStock = stock <= 0;
+  const isAtMax = quantityInCart >= stock;
 
   const handleAdd = () => {
     if (quantityInCart < stock) {
       addItem(
         {
-          productId: cartItemId,   // unique per variant combo
+          productId: cartItemId,
           name,
-          price,                   // computed price
+          price,
           image,
           ...(selectedVariants.length > 0 && { selectedVariants }),
         },
         1,
       );
-
-      // Human-readable toast — shows which specs were added
       const specSummary =
         selectedVariants.length > 0
           ? ` (${selectedVariants.map((v) => v.label).join(" / ")})`
           : "";
       toast.success(`${name}${specSummary} added to cart`);
-
       setJustAdded(true);
       setTimeout(() => setJustAdded(false), 1800);
     }
@@ -75,7 +70,7 @@ export function AddToCartButton({
     }
   };
 
-  // ── Out of stock ───────────────────────────────────────────
+  // Out of stock
   if (isOutOfStock) {
     return (
       <Button
@@ -90,7 +85,7 @@ export function AddToCartButton({
     );
   }
 
-  // ── Not in cart ────────────────────────────────────────────
+  // Not in cart
   if (quantityInCart === 0) {
     return (
       <Button
@@ -105,20 +100,22 @@ export function AddToCartButton({
       >
         {justAdded ? (
           <>
-            <Check className="mr-2 h-4 w-4" />
-            Added!
+            <Check className="h-4 w-4 shrink-0" />
+            <span className="ml-1.5">Added!</span>
           </>
         ) : (
           <>
-            <ShoppingBag className="mr-2 h-4 w-4" />
-            Add to Cart — ₦{price.toLocaleString()}
+            <ShoppingBag className="h-4 w-4 shrink-0" />
+            {/* Mobile: icon + price only. sm+: full text */}
+            <span className="sm:hidden ml-1.5">₦{price.toLocaleString()}</span>
+            <span className="hidden sm:inline ml-1.5">Add to Cart — ₦{price.toLocaleString()}</span>
           </>
         )}
       </Button>
     );
   }
 
-  // ── In cart — quantity controls ────────────────────────────
+  // In cart — quantity controls
   return (
     <div
       className={cn(

@@ -19,10 +19,16 @@ interface ProductCardProps {
   activeCategory?: string;
 }
 
-function getCategoryLabel(category: Product["category"], activeCategory: string | undefined): string {
+function getCategoryLabel(
+  category: Product["category"],
+  activeCategory: string | undefined,
+): string {
   if (!category) return "";
   if (!activeCategory) return category.title ?? "";
-  const cat = category as typeof category & { parentSlug?: string | null; parentTitle?: string | null };
+  const cat = category as typeof category & {
+    parentSlug?: string | null;
+    parentTitle?: string | null;
+  };
   if (cat.slug === activeCategory) return cat.title ?? "";
   if (cat.parentSlug === activeCategory) return cat.parentTitle ?? cat.title ?? "";
   return cat.title ?? "";
@@ -34,7 +40,8 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
 
   const images = product.images ?? [];
   const mainImageUrl = images[0]?.asset?.url;
-  const displayedImageUrl = hoveredImageIndex !== null ? images[hoveredImageIndex]?.asset?.url : mainImageUrl;
+  const displayedImageUrl =
+    hoveredImageIndex !== null ? images[hoveredImageIndex]?.asset?.url : mainImageUrl;
 
   const stock = product.stock ?? 0;
   const isOutOfStock = stock <= 0;
@@ -42,26 +49,20 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
   const categoryLabel = getCategoryLabel(product.category, activeCategory);
 
   return (
-    <div className={cn(
-      // Base
-      "group relative flex h-full flex-col overflow-hidden rounded-xl sm:rounded-2xl",
-      "transition-all duration-300 ease-out",
-      // Light mode
-      "bg-white ring-1 ring-zinc-200",
-      "hover:-translate-y-1 hover:ring-zinc-300 hover:shadow-xl hover:shadow-zinc-200/80",
-      // Dark mode — blue/cyan neon glow on hover
-      "dark:bg-[#111111] dark:ring-1 dark:ring-[#1f1f1f]",
-      "dark:hover:-translate-y-1.5",
-      "dark:hover:ring-cyan-500/30",
-      "dark:hover:shadow-[0_0_0_1px_rgba(6,182,212,0.2),0_8px_40px_rgba(0,0,0,0.8),0_0_30px_rgba(6,182,212,0.08)]",
-    )}>
-
-      {/* Image area */}
+    <div
+      className={cn(
+        "group relative flex h-full flex-col overflow-hidden rounded-xl sm:rounded-2xl",
+        "transition-all duration-300 ease-out",
+        "bg-white ring-1 ring-zinc-200",
+        "hover:-translate-y-1 hover:ring-zinc-300 hover:shadow-xl hover:shadow-zinc-200/80",
+        "dark:bg-[#111111] dark:ring-1 dark:ring-[#1f1f1f]",
+        "dark:hover:-translate-y-1.5 dark:hover:ring-cyan-500/30",
+        "dark:hover:shadow-[0_0_0_1px_rgba(6,182,212,0.2),0_8px_40px_rgba(0,0,0,0.8),0_0_30px_rgba(6,182,212,0.08)]",
+      )}
+    >
+      {/* ── Image area ── always square for consistency on mobile */}
       <Link href={`/products/${product.slug}`} className="block">
-        <div className={cn(
-          "relative overflow-hidden bg-zinc-100 dark:bg-[#0d0d0d]",
-          hasMultipleImages ? "aspect-square" : "aspect-4/5",
-        )}>
+        <div className="relative aspect-square overflow-hidden bg-zinc-100 dark:bg-[#0d0d0d]">
           {displayedImageUrl ? (
             <Image
               src={displayedImageUrl}
@@ -72,9 +73,18 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
             />
           ) : (
             <div className="flex h-full items-center justify-center text-zinc-300 dark:text-zinc-700">
-              <svg className="h-10 w-10 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1}
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              <svg
+                className="h-10 w-10 opacity-40"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1}
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
               </svg>
             </div>
           )}
@@ -91,14 +101,14 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
 
           {/* Out of stock badge */}
           {isOutOfStock && (
-            <div className="absolute left-2 top-2 sm:left-3 sm:top-3 rounded-full bg-red-500/90 px-2 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-semibold text-white backdrop-blur-sm shadow-sm">
+            <div className="absolute left-2 top-2 rounded-full bg-red-500/90 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm shadow-sm">
               Out of Stock
             </div>
           )}
 
           {/* Category badge */}
           {categoryLabel && !isOutOfStock && (
-            <span className="absolute left-2 top-2 sm:left-3 sm:top-3 max-w-[70%] truncate rounded-full bg-white/85 dark:bg-black/70 px-2 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-medium text-zinc-700 dark:text-zinc-300 backdrop-blur-sm border border-zinc-200/50 dark:border-white/8">
+            <span className="absolute left-2 top-2 max-w-[65%] truncate rounded-full bg-white/85 dark:bg-black/70 px-2 py-0.5 text-[10px] font-medium text-zinc-700 dark:text-zinc-300 backdrop-blur-sm border border-zinc-200/50 dark:border-white/8">
               {categoryLabel}
             </span>
           )}
@@ -116,9 +126,9 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
         </div>
       </Link>
 
-      {/* Thumbnail strip */}
+      {/* ── Thumbnail strip — hidden on mobile to keep card tight ── */}
       {hasMultipleImages && (
-        <div className="flex gap-1.5 border-t border-zinc-100 dark:border-[#1a1a1a] bg-zinc-50 dark:bg-[#0d0d0d] p-2 sm:p-3">
+        <div className="hidden sm:flex gap-1.5 border-t border-zinc-100 dark:border-[#1a1a1a] bg-zinc-50 dark:bg-[#0d0d0d] p-2 sm:p-3">
           {images.map((image, index) => (
             <button
               key={image._key ?? index}
@@ -133,34 +143,39 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
               onMouseLeave={() => setHoveredImageIndex(null)}
             >
               {image.asset?.url && (
-                <Image src={image.asset.url} alt={`${product.name} - view ${index + 1}`} fill className="object-cover" sizes="80px" />
+                <Image
+                  src={image.asset.url}
+                  alt={`${product.name} - view ${index + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="80px"
+                />
               )}
             </button>
           ))}
         </div>
       )}
 
-      {/* Product info */}
-      <div className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
+      {/* ── Product info ── */}
+      <div className="flex flex-1 flex-col gap-1.5 p-2.5 sm:gap-2 sm:p-4">
 
-        {/* Name + price */}
-        <div className="flex flex-col gap-1">
-          <Link href={`/products/${product.slug}`} className="block">
-            <h3 className="font-display line-clamp-2 text-[13px] sm:text-sm font-semibold leading-snug text-zinc-900 dark:text-[#f1f1f1] transition-colors group-hover:text-zinc-700 dark:group-hover:text-white">
-              {product.name}
-            </h3>
-          </Link>
+        {/* Name */}
+        <Link href={`/products/${product.slug}`} className="block">
+          <h3 className="font-display line-clamp-2 text-[12px] sm:text-sm font-semibold leading-snug text-zinc-900 dark:text-[#f1f1f1] transition-colors group-hover:text-zinc-700 dark:group-hover:text-white">
+            {product.name}
+          </h3>
+        </Link>
 
-          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
-            <p className="font-display text-base sm:text-lg font-bold tracking-tight text-zinc-900 dark:text-amber-400 shrink-0">
-              {formatInCurrency(product.price)}
-            </p>
-            <StockBadge productId={product._id} stock={stock} />
-          </div>
+        {/* Price + stock badge */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <p className="font-display text-sm sm:text-lg font-bold tracking-tight text-zinc-900 dark:text-amber-400 shrink-0">
+            {formatInCurrency(product.price)}
+          </p>
+          <StockBadge productId={product._id} stock={stock} />
         </div>
 
         {/* CTAs */}
-        <div className="mt-auto flex flex-col gap-1.5 sm:gap-2">
+        <div className="mt-auto flex flex-col gap-1.5 pt-1">
           <AddToCartButton
             productId={product._id}
             name={product.name ?? "Unknown Product"}
@@ -171,23 +186,26 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
           <Link
             href={`/products/${product.slug}`}
             className={cn(
-              "flex h-8 sm:h-9 w-full items-center justify-center rounded-lg text-[11px] sm:text-xs font-medium transition-all duration-200",
+              "flex h-8 w-full items-center justify-center rounded-lg text-[11px] font-medium transition-all duration-200",
               "border border-zinc-200 text-zinc-500 hover:border-zinc-400 hover:bg-zinc-50 hover:text-zinc-700",
               "dark:border-[#2a2a2a] dark:text-[#a3a3a3] dark:hover:border-cyan-500/30 dark:hover:bg-[#1a1a1a] dark:hover:text-[#f1f1f1]",
             )}
           >
-            View Full Details
+            View Details
           </Link>
 
-          <div className="flex justify-center pt-0.5">
-            <CompareButton product={{
-              productId: product._id,
-              name: product.name ?? "",
-              price: product.price ?? 0,
-              image: mainImageUrl ?? undefined,
-              slug: product.slug ?? "",
-              categoryTitle: product.category?.title ?? undefined,
-            }} />
+          {/* Compare — hidden on mobile to reduce clutter */}
+          <div className="hidden sm:flex justify-center pt-0.5">
+            <CompareButton
+              product={{
+                productId: product._id,
+                name: product.name ?? "",
+                price: product.price ?? 0,
+                image: mainImageUrl ?? undefined,
+                slug: product.slug ?? "",
+                categoryTitle: product.category?.title ?? undefined,
+              }}
+            />
           </div>
         </div>
       </div>

@@ -16,7 +16,11 @@ interface ProductGridProps {
 const INITIAL_LIMIT = 12;
 const LOAD_MORE_COUNT = 12;
 
-export function ProductGrid({ products, activeCategory, limitOnHomepage = false }: ProductGridProps) {
+export function ProductGrid({
+  products,
+  activeCategory,
+  limitOnHomepage = false,
+}: ProductGridProps) {
   const [displayLimit, setDisplayLimit] = useState(INITIAL_LIMIT);
 
   if (products.length === 0) {
@@ -32,25 +36,15 @@ export function ProductGrid({ products, activeCategory, limitOnHomepage = false 
     );
   }
 
-  const visibleProducts = limitOnHomepage ? products.slice(0, displayLimit) : products;
+  const visibleProducts = limitOnHomepage
+    ? products.slice(0, displayLimit)
+    : products;
   const hasMore = limitOnHomepage && displayLimit < products.length;
   const remaining = products.length - displayLimit;
 
   return (
     <div className="flex flex-col gap-8">
-      {/*
-        Grid breakpoints use direct Tailwind classes (not @container)
-        because @container checks the container width, not viewport —
-        and with a 288px sidebar the main area never reaches @xl (80rem).
-
-        Breakpoints:
-        - Mobile  (<640px):  2 columns — tight but usable, shows more products
-        - Tablet  (640-1023px): 2 columns
-        - Desktop (1024px+): 3 columns (with sidebar open)
-        - Wide    (1280px+): 3 columns (sidebar takes space)
-        - XL      (1536px+): 4 columns
-      */}
-      <div className="grid gap-3 grid-cols-2 sm:gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 sm:gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
         {visibleProducts.map((product) => (
           <ProductCard
             key={product._id}

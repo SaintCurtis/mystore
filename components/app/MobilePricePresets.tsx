@@ -3,11 +3,11 @@
 import { useRouter, useSearchParams } from "next/navigation";
 
 const PRESETS = [
-  { label: "Under ₦100K",  min: null,    max: 100000  },
-  { label: "₦100K–₦300K",  min: 100000,  max: 300000  },
-  { label: "₦300K–₦600K",  min: 300000,  max: 600000  },
-  { label: "₦600K–₦1M",    min: 600000,  max: 1000000 },
-  { label: "Above ₦1M",    min: 1000000, max: null     },
+  { label: "Under ₦200K",  min: null,     max: 200000   },
+  { label: "₦200K–₦500K",  min: 200000,   max: 500000   },
+  { label: "₦500K–₦2M",    min: 500000,   max: 2000000  },
+  { label: "₦2M–₦5M",      min: 2000000,  max: 5000000  },
+  { label: "₦5M–₦8M",      min: 5000000,  max: 8000000  },
 ];
 
 export function MobilePricePresets() {
@@ -38,9 +38,10 @@ export function MobilePricePresets() {
   }
 
   return (
-    <div className="md:hidden mb-4">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-600 mb-2">
-        Budget
+    <div className="md:hidden mb-5">
+      {/* Bold visible label */}
+      <p className="text-xs font-extrabold uppercase tracking-widest text-zinc-800 dark:text-zinc-100 mb-2.5">
+        💰 Budget
       </p>
       <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
         {PRESETS.map(({ label, min, max }) => {
@@ -51,15 +52,15 @@ export function MobilePricePresets() {
               type="button"
               onClick={() => handlePreset(min, max)}
               className={`
-                flex shrink-0 items-center rounded-full px-3.5 py-1.5
-                text-xs font-semibold whitespace-nowrap transition-all duration-150 border
+                flex shrink-0 items-center gap-1 rounded-full px-4 py-2
+                text-[13px] font-bold whitespace-nowrap transition-all duration-150 border
                 ${active
-                  ? "bg-amber-500 border-amber-500 text-zinc-950 shadow-sm shadow-amber-500/20"
-                  : "bg-white dark:bg-[#111111] border-zinc-200 dark:border-[#2a2a2a] text-zinc-600 dark:text-[#a3a3a3] hover:border-zinc-300 dark:hover:border-[#3a3a3a]"
+                  ? "bg-amber-500 border-amber-500 text-zinc-950 shadow-md shadow-amber-500/30 scale-105"
+                  : "bg-white dark:bg-[#111111] border-zinc-300 dark:border-[#2a2a2a] text-zinc-700 dark:text-zinc-200 hover:border-amber-400 dark:hover:border-amber-500/50 hover:text-amber-600 dark:hover:text-amber-400"
                 }
               `}
             >
-              {active && <span className="mr-1">✓</span>}
+              {active && <span className="text-zinc-950">✓</span>}
               {label}
             </button>
           );
