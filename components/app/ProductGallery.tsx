@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
@@ -17,12 +17,16 @@ interface ProductGalleryProps {
 
 export function ProductGallery({ images, productName }: ProductGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [zoomed, setZoomed] = useState(false);
 
-  // ── Touch / swipe state ──────────────────────────────────────────────────
+  // ── Drag/swipe animation state ──────────────────────────────────────────
+  const [dragX, setDragX] = useState(0);           // live offset while dragging
+  const [isAnimating, setIsAnimating] = useState(false); // true during snap
+  const [slideDir, setSlideDir] = useState<"left" | "right" | null>(null);
+
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
   const isDragging = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   if (!images || images.length === 0) {
     return (
@@ -35,12 +39,26 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
   const total = images.length;
   const selectedImage = images[selectedIndex];
 
-  function goTo(index: number) {
-    setSelectedIndex((index + total) % total);
+  function goTo(index: number, direction: "left" | "right") {
+    if (isAnimating) return;
+    const next = (index + total) % total;
+    setSlideDir(direction);
+    setIsAnimating(true);
+    setDragX(0);
+    setTimeout(() => {
+      setSelectedIndex(next);
+      setSlideDir(null);
+      setIsAnimating(false);
+    }, 280);
   }
 
-  function prev() { goTo(selectedIndex - 1); }
-  function next() { goTo(selectedIndex + 1); }
+  function prev() { goTo(selectedIndex - 1, "right"); }
+  function next() { goTo(selectedIndex + 1, "left"); }
+
+  function goToIndex(index: number) {
+    if (index === selectedIndex || isAnimating) return;
+    goTo(index, index > selectedIndex ? "left" : "right");
+  }
 
   // ── Touch handlers ───────────────────────────────────────────────────────
   function handleTouchStart(e: React.TouchEvent) {
@@ -53,22 +71,63 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
     if (touchStartX.current === null || touchStartY.current === null) return;
     const dx = e.touches[0].clientX - touchStartX.current;
     const dy = e.touches[0].clientY - touchStartY.current;
-    // Only mark as horizontal drag if x movement is dominant
-    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) {
-      isDragging.current = true;
+
+    if (!isDragging.current) {
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) {
+        isDragging.current = true;
+      } else if (Math.abs(dy) > 10) {
+        // vertical scroll — don't hijack
+        return;
+      }
+    }
+
+    if (isDragging.current) {
+      e.preventDefault();
+      // Rubber-band resistance at edges
+      const resistance = total === 1 ? 0.1 : 0.85;
+      setDragX(dx * resistance);
     }
   }
 
   function handleTouchEnd(e: React.TouchEvent) {
     if (touchStartX.current === null) return;
     const dx = e.changedTouches[0].clientX - touchStartX.current;
-    if (isDragging.current && Math.abs(dx) > 40) {
+
+    if (isDragging.current && Math.abs(dx) > 50) {
+      // Committed swipe
       if (dx < 0) next();
       else prev();
+    } else {
+      // Snap back with spring
+      setIsAnimating(true);
+      setDragX(0);
+      setTimeout(() => setIsAnimating(false), 300);
     }
+
     touchStartX.current = null;
     touchStartY.current = null;
     isDragging.current = false;
+  }
+
+  // ── Slide animation transform ─────────────────────────────────────────
+  // During drag: follow finger
+  // During slide: animate out/in
+  function getTransform() {
+    if (dragX !== 0 && !isAnimating) {
+      return `translateX(${dragX}px)`;
+    }
+    if (isAnimating && slideDir === "left") {
+      return `translateX(-100%)`;
+    }
+    if (isAnimating && slideDir === "right") {
+      return `translateX(100%)`;
+    }
+    return `translateX(0px)`;
+  }
+
+  function getTransition() {
+    if (dragX !== 0 && !isAnimating) return "none"; // live drag — no transition
+    return "transform 280ms cubic-bezier(0.25, 0.46, 0.45, 0.94)";
   }
 
   return (
@@ -76,33 +135,87 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
 
       {/* ── Main image frame ─────────────────────────────────────────────── */}
       <div className="group relative">
-        {/* Outer decorative frame */}
         <div className="relative overflow-hidden rounded-2xl border-2 border-zinc-200 dark:border-[#1f1f1f] bg-white dark:bg-[#0d0d0d] shadow-md shadow-zinc-200/60 dark:shadow-black/40">
 
-          {/* Aspect ratio container */}
+          {/* Aspect ratio container — clips the sliding images */}
           <div
-            className="relative aspect-square select-none cursor-grab active:cursor-grabbing"
+            ref={containerRef}
+            className="relative aspect-square select-none overflow-hidden cursor-grab active:cursor-grabbing"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            {selectedImage?.asset?.url ? (
-              <Image
-                src={selectedImage.asset.url}
-                alt={productName ?? "Product image"}
-                fill
-                className="object-contain p-4 transition-opacity duration-300"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                priority
-                draggable={false}
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center text-zinc-400 text-sm">
-                No image
+            {/* Sliding image wrapper */}
+            <div
+              style={{
+                transform: getTransform(),
+                transition: getTransition(),
+                willChange: "transform",
+              }}
+              className="absolute inset-0"
+            >
+              {selectedImage?.asset?.url ? (
+                <Image
+                  src={selectedImage.asset.url}
+                  alt={productName ?? "Product image"}
+                  fill
+                  className="object-contain p-4"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  priority
+                  draggable={false}
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center text-zinc-400 text-sm">
+                  No image
+                </div>
+              )}
+            </div>
+
+            {/* Peek of next image during drag — right side */}
+            {dragX < -20 && selectedIndex < total - 1 && (
+              <div
+                style={{
+                  transform: `translateX(calc(100% + ${dragX}px))`,
+                  transition: "none",
+                }}
+                className="absolute inset-0 opacity-60"
+              >
+                {images[selectedIndex + 1]?.asset?.url && (
+                  <Image
+                    src={images[selectedIndex + 1].asset!.url!}
+                    alt="Next"
+                    fill
+                    className="object-contain p-4"
+                    sizes="50vw"
+                    draggable={false}
+                  />
+                )}
               </div>
             )}
 
-            {/* Left / Right arrow buttons — visible on hover (desktop) */}
+            {/* Peek of prev image during drag — left side */}
+            {dragX > 20 && selectedIndex > 0 && (
+              <div
+                style={{
+                  transform: `translateX(calc(-100% + ${dragX}px))`,
+                  transition: "none",
+                }}
+                className="absolute inset-0 opacity-60"
+              >
+                {images[selectedIndex - 1]?.asset?.url && (
+                  <Image
+                    src={images[selectedIndex - 1].asset!.url!}
+                    alt="Previous"
+                    fill
+                    className="object-contain p-4"
+                    sizes="50vw"
+                    draggable={false}
+                  />
+                )}
+              </div>
+            )}
+
+            {/* Arrow buttons — desktop hover */}
             {total > 1 && (
               <>
                 <button
@@ -124,43 +237,50 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
               </>
             )}
 
-            {/* Image counter badge — top right */}
+            {/* Counter badge */}
             {total > 1 && (
-              <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-black/50 px-2.5 py-1 backdrop-blur-sm">
+              <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-black/50 px-2.5 py-1 backdrop-blur-sm z-10">
                 <span className="text-[11px] font-semibold text-white">
                   {selectedIndex + 1} / {total}
                 </span>
               </div>
             )}
 
-            {/* Zoom hint — bottom left, desktop only */}
+            {/* Swipe hint — mobile only, fades after first swipe */}
+            {total > 1 && dragX === 0 && !isAnimating && selectedIndex === 0 && (
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 sm:hidden flex items-center gap-1.5 rounded-full bg-black/40 px-3 py-1 backdrop-blur-sm animate-pulse">
+                <span className="text-[10px] text-white/90 font-medium">← swipe →</span>
+              </div>
+            )}
+
+            {/* Zoom hint — desktop */}
             <div className="absolute bottom-3 left-3 hidden sm:flex items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <ZoomIn className="h-3 w-3 text-white/80" />
               <span className="text-[10px] text-white/80 font-medium">Click to zoom</span>
             </div>
           </div>
 
-          {/* Amber accent line at bottom of frame */}
+          {/* Amber accent line */}
           <div className="h-0.5 w-full bg-linear-to-r from-transparent via-amber-500/60 to-transparent" />
         </div>
 
-        {/* Subtle outer glow on active */}
+        {/* Outer glow ring */}
         <div className="pointer-events-none absolute -inset-px rounded-2xl ring-1 ring-amber-500/10" />
       </div>
 
-      {/* ── Dot indicators — mobile only ────────────────────────────────── */}
+      {/* ── Dot indicators — mobile ──────────────────────────────────────── */}
       {total > 1 && (
         <div className="flex items-center justify-center gap-1.5 sm:hidden">
           {images.map((_, i) => (
             <button
               key={i}
               type="button"
-              onClick={() => setSelectedIndex(i)}
+              onClick={() => goToIndex(i)}
               className={cn(
-                "rounded-full transition-all duration-200",
+                "rounded-full transition-all duration-300",
                 i === selectedIndex
                   ? "h-2 w-6 bg-amber-500"
-                  : "h-2 w-2 bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-600"
+                  : "h-2 w-2 bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400",
               )}
               aria-label={`Go to image ${i + 1}`}
             />
@@ -175,14 +295,14 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
             <button
               key={image._key}
               type="button"
-              onClick={() => setSelectedIndex(index)}
+              onClick={() => goToIndex(index)}
               aria-label={`View image ${index + 1}`}
               aria-pressed={selectedIndex === index}
               className={cn(
                 "relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 transition-all duration-200",
                 selectedIndex === index
                   ? "border-amber-500 shadow-sm shadow-amber-500/20 scale-105"
-                  : "border-zinc-200 dark:border-[#1f1f1f] hover:border-zinc-400 dark:hover:border-[#3a3a3a] opacity-70 hover:opacity-100"
+                  : "border-zinc-200 dark:border-[#1f1f1f] hover:border-zinc-400 dark:hover:border-[#3a3a3a] opacity-70 hover:opacity-100",
               )}
             >
               {image.asset?.url ? (
@@ -194,11 +314,8 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                   sizes="64px"
                 />
               ) : (
-                <div className="flex h-full items-center justify-center text-[10px] text-zinc-400">
-                  N/A
-                </div>
+                <div className="flex h-full items-center justify-center text-[10px] text-zinc-400">N/A</div>
               )}
-              {/* Active overlay shimmer */}
               {selectedIndex === index && (
                 <div className="absolute inset-0 bg-amber-500/5 rounded-xl" />
               )}
@@ -207,20 +324,20 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
         </div>
       )}
 
-      {/* ── Mobile thumbnail strip ───────────────────────────────────────── */}
+      {/* ── Thumbnail strip — mobile ─────────────────────────────────────── */}
       {total > 1 && (
         <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 sm:hidden">
           {images.map((image, index) => (
             <button
               key={image._key}
               type="button"
-              onClick={() => setSelectedIndex(index)}
+              onClick={() => goToIndex(index)}
               aria-label={`View image ${index + 1}`}
               className={cn(
                 "relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border-2 transition-all duration-200",
                 selectedIndex === index
-                  ? "border-amber-500 shadow-sm shadow-amber-500/20"
-                  : "border-zinc-200 dark:border-[#1f1f1f] opacity-60 hover:opacity-100"
+                  ? "border-amber-500 shadow-md shadow-amber-500/30 scale-105"
+                  : "border-zinc-200 dark:border-[#1f1f1f] opacity-60 hover:opacity-100",
               )}
             >
               {image.asset?.url ? (
@@ -232,9 +349,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                   sizes="56px"
                 />
               ) : (
-                <div className="flex h-full items-center justify-center text-[10px] text-zinc-400">
-                  N/A
-                </div>
+                <div className="flex h-full items-center justify-center text-[10px] text-zinc-400">N/A</div>
               )}
             </button>
           ))}
