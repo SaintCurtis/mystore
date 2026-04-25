@@ -1,16 +1,19 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Plus_Jakarta_Sans, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
-// ── Single font: Inter for everything ─────────────────────────────────────
-// Inter is clean, modern, highly legible at all sizes — ideal for e-commerce.
-// We load it once and assign it to both --font-display and --font-body so
-// every className (font-display, font-body, font-sans) uses the same typeface.
-const inter = Inter({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
-  variable: "--font-inter",
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-body",
   display: "swap",
 });
 
@@ -81,17 +84,13 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
-        {/*
-          Theme script — runs synchronously before React hydrates.
-          DEFAULT IS NOW LIGHT MODE. Only applies dark if user explicitly chose it.
-        */}
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'){document.documentElement.classList.add('dark')}else{document.documentElement.classList.remove('dark')}}catch(e){document.documentElement.classList.remove('dark')}})();`,
           }}
         />
       </head>
-      <body className={`${inter.variable} antialiased transition-colors duration-300`}>
+      <body className={`${jakarta.variable} ${dmSans.variable} font-body antialiased transition-colors duration-300`}>
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

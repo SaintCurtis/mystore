@@ -107,15 +107,23 @@ export function ProductInfo({ product }: ProductInfoProps) {
       )}
 
       {/* ── Variant selector ── inserted between description and CTAs */}
-      {hasVariants && (
-        <div className="mt-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/40 p-4">
-          <VariantSelector
-            groups={variantGroups}
-            selected={selectedVariants}
-            onChange={setSelectedVariants}
-          />
-        </div>
-      )}
+     {hasVariants && (
+  <div className="mt-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/40 p-4">
+    <div className="mb-4 flex items-center gap-2 border-b border-zinc-200 dark:border-zinc-700/60 pb-3">
+      <span className="text-base font-bold text-zinc-900 dark:text-zinc-100">
+        Choose a Variant
+      </span>
+      <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">
+        Optional upgrade
+      </span>
+    </div>
+    <VariantSelector
+      groups={variantGroups}
+      selected={selectedVariants}
+      onChange={setSelectedVariants}
+    />
+  </div>
+)}
 
       {/* CTAs */}
       <div className="mt-8 flex flex-col gap-3">

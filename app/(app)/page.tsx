@@ -21,6 +21,7 @@ import { HeroSection } from "@/components/app/HeroSection";
 import { MobileTrustBar } from "@/components/app/MobileTrustBar";
 import { TestimonialsCarousel } from "@/components/app/TestimonialsCarousel";
 import { AboutSection } from "@/components/app/AboutSection";
+import { MobilePricePresets } from "@/components/app/MobilePricePresets";
 
 const DRILLDOWN_ROOTS = ["monitors", "content-creation-tools", "computers", "accessories"] as const;
 
@@ -154,7 +155,6 @@ export default async function HomePage({ searchParams }: PageProps) {
 
       {isHomepage && <HeroSection />}
 
-      {/* 📱 Mobile trust bar — shows right after hero on mobile only */}
       {isHomepage && <MobileTrustBar />}
 
       {isHomepage && featuredProducts.length > 0 && (
@@ -186,6 +186,10 @@ export default async function HomePage({ searchParams }: PageProps) {
 
       {/* Product Grid */}
       <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8 sm:px-6 lg:px-8">
+        {/* Mobile budget filter presets */}
+        <Suspense fallback={null}>
+          <MobilePricePresets />
+        </Suspense>
         <ProductSection
           categories={categories}
           products={products}

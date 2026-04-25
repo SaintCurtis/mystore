@@ -17,6 +17,9 @@ import { WelcomePopup } from "@/components/app/WelcomePopup";
 import { AppShell } from "@/components/app/AppShell";
 import { Footer } from "@/components/app/Footer";
 import { MobileBottomBar } from "@/components/app/MobileBottomBar";
+import { MobileCategoryPills } from "@/components/app/MobileCategoryPills";
+import { BuildMySetupFAB } from "@/components/app/BuildMySetupFAB";
+import { Suspense } from "react";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -34,14 +37,16 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                 <AppShell>
                   <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#0a0a0a] transition-colors duration-200">
                     <Header />
+                    {/* Sticky horizontal category pills — mobile only */}
+                    <Suspense fallback={<div className="h-10 md:hidden" />}>
+                      <MobileCategoryPills />
+                    </Suspense>
                     <main className="flex-1">{children}</main>
                     <Footer />
                   </div>
                 </AppShell>
-
-                {/* Mobile sticky bottom navigation bar */}
                 <MobileBottomBar />
-
+                <BuildMySetupFAB />
                 <CartSheet />
                 <WishlistSheet />
                 <ChatSheet />
