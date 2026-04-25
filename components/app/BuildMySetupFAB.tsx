@@ -1,26 +1,43 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Wand2 } from "lucide-react";
 
 export function BuildMySetupFAB() {
   const [visible, setVisible] = useState(false);
+  const [nearFooter, setNearFooter] = useState(false);
 
   useEffect(() => {
     function handleScroll() {
-      setVisible(window.scrollY > 400);
+      const scrollY = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const docHeight = document.documentElement.scrollHeight;
+
+      // Show after 400px scroll
+      setVisible(scrollY > 400);
+
+      // Hide when within 300px of the bottom of the page (footer area)
+      const distanceFromBottom = docHeight - scrollY - windowHeight;
+      setNearFooter(distanceFromBottom < 300);
     }
+
     window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // run once on mount
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const shouldShow = visible && !nearFooter;
 
   return (
     <div
       className={`
-        fixed left-4 z-40 md:hidden transition-all duration-300
-        ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}
+        fixed left-4 z-40 md:hidden transition-all duration-500
         bottom-20
+        ${shouldShow
+          ? "opacity-100 translate-y-0 pointer-events-auto"
+          : "opacity-0 translate-y-4 pointer-events-none"
+        }
       `}
     >
       <Link
