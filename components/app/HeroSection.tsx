@@ -60,65 +60,71 @@ export function HeroSection() {
             <div className={`mb-5 inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/8 px-3 py-1.5 transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
               <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
               <span className="text-xs font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400 sm:hidden">
-                 BN: 9245886 · Est. 2019
+                BN: 9245886 · Est. 2019
               </span>
               <span className="text-xs font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400 hidden sm:inline">
                 BN: 9245886 · Est. 2019 · Computer Sales & Engineering
               </span>
             </div>
 
-            {/* ── Headline ──────────────────────────────────────────────────
-                Friend's notes:
-                - "Premium" stays as-is (extrabold)
-                - Rotating word → font-bold (was already amber but now explicitly bold)
-                - "Sold by Someone Who" → stays zinc-500 (subdued)
-                - "Actually Understands Them." → font-semibold (friend's request)
-            ──────────────────────────────────────────────────────────────── */}
-            <h1 className={`font-display leading-[1.05] tracking-tight text-zinc-900 dark:text-[#f1f1f1]
-              text-[2.2rem] sm:text-5xl lg:text-6xl xl:text-7xl
+            {/* ── Headline ── */}
+            <h1 className={`font-display leading-[1.08] tracking-tight text-zinc-900 dark:text-[#f1f1f1]
               transition-all duration-700 delay-100
               ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
 
-              {/* "Premium" — extrabold */}
-              <span className="font-extrabold">Premium </span>
-
-              {/* Rotating word — bold + amber */}
-              <span className="relative inline-block">
-                <span
-                  className={`font-bold text-amber-500 dark:text-amber-400 transition-all duration-350 ${
-                    visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3"
-                  }`}
-                  style={{ display: "inline-block" }}
-                >
-                  {ROTATING_WORDS[wordIndex]}
+              {/* Mobile headline — short & punchy */}
+              <span className="block sm:hidden">
+                <span className="text-[2rem] font-extrabold leading-tight">
+                  The Smartest Way
+                  <br />
+                  to Buy{" "}
+                  <span
+                    className={`text-amber-500 dark:text-amber-400 transition-all duration-350 inline-block ${
+                      visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
+                    }`}
+                  >
+                    {ROTATING_WORDS[wordIndex]}
+                  </span>
+                  <br />
+                  <span className="relative">
+                    in Nigeria
+                    <svg aria-hidden className="absolute -bottom-1.5 left-0 w-full overflow-visible" viewBox="0 0 300 10" fill="none" preserveAspectRatio="none">
+                      <path d="M0 8 Q75 2 150 6 Q225 10 300 4" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                    </svg>
+                  </span>
+                  .
                 </span>
               </span>
 
-              <br />
-
-              {/* Mobile line */}
-              <span className="font-semibold text-zinc-500 dark:text-[#a3a3a3] sm:hidden">
-                For People Who Value It.
+              {/* Desktop headline — fuller */}
+              <span className="hidden sm:block text-5xl lg:text-6xl xl:text-7xl">
+                <span className="font-extrabold">The Smartest Way</span>
+                <br />
+                <span className="font-extrabold">to Buy </span>
+                <span className="relative inline-block">
+                  <span
+                    className={`font-bold text-amber-500 dark:text-amber-400 transition-all duration-350 inline-block ${
+                      visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3"
+                    }`}
+                  >
+                    {ROTATING_WORDS[wordIndex]}
+                  </span>
+                </span>
+                <br />
+                <span className="font-semibold text-zinc-500 dark:text-[#a3a3a3]">in </span>
+                <span className="relative font-semibold text-zinc-700 dark:text-[#d4d4d4]">
+                  Nigeria
+                  <svg aria-hidden className="absolute -bottom-2 left-0 w-full overflow-visible" viewBox="0 0 500 10" fill="none" preserveAspectRatio="none">
+                    <path d="M0 8 Q125 2 250 6 Q375 10 500 4" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                  </svg>
+                </span>
+                <span className="font-semibold text-zinc-500 dark:text-[#a3a3a3]">.</span>
               </span>
-
-              {/* Desktop lines */}
-              <span className="hidden sm:inline font-normal text-zinc-400 dark:text-[#6b6b6b]">
-                Sold by Someone Who
-              </span>
-              <br className="hidden sm:block" />
-              {/* ✅ "Actually Understands Them" → font-semibold (friend's request) */}
-              <span className="hidden sm:inline font-semibold text-zinc-600 dark:text-[#a3a3a3] relative">
-                Actually Understands Them
-                <svg aria-hidden className="absolute -bottom-2 left-0 w-full overflow-visible" viewBox="0 0 500 10" fill="none" preserveAspectRatio="none">
-                  <path d="M0 8 Q125 2 250 6 Q375 10 500 4" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-                </svg>
-              </span>
-              <span className="hidden sm:inline font-semibold text-zinc-600 dark:text-[#a3a3a3]">.</span>
             </h1>
 
-            {/* ✅ Tagline — italic for elegance */}
+            {/* Tagline */}
             <p className={`mt-5 text-sm font-semibold italic text-amber-600 dark:text-amber-400 sm:text-lg transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
-              Built with engineering insight. Delivered with care.
+              Engineer-verified. Warranty on everything. Since 2019.
             </p>
 
             {/* Sub-copy desktop */}
@@ -131,7 +137,7 @@ export function HeroSection() {
 
             {/* Sub-copy mobile */}
             <p className={`mt-2 text-sm leading-6 text-zinc-500 dark:text-[#a3a3a3] sm:hidden transition-all duration-700 delay-300 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
-              CAC-registered. Engineer-verified. Warranty on everything. Ships worldwide.
+              Engineer-verified. CAC-registered. Ships worldwide.
             </p>
 
             {/* CTAs */}
