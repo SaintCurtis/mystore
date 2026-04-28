@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ShieldCheck, RotateCcw, Globe, Tag } from "lucide-react";
+import { ShieldCheck, RotateCcw, Globe, Tag, Zap } from "lucide-react";
 import { AddToCartButton } from "@/components/app/AddToCartButton";
 import { AskAISimilarButton } from "@/components/app/AskAISimilarButton";
 import { StockBadge } from "@/components/app/StockBadge";
@@ -13,6 +13,9 @@ import { VariantSelector } from "@/components/app/VariantSelector";
 import { StickyAddToCart } from "@/components/app/StickyAddToCart";
 import { recordView } from "@/lib/hooks/useRecentlyViewed";
 import { useCurrency } from "@/lib/store/currency-store-provider";
+import { useCartActions } from "@/lib/store/cart-store-provider";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   buildDefaultSelections,
   computeVariantPrice,
@@ -29,8 +32,10 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const imageUrl = product.images?.[0]?.asset?.url;
   const stock    = product.stock ?? 0;
   const { formatInCurrency } = useCurrency();
+  const { addItem } = useCartActions();
+  const router = useRouter();
 
-  // ── Variants ─────────────────────────────────────────────────────────────
+  // ── Variants ──────────────────────────────────────────────────────────────
   const variantGroups = ((product as any).variantGroups ?? []) as VariantGroup[];
   const hasVariants   = variantGroups.length > 0;
 
@@ -43,7 +48,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
   const priceChanged = hasVariants && displayPrice !== basePrice;
 
-  // ── Ref for sticky bar — observes the CTA area ────────────────────────────
+  // ── Ref for sticky bar ────────────────────────────────────────────────────
   const ctaRef = useRef<HTMLDivElement>(null);
 
   // ── Recently viewed ───────────────────────────────────────────────────────
@@ -62,6 +67,29 @@ export function ProductInfo({ product }: ProductInfoProps) {
     typeof window !== "undefined"
       ? window.location.href
       : `https://mystore-drab-nine.vercel.app/products/${product.slug}`;
+
+  // ── Buy Now handler ───────────────────────────────────────────────────────
+  // Adds item to cart then navigates straight to checkout
+  const handleBuyNow = () => {
+    const variantKey =
+      selectedVariants.length > 0
+        ? selectedVariants.map((v) => `${v.type}:${v.label}`).join("|")
+        : "";
+    const cartItemId = variantKey ? `${product._id}__${variantKey}` : product._id;
+
+    addItem(
+      {
+        productId: cartItemId,
+        name: product.name ?? "Unknown Product",
+        price: displayPrice,
+        image: imageUrl ?? undefined,
+        ...(selectedVariants.length > 0 && { selectedVariants }),
+      },
+      1,
+    );
+    toast.success("Proceeding to checkout…");
+    router.push("/checkout");
+  };
 
   return (
     <>
@@ -83,7 +111,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
           {product.name}
         </h1>
 
-        {/* Price + stock */}
+        {/* Price + stock — shown ONCE */}
         <div className="mt-5 flex items-center gap-4">
           <div className="flex flex-col gap-0.5">
             <p className="font-display text-3xl font-bold tracking-tight text-zinc-900 dark:text-amber-400">
@@ -129,29 +157,62 @@ export function ProductInfo({ product }: ProductInfoProps) {
           </div>
         )}
 
-        {/* CTAs — ref attached here so sticky bar knows when this is off screen */}
+        {/* ── CTAs ── */}
         <div ref={ctaRef} className="mt-8 flex flex-col gap-3">
-          <AddToCartButton
-            productId={product._id}
-            name={product.name ?? "Unknown Product"}
-            price={displayPrice}
-            image={imageUrl ?? undefined}
-            stock={stock}
-            selectedVariants={selectedVariants}
-          />
 
-          <div className="grid grid-cols-2 gap-2">
-            <WishlistButton
+          {stock > 0 ? (
+            <>
+              {/* Primary row: Buy Now + Add to Cart */}
+              <div className="flex gap-2">
+                {/* Buy Now — amber, full width, goes to checkout */}
+                <button
+                  type="button"
+                  onClick={handleBuyNow}
+                  className="flex flex-1 h-12 items-center justify-center gap-2 rounded-xl bg-amber-500 text-zinc-950 font-display text-sm font-bold tracking-wide shadow-lg shadow-amber-500/25 hover:bg-amber-400 hover:shadow-amber-400/30 transition-all duration-200 active:scale-[0.98]"
+                >
+                  <Zap className="h-4 w-4 shrink-0" />
+                  Buy Now
+                </button>
+
+                {/* Add to Cart — dark, icon + label */}
+                <AddToCartButton
+                  productId={product._id}
+                  name={product.name ?? "Unknown Product"}
+                  price={displayPrice}
+                  image={imageUrl ?? undefined}
+                  stock={stock}
+                  selectedVariants={selectedVariants}
+                  showLabel={true}
+                  className="flex-1 h-12 rounded-xl text-sm"
+                />
+              </div>
+
+              {/* Secondary row */}
+              <div className="grid grid-cols-2 gap-2">
+                <WishlistButton
+                  productId={product._id}
+                  name={product.name ?? ""}
+                  price={displayPrice}
+                  image={imageUrl ?? undefined}
+                  slug={product.slug ?? ""}
+                  categoryTitle={product.category?.title ?? undefined}
+                  variant="inline"
+                />
+                <AskAISimilarButton productName={product.name ?? "this product"} />
+              </div>
+            </>
+          ) : (
+            /* Out of stock */
+            <AddToCartButton
               productId={product._id}
-              name={product.name ?? ""}
+              name={product.name ?? "Unknown Product"}
               price={displayPrice}
               image={imageUrl ?? undefined}
-              slug={product.slug ?? ""}
-              categoryTitle={product.category?.title ?? undefined}
-              variant="inline"
+              stock={stock}
+              selectedVariants={selectedVariants}
+              showLabel={true}
             />
-            <AskAISimilarButton productName={product.name ?? "this product"} />
-          </div>
+          )}
 
           <WhatsAppShare
             productName={product.name ?? ""}
@@ -200,7 +261,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
         )}
       </div>
 
-      {/* Sticky Add to Cart — mobile only, appears when CTA scrolls out of view */}
+      {/* Sticky Add to Cart — mobile only */}
       <StickyAddToCart
         productId={product._id}
         name={product.name ?? "Unknown Product"}

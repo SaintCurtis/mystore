@@ -3,13 +3,14 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Eye } from "lucide-react";
+import { Eye, Zap, ShoppingBag, Check, Plus, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AddToCartButton } from "@/components/app/AddToCartButton";
 import { StockBadge } from "@/components/app/StockBadge";
 import { WishlistButton } from "@/components/app/WishlistButton";
 import { CompareButton } from "@/components/app/CompareButton";
 import { useCurrency } from "@/lib/store/currency-store-provider";
+import { useCartActions, useCartItem } from "@/lib/store/cart-store-provider";
+import { toast } from "sonner";
 import type { FILTER_PRODUCTS_BY_NAME_QUERY_RESULT } from "@/sanity.types";
 
 type Product = FILTER_PRODUCTS_BY_NAME_QUERY_RESULT[number];
@@ -36,7 +37,9 @@ function getCategoryLabel(
 
 export function ProductCard({ product, activeCategory }: ProductCardProps) {
   const [hoveredImageIndex, setHoveredImageIndex] = useState<number | null>(null);
+  const [justAdded, setJustAdded] = useState(false);
   const { formatInCurrency } = useCurrency();
+  const { addItem, updateQuantity } = useCartActions();
 
   const images = product.images ?? [];
   const mainImageUrl = images[0]?.asset?.url;
@@ -47,6 +50,37 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
   const isOutOfStock = stock <= 0;
   const hasMultipleImages = images.length > 1;
   const categoryLabel = getCategoryLabel(product.category, activeCategory);
+
+  // Live cart state — Zustand persists this across renders ✅
+  const cartItem = useCartItem(product._id);
+  const quantityInCart = cartItem?.quantity ?? 0;
+  const isInCart = quantityInCart > 0;
+  const isAtMax = quantityInCart >= stock;
+
+  const handleAddToCart = () => {
+    if (quantityInCart < stock) {
+      addItem(
+        { productId: product._id, name: product.name ?? "", price: product.price ?? 0, image: mainImageUrl ?? undefined },
+        1,
+      );
+      toast.success(`${product.name} added to cart`);
+      setJustAdded(true);
+      setTimeout(() => setJustAdded(false), 1800);
+    }
+  };
+
+  const handleIncrement = () => {
+    if (quantityInCart < stock) {
+      addItem(
+        { productId: product._id, name: product.name ?? "", price: product.price ?? 0, image: mainImageUrl ?? undefined },
+        1,
+      );
+    }
+  };
+
+  const handleDecrement = () => {
+    if (quantityInCart > 0) updateQuantity(product._id, quantityInCart - 1);
+  };
 
   return (
     <div
@@ -60,7 +94,7 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
         "dark:hover:shadow-[0_0_0_1px_rgba(6,182,212,0.2),0_8px_40px_rgba(0,0,0,0.8),0_0_30px_rgba(6,182,212,0.08)]",
       )}
     >
-      {/* ── Image area ── always square for consistency on mobile */}
+      {/* ── Image ── */}
       <Link href={`/products/${product.slug}`} className="block">
         <div className="relative aspect-square overflow-hidden bg-zinc-100 dark:bg-[#0d0d0d]">
           {displayedImageUrl ? (
@@ -72,48 +106,34 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
           ) : (
-            <div className="flex h-full items-center justify-center text-zinc-300 dark:text-zinc-700">
-              <svg
-                className="h-10 w-10 opacity-40"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1}
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
+            <div className="flex h-full items-center justify-center">
+              <svg className="h-10 w-10 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1}
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
           )}
 
-          {/* Hover overlay */}
           <div className="absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-          {/* View details pill */}
           <div className="absolute inset-x-0 bottom-3 flex justify-center opacity-0 translate-y-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
             <span className="flex items-center gap-1.5 rounded-full bg-black/40 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur-md border border-white/10">
               <Eye className="h-2.5 w-2.5" /> View Details
             </span>
           </div>
 
-          {/* Out of stock badge */}
           {isOutOfStock && (
-            <div className="absolute left-2 top-2 rounded-full bg-red-500/90 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm shadow-sm">
+            <div className="absolute left-2 top-2 rounded-full bg-red-500/90 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
               Out of Stock
             </div>
           )}
 
-          {/* Category badge */}
           {categoryLabel && !isOutOfStock && (
             <span className="absolute left-2 top-2 max-w-[65%] truncate rounded-full bg-white/85 dark:bg-black/70 px-2 py-0.5 text-[10px] font-medium text-zinc-700 dark:text-zinc-300 backdrop-blur-sm border border-zinc-200/50 dark:border-white/8">
               {categoryLabel}
             </span>
           )}
 
-          {/* Wishlist button */}
           <WishlistButton
             productId={product._id}
             name={product.name ?? ""}
@@ -126,7 +146,7 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
         </div>
       </Link>
 
-      {/* ── Thumbnail strip — hidden on mobile to keep card tight ── */}
+      {/* ── Thumbnail strip — desktop only ── */}
       {hasMultipleImages && (
         <div className="hidden sm:flex gap-1.5 border-t border-zinc-100 dark:border-[#1a1a1a] bg-zinc-50 dark:bg-[#0d0d0d] p-2 sm:p-3">
           {images.map((image, index) => (
@@ -143,59 +163,110 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
               onMouseLeave={() => setHoveredImageIndex(null)}
             >
               {image.asset?.url && (
-                <Image
-                  src={image.asset.url}
-                  alt={`${product.name} - view ${index + 1}`}
-                  fill
-                  className="object-cover"
-                  sizes="80px"
-                />
+                <Image src={image.asset.url} alt={`${product.name} - view ${index + 1}`}
+                  fill className="object-cover" sizes="80px" />
               )}
             </button>
           ))}
         </div>
       )}
 
-      {/* ── Product info ── */}
-      <div className="flex flex-1 flex-col gap-1.5 p-2.5 sm:gap-2 sm:p-4">
+      {/* ── Info ── */}
+      <div className="flex flex-1 flex-col p-2.5 sm:p-4">
 
         {/* Name */}
-        <Link href={`/products/${product.slug}`} className="block">
-          <h3 className="font-display line-clamp-2 text-[12px] sm:text-sm font-semibold leading-snug text-zinc-900 dark:text-[#f1f1f1] transition-colors group-hover:text-zinc-700 dark:group-hover:text-white">
+        <Link href={`/products/${product.slug}`} className="block mb-2">
+          <h3 className="font-display line-clamp-2 text-[12px] sm:text-sm font-semibold leading-snug text-zinc-900 dark:text-[#f1f1f1] group-hover:text-zinc-700 dark:group-hover:text-white transition-colors">
             {product.name}
           </h3>
         </Link>
 
-        {/* Price + stock badge */}
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <p className="font-display text-sm sm:text-lg font-bold tracking-tight text-zinc-900 dark:text-amber-400 shrink-0">
+        {/* Price — bold, centered, flush above buttons */}
+        <div className="flex flex-col items-center gap-1 mb-3">
+          <p className="font-display text-base sm:text-xl font-extrabold tracking-tight text-zinc-900 dark:text-amber-400">
             {formatInCurrency(product.price)}
           </p>
           <StockBadge productId={product._id} stock={stock} />
         </div>
 
-        {/* CTAs */}
-        <div className="mt-auto flex flex-col gap-1.5 pt-1">
-          <AddToCartButton
-            productId={product._id}
-            name={product.name ?? "Unknown Product"}
-            price={product.price ?? 0}
-            image={mainImageUrl ?? undefined}
-            stock={stock}
-          />
-          <Link
-            href={`/products/${product.slug}`}
-            className={cn(
-              "flex h-8 w-full items-center justify-center rounded-lg text-[11px] font-medium transition-all duration-200",
-              "border border-zinc-200 text-zinc-500 hover:border-zinc-400 hover:bg-zinc-50 hover:text-zinc-700",
-              "dark:border-[#2a2a2a] dark:text-[#a3a3a3] dark:hover:border-cyan-500/30 dark:hover:bg-[#1a1a1a] dark:hover:text-[#f1f1f1]",
-            )}
-          >
-            View Details
-          </Link>
+        {/* ── CTAs ── */}
+        <div className="mt-auto">
+          {isOutOfStock ? (
+            <button disabled
+              className="w-full h-11 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-400 cursor-not-allowed border border-zinc-200 dark:border-zinc-700">
+              Out of Stock
+            </button>
+          ) : (
+            // Both children are flex-1 so they are ALWAYS equal width
+            // The right child swaps between cart icon and stepper — left side never moves
+            <div className="flex gap-1.5 h-11">
 
-          {/* Compare — hidden on mobile to reduce clutter */}
-          <div className="hidden sm:flex justify-center pt-0.5">
+              {/* LEFT: Buy Now — always here, always amber */}
+              <Link
+                href={`/products/${product.slug}`}
+                className={cn(
+                  "flex flex-1 h-full items-center justify-center gap-1.5 rounded-lg whitespace-nowrap",
+                  "bg-amber-500 text-zinc-950 font-display text-xs sm:text-sm font-bold tracking-wide",
+                  "shadow-md shadow-amber-500/20 hover:bg-amber-400 transition-all duration-200 active:scale-[0.98]",
+                )}
+              >
+                <Zap className="h-3.5 w-3.5 shrink-0" />
+                Buy Now
+              </Link>
+
+              {/* RIGHT: cart icon  →  stepper  (same flex-1 space, Buy Now never shifts) */}
+              <div className="flex-1 h-full">
+
+                {!isInCart ? (
+                  /* Cart icon */
+                  <button
+                    type="button"
+                    onClick={handleAddToCart}
+                    className={cn(
+                      "flex h-full w-full items-center justify-center rounded-lg transition-all duration-200 active:scale-[0.97]",
+                      justAdded
+                        ? "bg-emerald-500 text-white"
+                        : "bg-zinc-900 dark:bg-[#222] text-white border border-zinc-700 dark:border-zinc-600 hover:bg-zinc-700 dark:hover:bg-[#2a2a2a]",
+                    )}
+                    aria-label="Add to cart"
+                  >
+                    {justAdded ? <Check className="h-4 w-4" /> : <ShoppingBag className="h-4 w-4" />}
+                  </button>
+                ) : (
+                  /* Stepper — equal 3-column layout, fat tap targets */
+                  <div className="flex h-full w-full items-stretch overflow-hidden rounded-lg border-2 border-amber-500/50 dark:border-amber-500/40 bg-amber-50 dark:bg-amber-500/8">
+                    <button
+                      type="button"
+                      onClick={handleDecrement}
+                      className="flex flex-1 items-center justify-center text-amber-700 dark:text-amber-400 font-black transition-colors hover:bg-amber-100 dark:hover:bg-amber-500/15 active:bg-amber-200 dark:active:bg-amber-500/25"
+                      aria-label="Remove one"
+                    >
+                      <Minus className="h-4 w-4" />
+                    </button>
+
+                    <div className="flex flex-1 items-center justify-center border-x-2 border-amber-500/25 bg-white dark:bg-[#111]">
+                      <span className="font-display text-sm font-black text-amber-600 dark:text-amber-400 tabular-nums">
+                        {quantityInCart}
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleIncrement}
+                      disabled={isAtMax}
+                      className="flex flex-1 items-center justify-center text-amber-700 dark:text-amber-400 font-black transition-colors hover:bg-amber-100 dark:hover:bg-amber-500/15 active:bg-amber-200 dark:active:bg-amber-500/25 disabled:opacity-30 disabled:cursor-not-allowed"
+                      aria-label="Add one more"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Compare — desktop only */}
+          <div className="hidden sm:flex justify-center pt-1.5">
             <CompareButton
               product={{
                 productId: product._id,

@@ -16,6 +16,8 @@ interface AddToCartButtonProps {
   stock: number;
   className?: string;
   selectedVariants?: SelectedVariant[];
+  /** When true, shows full "Add to Cart" label (for product detail page) */
+  showLabel?: boolean;
 }
 
 export function AddToCartButton({
@@ -26,6 +28,7 @@ export function AddToCartButton({
   stock,
   className,
   selectedVariants = [],
+  showLabel = false,
 }: AddToCartButtonProps) {
   const { addItem, updateQuantity } = useCartActions();
 
@@ -85,67 +88,65 @@ export function AddToCartButton({
     );
   }
 
-  // Not in cart
+  // Not yet in cart
   if (quantityInCart === 0) {
     return (
       <Button
         onClick={handleAdd}
         className={cn(
-          "min-h-11 h-11 w-full rounded-lg font-display text-sm font-bold tracking-wide transition-all duration-200 active:scale-[0.98]",
+          "min-h-11 h-11 w-full rounded-lg font-display font-bold tracking-wide transition-all duration-200 active:scale-[0.98]",
           justAdded
             ? "bg-emerald-500 text-white hover:bg-emerald-500"
-            : "bg-amber-500 text-zinc-950 hover:bg-amber-400 shadow-lg shadow-amber-500/20 hover:shadow-amber-400/25 dark:shadow-amber-500/10",
+            : "bg-zinc-900 text-white hover:bg-zinc-700 dark:bg-[#1f1f1f] dark:hover:bg-[#2a2a2a] border border-zinc-700 dark:border-zinc-600",
           className,
         )}
       >
         {justAdded ? (
           <>
             <Check className="h-4 w-4 shrink-0" />
-            <span className="ml-1.5">Added!</span>
+            {showLabel && <span className="ml-1.5 text-sm">Added!</span>}
           </>
         ) : (
           <>
             <ShoppingBag className="h-4 w-4 shrink-0" />
-            {/* Mobile: icon + price only. sm+: full text */}
-            <span className="sm:hidden ml-1.5">₦{price.toLocaleString()}</span>
-            <span className="hidden sm:inline ml-1.5">Add to Cart — ₦{price.toLocaleString()}</span>
+            {showLabel && <span className="ml-1.5 text-sm">Add to Cart</span>}
           </>
         )}
       </Button>
     );
   }
 
-  // In cart — quantity controls
+  // In cart — quantity stepper
   return (
     <div
       className={cn(
-        "flex min-h-11 h-11 w-full items-center overflow-hidden rounded-lg border border-amber-500/50 bg-amber-500/8 dark:border-amber-500/40 dark:bg-amber-500/5",
+        "flex min-h-11 h-11 w-full items-stretch overflow-hidden rounded-lg border border-amber-500/50 bg-amber-500/8 dark:border-amber-500/40 dark:bg-amber-500/5",
         className,
       )}
     >
       <button
         type="button"
-        className="flex h-full min-w-48px flex-1 items-center justify-center text-zinc-500 dark:text-zinc-400 transition-colors hover:bg-amber-500/10 hover:text-amber-500 dark:hover:text-amber-400 active:bg-amber-500/15"
+        className="flex flex-1 items-center justify-center text-zinc-600 dark:text-zinc-300 font-bold text-lg transition-colors hover:bg-amber-500/15 hover:text-amber-600 dark:hover:text-amber-400 active:bg-amber-500/25"
         onClick={handleDecrement}
         aria-label="Decrease quantity"
       >
-        <Minus className="h-3.5 w-3.5" />
+        <Minus className="h-4 w-4" />
       </button>
 
-      <div className="flex h-full min-w-40px flex-1 items-center justify-center border-x border-amber-500/20">
-        <span className="font-display text-sm font-bold text-amber-500 dark:text-amber-400 tabular-nums">
+      <div className="flex flex-1 items-center justify-center border-x border-amber-500/25 bg-amber-500/5">
+        <span className="font-display text-base font-extrabold text-amber-600 dark:text-amber-400 tabular-nums">
           {quantityInCart}
         </span>
       </div>
 
       <button
         type="button"
-        className="flex h-full min-w-48px flex-1 items-center justify-center text-zinc-500 dark:text-zinc-400 transition-colors hover:bg-amber-500/10 hover:text-amber-500 dark:hover:text-amber-400 active:bg-amber-500/15 disabled:opacity-30 disabled:cursor-not-allowed"
+        className="flex flex-1 items-center justify-center text-zinc-600 dark:text-zinc-300 font-bold text-lg transition-colors hover:bg-amber-500/15 hover:text-amber-600 dark:hover:text-amber-400 active:bg-amber-500/25 disabled:opacity-30 disabled:cursor-not-allowed"
         onClick={handleAdd}
         disabled={isAtMax}
         aria-label="Increase quantity"
       >
-        <Plus className="h-3.5 w-3.5" />
+        <Plus className="h-4 w-4" />
       </button>
     </div>
   );
