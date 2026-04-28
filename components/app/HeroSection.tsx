@@ -50,14 +50,14 @@ export function HeroSection() {
       <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 h-[400px] w-[400px] rounded-full hidden dark:block"
         style={{ background: "radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 65%)" }} />
 
-      <div className="relative mx-auto max-w-7xl px-4 pt-10 pb-0 sm:px-6 sm:pt-16 lg:px-8 lg:pt-20">
+      <div className="relative mx-auto max-w-7xl px-4 pt-8 pb-0 sm:px-6 sm:pt-16 lg:px-8 lg:pt-20">
         <div className="flex flex-col lg:flex-row lg:items-end lg:gap-20">
 
           {/* Left */}
-          <div className="flex-1 pb-10 lg:pb-16">
+          <div className="flex-1 pb-8 lg:pb-16">
 
             {/* CAC pill */}
-            <div className={`mb-5 inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/8 px-3 py-1.5 transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
+            <div className={`mb-4 inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/8 px-3 py-1.5 transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
               <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
               <span className="text-xs font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400 sm:hidden">
                 BN: 9245886 · Est. 2019
@@ -72,7 +72,7 @@ export function HeroSection() {
               transition-all duration-700 delay-100
               ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
 
-              {/* Mobile headline — short & punchy */}
+              {/* Mobile headline */}
               <span className="block sm:hidden">
                 <span className="text-[2rem] font-extrabold leading-tight">
                   The Smartest Way
@@ -96,7 +96,7 @@ export function HeroSection() {
                 </span>
               </span>
 
-              {/* Desktop headline — fuller */}
+              {/* Desktop headline */}
               <span className="hidden sm:block text-5xl lg:text-6xl xl:text-7xl">
                 <span className="font-extrabold">The Smartest Way</span>
                 <br />
@@ -123,7 +123,7 @@ export function HeroSection() {
             </h1>
 
             {/* Tagline */}
-            <p className={`mt-5 text-sm font-semibold italic text-amber-600 dark:text-amber-400 sm:text-lg transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
+            <p className={`mt-4 text-sm font-semibold italic text-amber-600 dark:text-amber-400 sm:text-lg transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
               Engineer-verified. Warranty on everything. Since 2019.
             </p>
 
@@ -135,13 +135,13 @@ export function HeroSection() {
               come with warranty. We ship worldwide.
             </p>
 
-            {/* Sub-copy mobile */}
+            {/* Sub-copy mobile — short */}
             <p className={`mt-2 text-sm leading-6 text-zinc-500 dark:text-[#a3a3a3] sm:hidden transition-all duration-700 delay-300 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
               Engineer-verified. CAC-registered. Ships worldwide.
             </p>
 
             {/* CTAs */}
-            <div className={`mt-7 space-y-3 transition-all duration-700 delay-400 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
+            <div className={`mt-6 space-y-3 transition-all duration-700 delay-400 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
 
               {/* Row 1 */}
               <div className="flex flex-wrap items-center gap-3">
@@ -201,10 +201,23 @@ export function HeroSection() {
                   <ArrowRight className="h-4 w-4 shrink-0 text-blue-500 dark:text-blue-400 transition-transform group-hover:translate-x-1" />
                 </Link>
               </div>
+
+              {/* WhatsApp CTA — mobile only, below main CTAs */}
+              <a
+                href={`https://wa.me/2349060898951?text=${encodeURIComponent("Hi! I need help choosing a product on The Saint's TechNet.")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="sm:hidden flex items-center justify-center gap-2 w-full rounded-xl border border-[#25D366]/30 bg-[#25D366]/8 px-4 py-3 text-sm font-bold text-[#128C7E] dark:text-[#25D366] hover:bg-[#25D366]/15 transition-colors"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                </svg>
+                Chat with an Engineer on WhatsApp
+              </a>
             </div>
           </div>
 
-          {/* Right — trust badges desktop */}
+          {/* Right — trust badges desktop only */}
           <div className={`hidden lg:flex flex-col gap-3 pb-16 w-64 shrink-0 transition-all duration-700 delay-500 ${mounted ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"}`}>
             {TRUST_BADGES.map(({ icon: Icon, label, sub }) => (
               <div key={label} className="flex items-center gap-3 rounded-xl border border-zinc-200 dark:border-[#1f1f1f] bg-white dark:bg-[#111111] px-4 py-3.5 transition-colors">
@@ -220,20 +233,12 @@ export function HeroSection() {
           </div>
         </div>
 
-        {/* Mobile trust badges */}
-        <div className="flex gap-3 overflow-x-auto pb-8 lg:hidden scrollbar-hide">
-          {TRUST_BADGES.map(({ icon: Icon, label, sub }) => (
-            <div key={label} className="flex shrink-0 items-center gap-2.5 rounded-xl border border-zinc-200 dark:border-[#1f1f1f] bg-white dark:bg-[#111111] px-3.5 py-3 transition-colors">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/10">
-                <Icon className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-zinc-900 dark:text-[#f1f1f1]">{label}</p>
-                <p className="text-[10px] text-zinc-500 dark:text-[#a3a3a3]">{sub}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+        {/* 
+          ✅ REMOVED: Mobile trust badge horizontal scroll row.
+          The MobileTrustBar component below the hero already handles
+          social proof on mobile (Engineer-Inspected, Fast Response, etc.)
+          Removing this eliminates the perceived duplication.
+        */}
       </div>
 
       {/* Blend */}
