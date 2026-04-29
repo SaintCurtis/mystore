@@ -147,7 +147,7 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
       </Link>
 
       {/* ── Thumbnail strip — desktop only ── */}
-      {hasMultipleImages && (
+      {hasMultipleImages ? (
         <div className="hidden sm:flex gap-1.5 border-t border-zinc-100 dark:border-[#1a1a1a] bg-zinc-50 dark:bg-[#0d0d0d] p-2 sm:p-3">
           {images.map((image, index) => (
             <button
@@ -169,6 +169,12 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
             </button>
           ))}
         </div>
+      ) : (
+        // Single-image products: render a 1px separator so card structure
+        // stays consistent with multi-image cards in the same grid row.
+        // Without this, the info section absorbs the missing strip height
+        // as empty flex space — causing the white gap you see on desktop.
+        <div className="hidden sm:block h-px bg-zinc-100 dark:bg-[#1a1a1a]" />
       )}
 
       {/* ── Info ── */}
