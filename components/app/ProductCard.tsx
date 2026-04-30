@@ -51,7 +51,6 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
   const hasMultipleImages = images.length > 1;
   const categoryLabel = getCategoryLabel(product.category, activeCategory);
 
-  // Live cart state — Zustand persists this across renders ✅
   const cartItem = useCartItem(product._id);
   const quantityInCart = cartItem?.quantity ?? 0;
   const isInCart = quantityInCart > 0;
@@ -60,7 +59,12 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
   const handleAddToCart = () => {
     if (quantityInCart < stock) {
       addItem(
-        { productId: product._id, name: product.name ?? "", price: product.price ?? 0, image: mainImageUrl ?? undefined },
+        {
+          productId: product._id,
+          name: product.name ?? "",
+          price: product.price ?? 0,
+          image: mainImageUrl ?? undefined,
+        },
         1,
       );
       toast.success(`${product.name} added to cart`);
@@ -72,7 +76,12 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
   const handleIncrement = () => {
     if (quantityInCart < stock) {
       addItem(
-        { productId: product._id, name: product.name ?? "", price: product.price ?? 0, image: mainImageUrl ?? undefined },
+        {
+          productId: product._id,
+          name: product.name ?? "",
+          price: product.price ?? 0,
+          image: mainImageUrl ?? undefined,
+        },
         1,
       );
     }
@@ -170,109 +179,150 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
           ))}
         </div>
       ) : (
-        // Single-image products: render a 1px separator so card structure
-        // stays consistent with multi-image cards in the same grid row.
-        // Without this, the info section absorbs the missing strip height
-        // as empty flex space — causing the white gap you see on desktop.
         <div className="hidden sm:block h-px bg-zinc-100 dark:bg-[#1a1a1a]" />
       )}
 
       {/* ── Info ── */}
       <div className="flex flex-1 flex-col p-2.5 sm:p-4">
 
-        {/* Name */}
+        {/*
+          Name — min-h-[2.5em] keeps the grid row aligned even when
+          a product name is only one line vs two lines on the card next to it.
+        */}
         <Link href={`/products/${product.slug}`} className="block mb-2">
-          <h3 className="font-display line-clamp-2 text-[12px] sm:text-sm font-semibold leading-snug text-zinc-900 dark:text-[#f1f1f1] group-hover:text-zinc-700 dark:group-hover:text-white transition-colors">
+          <h3 className="font-display line-clamp-2 text-[12px] sm:text-sm font-semibold leading-snug text-zinc-900 dark:text-[#f1f1f1] group-hover:text-zinc-700 dark:group-hover:text-white transition-colors min-h-[2.5em]">
             {product.name}
           </h3>
         </Link>
 
-        {/* Price — bold, centered, flush above buttons */}
-        <div className="flex flex-col items-center gap-1 mb-3">
-          <p className="font-display text-base sm:text-xl font-extrabold tracking-tight text-zinc-900 dark:text-amber-400">
+        {/*
+          Price row — left-aligned reads premium, not marketplace.
+          StockBadge lives on the right so it costs zero extra vertical space.
+        */}
+        <div className="flex items-baseline justify-between gap-1 mb-3">
+          <p className="font-display text-base sm:text-xl font-extrabold tracking-tight leading-none text-zinc-900 dark:text-amber-400">
             {formatInCurrency(product.price)}
           </p>
           <StockBadge productId={product._id} stock={stock} />
         </div>
 
         {/* ── CTAs ── */}
-        <div className="mt-auto">
+        <div className="mt-auto space-y-1.5">
+
           {isOutOfStock ? (
-            <button disabled
-              className="w-full h-11 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-400 cursor-not-allowed border border-zinc-200 dark:border-zinc-700">
+
+            /* Out of stock — full width, no confusion */
+            <button
+              disabled
+              className="w-full h-11 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-400 cursor-not-allowed border border-zinc-200 dark:border-zinc-700"
+            >
               Out of Stock
             </button>
-          ) : (
-            // Both children are flex-1 so they are ALWAYS equal width
-            // The right child swaps between cart icon and stepper — left side never moves
-            <div className="flex gap-1.5 h-11">
 
-              {/* LEFT: Buy Now — always here, always amber */}
+          ) : isInCart ? (
+
+            <>
+              {/*
+                ── IN CART STATE ──────────────────────────────────────────────
+                Customer already committed. Buy Now stays as the dominant CTA
+                — clicking it takes them to the product page where checkout is
+                one step away. Stepper sits below, smaller, purely functional.
+                ─────────────────────────────────────────────────────────────── */}
               <Link
                 href={`/products/${product.slug}`}
                 className={cn(
-                  "flex flex-1 h-full items-center justify-center gap-1.5 rounded-lg whitespace-nowrap",
+                  "flex w-full h-11 items-center justify-center gap-1.5 rounded-lg",
                   "bg-amber-500 text-zinc-950 font-display text-xs sm:text-sm font-bold tracking-wide",
-                  "shadow-md shadow-amber-500/20 hover:bg-amber-400 transition-all duration-200 active:scale-[0.98]",
+                  "shadow-md shadow-amber-500/25 hover:bg-amber-400 transition-all duration-200 active:scale-[0.98]",
                 )}
               >
                 <Zap className="h-3.5 w-3.5 shrink-0" />
                 Buy Now
               </Link>
 
-              {/* RIGHT: cart icon  →  stepper  (same flex-1 space, Buy Now never shifts) */}
-              <div className="flex-1 h-full">
-
-                {!isInCart ? (
-                  /* Cart icon */
-                  <button
-                    type="button"
-                    onClick={handleAddToCart}
-                    className={cn(
-                      "flex h-full w-full items-center justify-center rounded-lg transition-all duration-200 active:scale-[0.97]",
-                      justAdded
-                        ? "bg-emerald-500 text-white"
-                        : "bg-zinc-900 dark:bg-[#222] text-white border border-zinc-700 dark:border-zinc-600 hover:bg-zinc-700 dark:hover:bg-[#2a2a2a]",
-                    )}
-                    aria-label="Add to cart"
-                  >
-                    {justAdded ? <Check className="h-4 w-4" /> : <ShoppingBag className="h-4 w-4" />}
-                  </button>
-                ) : (
-                  /* Stepper — equal 3-column layout, fat tap targets */
-                  <div className="flex h-full w-full items-stretch overflow-hidden rounded-lg border-2 border-amber-500/50 dark:border-amber-500/40 bg-amber-50 dark:bg-amber-500/8">
-                    <button
-                      type="button"
-                      onClick={handleDecrement}
-                      className="flex flex-1 items-center justify-center text-amber-700 dark:text-amber-400 font-black transition-colors hover:bg-amber-100 dark:hover:bg-amber-500/15 active:bg-amber-200 dark:active:bg-amber-500/25"
-                      aria-label="Remove one"
-                    >
-                      <Minus className="h-4 w-4" />
-                    </button>
-
-                    <div className="flex flex-1 items-center justify-center border-x-2 border-amber-500/25 bg-white dark:bg-[#111]">
-                      <span className="font-display text-sm font-black text-amber-600 dark:text-amber-400 tabular-nums">
-                        {quantityInCart}
-                      </span>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={handleIncrement}
-                      disabled={isAtMax}
-                      className="flex flex-1 items-center justify-center text-amber-700 dark:text-amber-400 font-black transition-colors hover:bg-amber-100 dark:hover:bg-amber-500/15 active:bg-amber-200 dark:active:bg-amber-500/25 disabled:opacity-30 disabled:cursor-not-allowed"
-                      aria-label="Add one more"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
-                  </div>
-                )}
+              {/* Compact quantity stepper — secondary, below Buy Now */}
+              <div className="flex h-8 w-full items-stretch overflow-hidden rounded-lg border border-amber-500/40 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/8">
+                <button
+                  type="button"
+                  onClick={handleDecrement}
+                  className="flex flex-1 items-center justify-center text-amber-700 dark:text-amber-400 font-black transition-colors hover:bg-amber-100 dark:hover:bg-amber-500/15 active:bg-amber-200 dark:active:bg-amber-500/25"
+                  aria-label="Remove one"
+                >
+                  <Minus className="h-3.5 w-3.5" />
+                </button>
+                <div className="flex flex-1 items-center justify-center border-x border-amber-500/25 bg-white dark:bg-[#111]">
+                  <span className="font-display text-xs font-black text-amber-600 dark:text-amber-400 tabular-nums">
+                    {quantityInCart}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleIncrement}
+                  disabled={isAtMax}
+                  className="flex flex-1 items-center justify-center text-amber-700 dark:text-amber-400 font-black transition-colors hover:bg-amber-100 dark:hover:bg-amber-500/15 active:bg-amber-200 dark:active:bg-amber-500/25 disabled:opacity-30 disabled:cursor-not-allowed"
+                  aria-label="Add one more"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                </button>
               </div>
-            </div>
+            </>
+
+          ) : (
+
+            <>
+              {/*
+                ── DEFAULT STATE — the impulse trigger ───────────────────────
+                One dominant button. Full width. Amber. Tall. Unmissable.
+                "Buy Now" = zero friction between desire and purchase.
+
+                The cart icon is embedded as a recessed pill on the right edge
+                of the Buy Now button. It's reachable but visually secondary —
+                the eye lands on "Buy Now" first, every single time.
+
+                On a 185px-wide card (Fold 4), the button fills the entire
+                card width. The embedded cart pill is 32px — still a
+                comfortable tap target without ever competing for attention.
+                ─────────────────────────────────────────────────────────────── */}
+              <div className="relative">
+                <Link
+                  href={`/products/${product.slug}`}
+                  className={cn(
+                    "flex w-full h-11 items-center justify-center gap-1.5 rounded-lg",
+                    "bg-amber-500 text-zinc-950 font-display text-xs sm:text-sm font-bold tracking-wide",
+                    "shadow-md shadow-amber-500/25 hover:bg-amber-400 transition-all duration-200 active:scale-[0.98]",
+                    "pr-11", // breathing room for the embedded cart pill
+                  )}
+                >
+                  <Zap className="h-3.5 w-3.5 shrink-0" />
+                  Buy Now
+                </Link>
+
+                {/* Cart pill — lives inside Buy Now, right edge, visually recessed */}
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  aria-label="Add to cart"
+                  className={cn(
+                    "absolute right-1.5 top-1/2 -translate-y-1/2",
+                    "flex h-8 w-8 items-center justify-center rounded-md",
+                    "transition-all duration-200 active:scale-95",
+                    justAdded
+                      ? "bg-emerald-500/20 text-emerald-800 dark:text-emerald-300"
+                      : "bg-black/15 dark:bg-black/30 text-zinc-950 hover:bg-black/25 dark:hover:bg-black/45",
+                  )}
+                >
+                  {justAdded
+                    ? <Check className="h-3.5 w-3.5" />
+                    : <ShoppingBag className="h-3.5 w-3.5" />
+                  }
+                </button>
+              </div>
+            </>
+
           )}
 
           {/* Compare — desktop only */}
-          <div className="hidden sm:flex justify-center pt-1.5">
+          <div className="hidden sm:flex justify-center pt-0.5">
             <CompareButton
               product={{
                 productId: product._id,
@@ -284,6 +334,7 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
               }}
             />
           </div>
+
         </div>
       </div>
     </div>
