@@ -11,9 +11,9 @@ import { CompareButton } from "@/components/app/CompareButton";
 import { useCurrency } from "@/lib/store/currency-store-provider";
 import { useCartActions, useCartItem } from "@/lib/store/cart-store-provider";
 import { toast } from "sonner";
-import type { FILTER_PRODUCTS_BY_NAME_QUERY_RESULT } from "@/sanity.types";
+import type { FILTER_PRODUCTS_BY_NAME_QUERYResult } from "@/sanity.types";
 
-type Product = FILTER_PRODUCTS_BY_NAME_QUERY_RESULT[number];
+type Product = FILTER_PRODUCTS_BY_NAME_QUERYResult[number]; 
 
 interface ProductCardProps {
   product: Product;
