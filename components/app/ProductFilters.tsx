@@ -22,7 +22,7 @@ import {
   CATEGORIES_WITH_CONDITIONS,
   CATEGORIES_WITH_BRANDS,
 } from "@/lib/constants/filters";
-import type { ALL_CATEGORIES_QUERY_RESULT } from "@/sanity.types";
+import type { ALL_CATEGORIES_QUERYResult } from "@/sanity.types";
 
 const PRICE_MIN = 50000;
 const PRICE_MAX = 8000000;
@@ -58,7 +58,7 @@ const DRILLDOWN_LABELS: Record<DrilldownRoot, string[]> = {
 };
 
 interface ProductFiltersProps {
-  categories: ALL_CATEGORIES_QUERY_RESULT;
+  categories: ALL_CATEGORIES_QUERYResult;
   brands?: { title: string; slug: string }[];
   models?: { title: string; slug: string }[];
 }
@@ -98,7 +98,7 @@ export function ProductFilters({
   }, [urlMinPrice, urlMaxPrice]);
 
   // ── Helpers — cast to any[] so parentSlug is always accessible ─
-  // The generated ALL_CATEGORIES_QUERY_RESULT type doesn't always
+  // The generated ALL_CATEGORIES_QUERYResult type doesn't always
   // surface parentSlug on the item type, but the runtime data
   // always has it from the GROQ query. Using any[] here is safe.
   const cats = categories as any[];

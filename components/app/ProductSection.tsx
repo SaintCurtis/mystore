@@ -7,13 +7,13 @@ import { Button } from "@/components/ui/button";
 import { ProductFilters } from "./ProductFilters";
 import { ProductGrid } from "./ProductGrid";
 import type {
-  ALL_CATEGORIES_QUERY_RESULT,
-  FILTER_PRODUCTS_BY_NAME_QUERY_RESULT,
+  ALL_CATEGORIES_QUERYResult,
+  FILTER_PRODUCTS_BY_NAME_QUERYResult,
 } from "@/sanity.types";
 
 interface ProductSectionProps {
-  categories: ALL_CATEGORIES_QUERY_RESULT;
-  products: FILTER_PRODUCTS_BY_NAME_QUERY_RESULT;
+  categories: ALL_CATEGORIES_QUERYResult;
+  products: FILTER_PRODUCTS_BY_NAME_QUERYResult;
   searchQuery: string;
   brands?: { title: string; slug: string }[];
   models?: { title: string; slug: string }[];

@@ -5,10 +5,10 @@ import { PackageSearch, ChevronDown } from "lucide-react";
 import { ProductCard } from "./ProductCard";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
-import type { FILTER_PRODUCTS_BY_NAME_QUERY_RESULT } from "@/sanity.types";
+import type { FILTER_PRODUCTS_BY_NAME_QUERYResult } from "@/sanity.types";
 
 interface ProductGridProps {
-  products: FILTER_PRODUCTS_BY_NAME_QUERY_RESULT;
+  products: FILTER_PRODUCTS_BY_NAME_QUERYResult;
   activeCategory?: string;
   limitOnHomepage?: boolean;
 }

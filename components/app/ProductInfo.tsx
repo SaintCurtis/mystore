@@ -22,10 +22,10 @@ import {
   type VariantGroup,
   type SelectedVariant,
 } from "@/types/variants";
-import type { PRODUCT_BY_SLUG_QUERY_RESULT } from "@/sanity.types";
+import type { PRODUCT_BY_SLUG_QUERYResult} from "@/sanity.types";
 
 interface ProductInfoProps {
-  product: NonNullable<PRODUCT_BY_SLUG_QUERY_RESULT>;
+  product: NonNullable<PRODUCT_BY_SLUG_QUERYResult>;
 }
 
 export function ProductInfo({ product }: ProductInfoProps) {
