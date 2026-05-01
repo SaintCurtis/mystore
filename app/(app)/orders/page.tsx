@@ -8,7 +8,7 @@ import { ORDERS_BY_USER_QUERY } from "@/lib/sanity/queries/orders";
 import { getOrderStatus } from "@/lib/constants/orderStatus";
 import { formatPrice, formatDate, formatOrderNumber } from "@/lib/utils";
 import { StackedProductImages } from "@/components/app/StackedProductImages";
-import type { ORDERS_BY_USER_QUERY_RESULT } from "@/sanity.types";
+import type { ORDERS_BY_USER_QUERYResult } from "@/sanity.types";
 
 export const metadata = {
   title: "Your Orders | The Saint's TechNet",
@@ -21,7 +21,7 @@ export default async function OrdersPage() {
   const { data: orders } = (await sanityFetch({
     query: ORDERS_BY_USER_QUERY,
     params: { clerkUserId: userId ?? "" },
-  })) as { data: ORDERS_BY_USER_QUERY_RESULT };
+  })) as { data: ORDERS_BY_USER_QUERYResult };
 
   if (orders.length === 0) {
     return (
@@ -61,7 +61,7 @@ export default async function OrdersPage() {
         </div>
 
         <div className="space-y-4">
-          {orders.map((order: ORDERS_BY_USER_QUERY_RESULT[number]) => {
+          {orders.map((order: ORDERS_BY_USER_QUERYResult[number]) => {
             const status = getOrderStatus(order.status);
             const StatusIcon = status.icon;
             const images = (order.itemImages ?? []).filter(

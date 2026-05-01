@@ -14,6 +14,17 @@ export const metadata: Metadata = {
   description: "Share your referral link and earn rewards for every friend who shops with us.",
 };
 
+type ReferralDoc = {
+  _id: string;
+  code: string | null;
+  clicks: number | null;
+  conversions: number | null;
+  totalEarned: number | null;
+  createdAt: string | null;
+  name: string | null;
+  email: string | null;
+} | null;
+
 export default async function ReferralPage() {
   const { userId } = await auth();
   const user = await currentUser();
@@ -22,11 +33,10 @@ export default async function ReferralPage() {
     redirect("/sign-in");
   }
 
-  // Fetch or create referral doc via API
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mystore-drab-nine.vercel.app";
 
-  // Try to get existing referral
-  let referral = await client.fetch(REFERRAL_BY_USER_QUERY, { clerkUserId: userId });
+  // Explicit type so TS never infers `never` after the null-check branch
+  let referral: ReferralDoc = await client.fetch(REFERRAL_BY_USER_QUERY, { clerkUserId: userId });
 
   // If none exists, create via the API
   if (!referral) {
@@ -38,7 +48,7 @@ export default async function ReferralPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        referral = data.referral;
+        referral = data.referral as ReferralDoc;
       }
     } catch {
       // proceed with null referral
