@@ -2,10 +2,9 @@ import { NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { client, writeClient } from "@/sanity/lib/client";
 import { defineQuery } from "next-sanity";
+import { REFERRAL_BY_USER_QUERY } from "@/lib/sanity/queries/referral";
 
-const REFERRAL_BY_USER_QUERY = defineQuery(
-  `*[_type == "referral" && clerkUserId == $clerkUserId][0]`
-);
+// Local only — not in the shared queries file
 const REFERRAL_BY_CODE_QUERY = defineQuery(
   `*[_type == "referral" && code == $code][0]`
 );
