@@ -17,10 +17,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useCurrency } from "@/lib/store/currency-store-provider";
-import type { FEATURED_PRODUCTS_QUERY_RESULT } from "@/sanity.types";
-type FeaturedProduct = FEATURED_PRODUCTS_QUERY_RESULT[number];
+import type { FEATURED_PRODUCTS_QUERYResult } from "@/sanity.types";
+type FeaturedProduct = FEATURED_PRODUCTS_QUERYResult[number];
 interface FeaturedCarouselProps {
-  products: FEATURED_PRODUCTS_QUERY_RESULT;
+  products: FEATURED_PRODUCTS_QUERYResult;
 }
 
 
