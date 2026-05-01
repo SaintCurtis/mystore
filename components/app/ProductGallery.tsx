@@ -4,10 +4,10 @@ import { useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
-import type { PRODUCT_BY_SLUG_QUERY_RESULT } from "@/sanity.types";
+import type { PRODUCT_BY_SLUG_QUERYResult } from "@/sanity.types";
 
 type ProductImages = NonNullable<
-  NonNullable<PRODUCT_BY_SLUG_QUERY_RESULT>["images"]
+  NonNullable<PRODUCT_BY_SLUG_QUERYResult>["images"]
 >;
 
 interface ProductGalleryProps {
