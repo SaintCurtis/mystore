@@ -1,7 +1,6 @@
 import { PackageIcon } from "@sanity/icons";
 import { defineField, defineType } from "sanity";
 
-// Inlined to avoid @/ Next.js path imports which break Sanity Studio build
 const COLORS_SANITY_LIST = [
   { title: "Black",       value: "black"       },
   { title: "White",       value: "white"       },
@@ -21,6 +20,35 @@ const MATERIALS_SANITY_LIST = [
   { title: "Glass",    value: "glass"    },
 ];
 
+// ─────────────────────────────────────────────────────────────────────────────
+// VARIANT PRICE ADJUSTMENT REFERENCE
+// (All adjustments are DELTAS — what the buyer pays ON TOP of the base price)
+// Base spec = Core i5 / 8GB RAM / 256GB SSD
+//
+// PROCESSOR (base = Core i5, ₦0):
+//   Core i5  →  +₦0       (included in base)
+//   Core i7  →  +₦35,000  (cost of i7 − cost of i5)
+//   Core i9  →  +₦55,000  (cost of i9 − cost of i5)
+//
+// RAM — DDR4 (base = 8GB, ₦0):
+//   8GB DDR4   →  +₦0        (base)
+//   16GB DDR4  →  +₦85,000   (full cost ₦85k − 8GB base ₦0)
+//   32GB DDR4  →  +₦85,000   (full cost ₦170k − 16GB cost ₦85k)
+//
+// RAM — DDR5 (base = 8GB, ₦0):
+//   8GB DDR5   →  +₦0        (base — if applicable)
+//   16GB DDR5  →  +₦250,000  (full cost ₦250k − 8GB base ₦0)
+//   32GB DDR5  →  +₦230,000  (full cost ₦480k − 16GB DDR5 cost ₦250k)
+//
+// SSD (base = 256GB, ₦0 — already priced into base):
+//   256GB  →  +₦0        (base, already included)
+//   512GB  →  +₦45,000   (full cost ₦45k − 256GB base ₦0)
+//   1TB    →  +₦60,000   (full cost ₦105k − 512GB cost ₦45k)
+//   2TB    →  +₦105,000  (full cost ₦210k − 1TB cost ₦105k)
+//
+// GPU: enter adjustment manually per product
+// ─────────────────────────────────────────────────────────────────────────────
+
 export const productType = defineType({
   name: "product",
   title: "Product",
@@ -31,7 +59,7 @@ export const productType = defineType({
     { name: "classification", title: "Classification" },
     { name: "media",          title: "Media" },
     { name: "inventory",      title: "Inventory" },
-    { name: "variants",       title: "Variants" },   // ← NEW group
+    { name: "variants",       title: "Variants" },
   ],
   fields: [
     // ── Core Details ───────────────────────────────────────────
@@ -58,7 +86,8 @@ export const productType = defineType({
       name: "price",
       type: "number",
       group: "details",
-      description: "Base price in NGN — variants add/subtract from this",
+      description:
+        "Base price in NGN — price of the lowest spec: Core i5 / 8GB RAM / 256GB SSD. All variant adjustments are added on top of this.",
       validation: (rule) => [
         rule.required().error("Price is required"),
         rule.positive().error("Price must be positive"),
@@ -81,23 +110,8 @@ export const productType = defineType({
       to: [{ type: "condition" }],
       group: "classification",
       description:
-        "Only set if NOT already encoded in the category (e.g. if category is 'Gaming Laptops — Brand New', leave this empty — condition is implied). Use this only for products where the category doesn't specify condition.",
-      hidden: ({ document }) => {
-        const categorySlug = (document?.category as any)?._ref ?? "";
-        const conditionEncodedSlugs = [
-          "gaming-laptops-brand-new",
-          "gaming-laptops-foreign-used",
-          "regular-laptops-brand-new",
-          "regular-laptops-foreign-used",
-          "macbook-brand-new",
-          "macbook-foreign-used",
-          "monitors-professional-brand-new",
-          "monitors-professional-foreign-used",
-          "monitors-gaming-brand-new",
-          "monitors-gaming-foreign-used",
-        ];
-        return false;
-      },
+        "Only set if NOT already encoded in the category. Leave empty if category name already includes condition (e.g. 'Gaming Laptops — Brand New').",
+      hidden: () => false,
     }),
     defineField({
       name: "brand",
@@ -105,7 +119,7 @@ export const productType = defineType({
       type: "reference",
       to: [{ type: "brand" }],
       group: "classification",
-      description: "e.g. Dell, HP, MSI, ASUS ROG — leave empty for MacBooks",
+      description: "e.g. Dell, HP, MSI, ASUS ROG",
     }),
     defineField({
       name: "model",
@@ -170,22 +184,47 @@ export const productType = defineType({
     }),
 
     // ── Variants ───────────────────────────────────────────────
-    // Each variant group = one spec axis (RAM, SSD, GPU, Color, Touchscreen).
-    // Options within a group are presented as chips/toggles on the product page.
-    // The displayed price = product.price + sum of all selected priceAdjustment values.
+    //
+    // IMPORTANT — HOW ADJUSTMENTS WORK:
+    // The buyer selects ONE option per group. The frontend adds all selected
+    // priceAdjustment values to the base price to get the final price.
+    // Each adjustment = (full component cost) − (cost of component already in base).
+    //
+    // QUICK REFERENCE (copy-paste when adding options):
+    //
+    //  PROCESSOR group  (type: processor)
+    //   "Core i5"  priceAdjustment: 0
+    //   "Core i7"  priceAdjustment: 35000
+    //   "Core i9"  priceAdjustment: 55000
+    //
+    //  RAM group — DDR4  (type: ram, label: "RAM (DDR4)")
+    //   "8GB DDR4"   priceAdjustment: 0
+    //   "16GB DDR4"  priceAdjustment: 85000
+    //   "32GB DDR4"  priceAdjustment: 85000   ← delta: 170k − 85k
+    //
+    //  RAM group — DDR5  (type: ram, label: "RAM (DDR5)")
+    //   "8GB DDR5"   priceAdjustment: 0
+    //   "16GB DDR5"  priceAdjustment: 250000
+    //   "32GB DDR5"  priceAdjustment: 230000  ← delta: 480k − 250k
+    //
+    //  SSD group  (type: ssd, label: "Storage")
+    //   "256GB"  priceAdjustment: 0           ← base, already in price
+    //   "512GB"  priceAdjustment: 45000       ← delta: 45k − 0
+    //   "1TB"    priceAdjustment: 60000       ← delta: 105k − 45k
+    //   "2TB"    priceAdjustment: 105000      ← delta: 210k − 105k
+    //
     defineField({
       name: "variantGroups",
       title: "Variant groups",
       type: "array",
       group: "variants",
       description:
-        "Add spec axes that affect price (RAM, SSD, GPU, Color, Touchscreen). Leave empty for products with no variants.",
+        "Add one group per spec axis. Base price = Core i5 / 8GB / 256GB SSD. Each adjustment = component cost delta from the tier below it. See quick reference in schema comments.",
       of: [
         {
           type: "object",
           name: "variantGroup",
           title: "Variant group",
-          // Sanity Studio preview for each group row
           preview: {
             select: { title: "label", subtitle: "type" },
             prepare: ({ title, subtitle }) => ({
@@ -201,10 +240,11 @@ export const productType = defineType({
               description: "Machine-readable key — used in cart & order records",
               options: {
                 list: [
-                  { title: "RAM",         value: "ram" },
-                  { title: "SSD Storage", value: "ssd" },
-                  { title: "GPU",         value: "gpu" },
-                  { title: "Color",       value: "color" },
+                  { title: "Processor",   value: "processor"   },
+                  { title: "RAM",         value: "ram"         },
+                  { title: "SSD Storage", value: "ssd"         },
+                  { title: "GPU",         value: "gpu"         },
+                  { title: "Color",       value: "color"       },
                   { title: "Touchscreen", value: "touchscreen" },
                 ],
                 layout: "dropdown",
@@ -215,7 +255,8 @@ export const productType = defineType({
               name: "label",
               title: "Display label",
               type: "string",
-              description: 'Shown above the chips, e.g. "RAM" or "Storage"',
+              description:
+                'Shown above the option chips on the product page. Be specific: "RAM (DDR4)", "RAM (DDR5)", "Storage", "Processor"',
               validation: (rule) => rule.required(),
             }),
             defineField({
@@ -236,10 +277,10 @@ export const productType = defineType({
                       title: title ?? "Unnamed",
                       subtitle:
                         subtitle === 0 || subtitle == null
-                          ? "Base price"
+                          ? "Included in base price"
                           : subtitle > 0
-                          ? `+₦${subtitle.toLocaleString()}`
-                          : `-₦${Math.abs(subtitle).toLocaleString()}`,
+                          ? `+₦${Number(subtitle).toLocaleString()}`
+                          : `-₦${Math.abs(Number(subtitle)).toLocaleString()}`,
                     }),
                   },
                   fields: [
@@ -247,15 +288,23 @@ export const productType = defineType({
                       name: "label",
                       title: "Label",
                       type: "string",
-                      description: 'e.g. "16GB", "1TB", "RTX 5090", "Moonlight White"',
+                      description:
+                        'What the buyer sees on the chip. e.g. "Core i5", "Core i7", "16GB DDR4", "512GB", "1TB"',
                       validation: (rule) => rule.required(),
                     }),
                     defineField({
+                      name: "hint",
+                      title: "Upgrade hint (optional)",
+                      type: "string",
+                      description:
+                        'Small subtext under the chip. e.g. "+256GB from base", "Faster memory", "Recommended"',
+                    }),
+                    defineField({
                       name: "priceAdjustment",
-                      title: "Price adjustment (NGN)",
+                      title: "Price adjustment (NGN) — DELTA only",
                       type: "number",
                       description:
-                        "Positive = surcharge, negative = discount, 0 = included in base price",
+                        "Enter the DELTA from the tier below — NOT the full component price. See quick reference above. e.g. 1TB = +60,000 (because 105k − 45k = 60k).",
                       initialValue: 0,
                       validation: (rule) => rule.required(),
                     }),
@@ -264,23 +313,23 @@ export const productType = defineType({
                       title: "Default selection?",
                       type: "boolean",
                       description:
-                        "Pre-selected when the page loads. Only one option per group should be default.",
+                        "Pre-selected on page load. Set this on the base/lowest spec option (Core i5, 8GB, 256GB). Only ONE per group.",
                       initialValue: false,
                     }),
                     defineField({
                       name: "inStock",
                       title: "In stock?",
                       type: "boolean",
-                      description: "Uncheck to show this option as unavailable (greyed out)",
+                      description:
+                        "Uncheck to grey out this option. Buyer can see it exists but cannot select it.",
                       initialValue: true,
                     }),
-                    // Only relevant for color type — hex code for the colour dot
                     defineField({
                       name: "hexColor",
                       title: "Hex colour code",
                       type: "string",
                       description:
-                        'Only for Color variants — e.g. "#1a1a1a". Leave empty for other types.',
+                        'Only for Color variants — e.g. "#1a1a1a". Leave empty for all other types.',
                       hidden: ({ parent }) => (parent as any)?.type !== "color",
                     }),
                   ],
