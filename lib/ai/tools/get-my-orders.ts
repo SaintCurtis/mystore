@@ -7,7 +7,7 @@ import {
   getOrderStatusEmoji,
 } from "@/lib/constants/orderStatus";
 import { formatPrice } from "@/lib/utils";
-import type { ORDERS_BY_USER_QUERYResult } from "@/sanity.types";
+import type { ORDERS_BY_USER_QUERY_RESULT } from "@/sanity.types";
 
 const getMyOrdersSchema = z.object({
   status: z
@@ -64,10 +64,10 @@ export function createGetMyOrdersTool(userId: string | null) {
         console.log("[GetMyOrders] Orders found:", orders.length);
 
         // Filter by status if provided
-        let filteredOrders = orders as ORDERS_BY_USER_QUERYResult;
+        let filteredOrders = orders as ORDERS_BY_USER_QUERY_RESULT;
         if (status) {
           filteredOrders = filteredOrders.filter(
-            (order: ORDERS_BY_USER_QUERYResult[number]) => order.status === status
+            (order: ORDERS_BY_USER_QUERY_RESULT[number]) => order.status === status
           );
         }
 
@@ -84,7 +84,7 @@ export function createGetMyOrdersTool(userId: string | null) {
         }
 
         const formattedOrders: OrderSummary[] = filteredOrders.map(
-          (order: ORDERS_BY_USER_QUERYResult[number]) => ({
+          (order: ORDERS_BY_USER_QUERY_RESULT[number]) => ({
             id: order._id,
             orderNumber: order.orderNumber ?? null,
             total: order.total ?? null,

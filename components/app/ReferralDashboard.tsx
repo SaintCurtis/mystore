@@ -11,8 +11,8 @@ import { cn } from "@/lib/utils";
 
 interface ReferralClick {
   _id: string;
-  code: string;
-  converted: boolean;
+  code: string | null;        // ← was `string` — now matches SANITY generated type
+  converted: boolean | null;  // ← was `boolean` — sanity generates boolean | null
   convertedOrderId?: string | null;
   clickedAt: string | null;
 }
@@ -109,7 +109,6 @@ export function ReferralDashboard({
 
       {/* ── Hero header ─────────────────────────────────────────────────── */}
       <div className="relative overflow-hidden bg-zinc-900 dark:bg-[#0f0f0f] border-b border-zinc-800">
-        {/* Background pattern */}
         <div className="absolute inset-0 opacity-5"
           style={{
             backgroundImage: `radial-gradient(circle at 20% 50%, #f59e0b 0%, transparent 50%),
@@ -150,7 +149,6 @@ export function ReferralDashboard({
 
             {referralUrl ? (
               <>
-                {/* Link display */}
                 <div className="flex items-center gap-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-[#0d0d0d] p-3 mb-4">
                   <code className="flex-1 text-xs text-zinc-600 dark:text-zinc-300 truncate font-mono">
                     {referralUrl}
@@ -173,7 +171,6 @@ export function ReferralDashboard({
                   </button>
                 </div>
 
-                {/* Your code badge */}
                 <div className="flex items-center gap-2 mb-5">
                   <span className="text-xs text-zinc-500 dark:text-zinc-400">Your code:</span>
                   <span className="rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-1 text-sm font-black tracking-widest text-amber-600 dark:text-amber-400">
@@ -181,29 +178,19 @@ export function ReferralDashboard({
                   </span>
                 </div>
 
-                {/* Share buttons */}
                 <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={handleShare}
-                    className="flex items-center justify-center gap-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-[#0d0d0d] px-3 py-2.5 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:border-zinc-400 dark:hover:border-zinc-500 transition-all active:scale-95"
-                  >
+                  <button type="button" onClick={handleShare}
+                    className="flex items-center justify-center gap-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-[#0d0d0d] px-3 py-2.5 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:border-zinc-400 dark:hover:border-zinc-500 transition-all active:scale-95">
                     <Share2 className="h-3.5 w-3.5" />
                     Share
                   </button>
-                  <button
-                    type="button"
-                    onClick={handleWhatsApp}
-                    className="flex items-center justify-center gap-2 rounded-xl border border-green-200 dark:border-green-900/50 bg-green-50 dark:bg-green-900/20 px-3 py-2.5 text-xs font-semibold text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 transition-all active:scale-95"
-                  >
+                  <button type="button" onClick={handleWhatsApp}
+                    className="flex items-center justify-center gap-2 rounded-xl border border-green-200 dark:border-green-900/50 bg-green-50 dark:bg-green-900/20 px-3 py-2.5 text-xs font-semibold text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 transition-all active:scale-95">
                     <span className="text-sm">💬</span>
                     WhatsApp
                   </button>
-                  <button
-                    type="button"
-                    onClick={handleTwitter}
-                    className="flex items-center justify-center gap-2 rounded-xl border border-sky-200 dark:border-sky-900/50 bg-sky-50 dark:bg-sky-900/20 px-3 py-2.5 text-xs font-semibold text-sky-700 dark:text-sky-400 hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-all active:scale-95"
-                  >
+                  <button type="button" onClick={handleTwitter}
+                    className="flex items-center justify-center gap-2 rounded-xl border border-sky-200 dark:border-sky-900/50 bg-sky-50 dark:bg-sky-900/20 px-3 py-2.5 text-xs font-semibold text-sky-700 dark:text-sky-400 hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-all active:scale-95">
                     <span className="text-sm">𝕏</span>
                     Post
                   </button>
@@ -224,54 +211,36 @@ export function ReferralDashboard({
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
             {
-              icon: MousePointerClick,
-              label: "Link Clicks",
+              icon: MousePointerClick, label: "Link Clicks",
               value: stats.clicks.toLocaleString(),
-              color: "text-blue-500",
-              bg: "bg-blue-50 dark:bg-blue-900/20",
+              color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20",
               border: "border-blue-100 dark:border-blue-900/30",
             },
             {
-              icon: Users,
-              label: "Conversions",
+              icon: Users, label: "Conversions",
               value: stats.conversions.toLocaleString(),
-              color: "text-emerald-500",
-              bg: "bg-emerald-50 dark:bg-emerald-900/20",
+              color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-900/20",
               border: "border-emerald-100 dark:border-emerald-900/30",
             },
             {
-              icon: Banknote,
-              label: "Total Earned",
+              icon: Banknote, label: "Total Earned",
               value: `₦${stats.earned.toLocaleString()}`,
-              color: "text-amber-500",
-              bg: "bg-amber-50 dark:bg-amber-900/20",
+              color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-900/20",
               border: "border-amber-100 dark:border-amber-900/30",
             },
             {
-              icon: Zap,
-              label: "Conv. Rate",
+              icon: Zap, label: "Conv. Rate",
               value: `${stats.conversionRate}%`,
-              color: "text-purple-500",
-              bg: "bg-purple-50 dark:bg-purple-900/20",
+              color: "text-purple-500", bg: "bg-purple-50 dark:bg-purple-900/20",
               border: "border-purple-100 dark:border-purple-900/30",
             },
           ].map(({ icon: Icon, label, value, color, bg, border }) => (
-            <div
-              key={label}
-              className={cn(
-                "rounded-2xl border p-4 bg-white dark:bg-[#111111]",
-                border,
-              )}
-            >
+            <div key={label} className={cn("rounded-2xl border p-4 bg-white dark:bg-[#111111]", border)}>
               <div className={cn("mb-3 flex h-9 w-9 items-center justify-center rounded-xl", bg)}>
                 <Icon className={cn("h-4 w-4", color)} />
               </div>
-              <p className="text-2xl font-black text-zinc-900 dark:text-zinc-100 tabular-nums">
-                {value}
-              </p>
-              <p className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                {label}
-              </p>
+              <p className="text-2xl font-black text-zinc-900 dark:text-zinc-100 tabular-nums">{value}</p>
+              <p className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">{label}</p>
             </div>
           ))}
         </div>
@@ -279,17 +248,13 @@ export function ReferralDashboard({
         {/* ── Tabs ─────────────────────────────────────────────────────── */}
         <div className="flex gap-1 rounded-xl bg-zinc-100 dark:bg-zinc-900 p-1">
           {(["overview", "history", "leaderboard"] as const).map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => setActiveTab(tab)}
+            <button key={tab} type="button" onClick={() => setActiveTab(tab)}
               className={cn(
                 "flex-1 rounded-lg py-2 text-xs font-bold capitalize transition-all duration-200",
                 activeTab === tab
                   ? "bg-white dark:bg-[#111111] text-zinc-900 dark:text-zinc-100 shadow-sm"
                   : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300",
-              )}
-            >
+              )}>
               {tab}
             </button>
           ))}
@@ -298,32 +263,13 @@ export function ReferralDashboard({
         {/* ── Overview tab ─────────────────────────────────────────────── */}
         {activeTab === "overview" && (
           <div className="space-y-4">
-
-            {/* How it works */}
             <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#111111] p-5 sm:p-6">
-              <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mb-4">
-                How it works
-              </h2>
+              <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mb-4">How it works</h2>
               <div className="space-y-4">
                 {[
-                  {
-                    step: "01",
-                    title: "Copy your link",
-                    desc: "Share your unique referral link with friends, family, or on social media.",
-                    icon: Copy,
-                  },
-                  {
-                    step: "02",
-                    title: "Friend shops",
-                    desc: "When someone clicks your link and places an order, it counts as a conversion.",
-                    icon: ExternalLink,
-                  },
-                  {
-                    step: "03",
-                    title: "You earn",
-                    desc: "Earn rewards for every successful order. The more you refer, the more you earn.",
-                    icon: Banknote,
-                  },
+                  { step: "01", title: "Copy your link", desc: "Share your unique referral link with friends, family, or on social media.", icon: Copy },
+                  { step: "02", title: "Friend shops", desc: "When someone clicks your link and places an order, it counts as a conversion.", icon: ExternalLink },
+                  { step: "03", title: "You earn", desc: "Earn rewards for every successful order. The more you refer, the more you earn.", icon: Banknote },
                 ].map(({ step, title, desc, icon: Icon }) => (
                   <div key={step} className="flex gap-4">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/20">
@@ -331,23 +277,16 @@ export function ReferralDashboard({
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-0.5">
-                        <span className="text-[10px] font-black tracking-widest text-amber-500/60">
-                          STEP {step}
-                        </span>
+                        <span className="text-[10px] font-black tracking-widest text-amber-500/60">STEP {step}</span>
                       </div>
-                      <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                        {title}
-                      </p>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 leading-relaxed">
-                        {desc}
-                      </p>
+                      <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{title}</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 leading-relaxed">{desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Tips */}
             <div className="rounded-2xl border border-amber-200 dark:border-amber-900/40 bg-amber-50 dark:bg-amber-900/10 p-5">
               <p className="text-xs font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400 mb-3">
                 💡 Pro tips to maximise earnings
@@ -373,24 +312,16 @@ export function ReferralDashboard({
         {activeTab === "history" && (
           <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#111111] overflow-hidden">
             <div className="border-b border-zinc-100 dark:border-zinc-800 px-5 py-4">
-              <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                Recent activity
-              </p>
-              <p className="text-xs text-zinc-500 mt-0.5">
-                Last 20 clicks on your referral link
-              </p>
+              <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Recent activity</p>
+              <p className="text-xs text-zinc-500 mt-0.5">Last 20 clicks on your referral link</p>
             </div>
             {clicks.length === 0 ? (
               <div className="flex flex-col items-center gap-3 py-12 text-center px-6">
                 <div className="h-12 w-12 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
                   <MousePointerClick className="h-6 w-6 text-zinc-400" />
                 </div>
-                <p className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
-                  No clicks yet
-                </p>
-                <p className="text-xs text-zinc-400">
-                  Share your link to start seeing activity here
-                </p>
+                <p className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">No clicks yet</p>
+                <p className="text-xs text-zinc-400">Share your link to start seeing activity here</p>
               </div>
             ) : (
               <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -416,9 +347,7 @@ export function ReferralDashboard({
                       </div>
                     </div>
                     {click.converted && (
-                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                        +Reward
-                      </span>
+                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">+Reward</span>
                     )}
                   </div>
                 ))}
@@ -432,21 +361,15 @@ export function ReferralDashboard({
           <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#111111] overflow-hidden">
             <div className="border-b border-zinc-100 dark:border-zinc-800 px-5 py-4 flex items-center gap-2">
               <Trophy className="h-4 w-4 text-amber-500" />
-              <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                Top Referrers
-              </p>
+              <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Top Referrers</p>
             </div>
             {leaderboard.length === 0 ? (
               <div className="flex flex-col items-center gap-3 py-12 text-center px-6">
                 <div className="h-12 w-12 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
                   <Trophy className="h-6 w-6 text-zinc-400" />
                 </div>
-                <p className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
-                  Leaderboard is empty
-                </p>
-                <p className="text-xs text-zinc-400">
-                  Be the first to make a conversion!
-                </p>
+                <p className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">Leaderboard is empty</p>
+                <p className="text-xs text-zinc-400">Be the first to make a conversion!</p>
               </div>
             ) : (
               <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -456,25 +379,18 @@ export function ReferralDashboard({
                   const isCurrentUser = entry.code === referral?.code;
 
                   return (
-                    <div
-                      key={entry._id}
+                    <div key={entry._id}
                       className={cn(
                         "flex items-center gap-4 px-5 py-4 transition-colors",
                         isCurrentUser && "bg-amber-50 dark:bg-amber-900/10",
-                      )}
-                    >
-                      {/* Rank */}
+                      )}>
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center">
                         {i < 3 ? (
                           <Icon className={cn("h-5 w-5", iconColor)} />
                         ) : (
-                          <span className="text-sm font-bold text-zinc-400">
-                            #{i + 1}
-                          </span>
+                          <span className="text-sm font-bold text-zinc-400">#{i + 1}</span>
                         )}
                       </div>
-
-                      {/* Name */}
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">
                           {isCurrentUser ? "You 🎉" : (entry.name ?? "Anonymous")}
@@ -483,8 +399,6 @@ export function ReferralDashboard({
                           {entry.conversions ?? 0} conversion{(entry.conversions ?? 0) !== 1 ? "s" : ""}
                         </p>
                       </div>
-
-                      {/* Earned */}
                       <div className="text-right shrink-0">
                         <p className="text-sm font-black text-amber-500">
                           ₦{(entry.totalEarned ?? 0).toLocaleString()}
@@ -499,7 +413,6 @@ export function ReferralDashboard({
           </div>
         )}
 
-        {/* Bottom padding for mobile nav */}
         <div className="h-20" />
       </div>
     </div>
