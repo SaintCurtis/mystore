@@ -5,14 +5,6 @@ import { LOW_STOCK_THRESHOLD } from "@/lib/constants/stock";
 // Shared Query Fragments
 // ============================================
 
-/**
- * Full filter conditions including condition + brand drill-down.
- * categorySlug matches EITHER:
- *   - the product's direct category slug, OR
- *   - the product's category's parent slug
- * This means filtering by "gaming-laptops" returns products in
- * both "brand-new" and "foreign-used" subcategories under it.
- */
 const PRODUCT_FILTER_CONDITIONS = `
   _type == "product"
   && (
@@ -37,7 +29,6 @@ const PRODUCT_FILTER_CONDITIONS = `
   && ($inStock == false || stock > 0)
 `;
 
-/** Projection for filtered product lists */
 const FILTERED_PRODUCT_PROJECTION = `{
   _id,
   name,
@@ -141,7 +132,8 @@ export const PRODUCT_BY_SLUG_QUERY = defineQuery(`*[
   stock,
   featured,
   assemblyRequired,
- 
+  isNegotiable,
+
   // ── Variants ──────────────────────────────────────────────
   "variantGroups": variantGroups[]{
     type,
@@ -177,8 +169,7 @@ export const FILTER_PRODUCTS_BY_RELEVANCE_QUERY = defineQuery(
 );
 
 // ============================================
-// Products by Category (expanded — matches both
-// direct category AND parent category)
+// Products by Category
 // ============================================
 
 export const PRODUCTS_BY_CATEGORY_QUERY = defineQuery(`*[

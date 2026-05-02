@@ -1,20 +1,21 @@
 {
+  "createdAt": "2026-05-02T22:00:04.518Z",
+  "studioVersion": "5.23.0",
   "version": 3,
-  "createdAt": "2026-04-23T04:40:25.379Z",
   "workspaces": [
     {
-      "name": "default",
-      "title": "Default",
       "basePath": "/studio",
-      "projectId": "az1j68mx",
       "dataset": "production",
-      "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\"><rect width=\"32\" height=\"32\" rx=\"2\" fill=\"#f0709b\"></rect><text x=\"50%\" y=\"50%\" text-anchor=\"middle\" alignment-baseline=\"middle\" fill=\"hsla(340, 81%, 29%, 1)\" class=\"sc-gzpDuk hfXNsv\">D</text></svg>",
+      "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\"><rect width=\"32\" height=\"32\" rx=\"2\" fill=\"#f0709b\"></rect><text x=\"50%\" y=\"50%\" text-anchor=\"middle\" alignment-baseline=\"middle\" fill=\"hsla(340, 81%, 29%, 1)\" style=\"font-family:Inter, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, &quot;Liberation Sans&quot;, Helvetica, Arial, system-ui, sans-serif;font-weight:500;font-size:13px;transform:translateY(1px)\">D</text></svg>",
       "mediaLibrary": {
-        "enabled": false
+        "enabled": false,
+        "__internal": {}
       },
-      "schema": "fbda187d.create-schema.json",
-      "tools": "46f6d878.create-tools.json"
+      "name": "default",
+      "projectId": "az1j68mx",
+      "schema": "1615eed5.create-schema.json",
+      "title": "Default",
+      "tools": "ef87c8fe.create-tools.json"
     }
-  ],
-  "studioVersion": "4.20.3"
+  ]
 }

@@ -20,35 +20,6 @@ const MATERIALS_SANITY_LIST = [
   { title: "Glass",    value: "glass"    },
 ];
 
-// ─────────────────────────────────────────────────────────────────────────────
-// VARIANT PRICE ADJUSTMENT REFERENCE
-// (All adjustments are DELTAS — what the buyer pays ON TOP of the base price)
-// Base spec = Core i5 / 8GB RAM / 256GB SSD
-//
-// PROCESSOR (base = Core i5, ₦0):
-//   Core i5  →  +₦0       (included in base)
-//   Core i7  →  +₦35,000  (cost of i7 − cost of i5)
-//   Core i9  →  +₦55,000  (cost of i9 − cost of i5)
-//
-// RAM — DDR4 (base = 8GB, ₦0):
-//   8GB DDR4   →  +₦0        (base)
-//   16GB DDR4  →  +₦85,000   (full cost ₦85k − 8GB base ₦0)
-//   32GB DDR4  →  +₦85,000   (full cost ₦170k − 16GB cost ₦85k)
-//
-// RAM — DDR5 (base = 8GB, ₦0):
-//   8GB DDR5   →  +₦0        (base — if applicable)
-//   16GB DDR5  →  +₦250,000  (full cost ₦250k − 8GB base ₦0)
-//   32GB DDR5  →  +₦230,000  (full cost ₦480k − 16GB DDR5 cost ₦250k)
-//
-// SSD (base = 256GB, ₦0 — already priced into base):
-//   256GB  →  +₦0        (base, already included)
-//   512GB  →  +₦45,000   (full cost ₦45k − 256GB base ₦0)
-//   1TB    →  +₦60,000   (full cost ₦105k − 512GB cost ₦45k)
-//   2TB    →  +₦105,000  (full cost ₦210k − 1TB cost ₦105k)
-//
-// GPU: enter adjustment manually per product
-// ─────────────────────────────────────────────────────────────────────────────
-
 export const productType = defineType({
   name: "product",
   title: "Product",
@@ -183,43 +154,51 @@ export const productType = defineType({
       initialValue: false,
     }),
 
+    // ── Negotiation ────────────────────────────────────────────
+    defineField({
+      name: "isNegotiable",
+      title: "Price is Negotiable?",
+      type: "boolean",
+      group: "inventory",
+      initialValue: false,
+      description: "Show a 'Negotiate Price' button on this product page",
+    }),
+    defineField({
+      name: "floorPrice",
+      title: "Floor Price (₦) — NEVER shown publicly",
+      type: "number",
+      group: "inventory",
+      description:
+        "The absolute lowest price you will accept. Only read server-side — never sent to the browser.",
+      hidden: ({ document }) => !document?.isNegotiable,
+      validation: (rule) =>
+        rule.custom((val, ctx) => {
+          if (!ctx.document?.isNegotiable) return true;
+          if (!val) return "Floor price is required when product is negotiable";
+          if ((val as number) >= (ctx.document?.price as number))
+            return "Floor price must be less than the listed price";
+          return true;
+        }),
+    }),
+    defineField({
+      name: "negotiationNotes",
+      title: "AI Negotiation Instructions (optional)",
+      type: "text",
+      group: "inventory",
+      rows: 3,
+      description:
+        'Private tactics for the AI. e.g. "Can bundle with a bag if they push hard", "Stock is old, be flexible"',
+      hidden: ({ document }) => !document?.isNegotiable,
+    }),
+
     // ── Variants ───────────────────────────────────────────────
-    //
-    // IMPORTANT — HOW ADJUSTMENTS WORK:
-    // The buyer selects ONE option per group. The frontend adds all selected
-    // priceAdjustment values to the base price to get the final price.
-    // Each adjustment = (full component cost) − (cost of component already in base).
-    //
-    // QUICK REFERENCE (copy-paste when adding options):
-    //
-    //  PROCESSOR group  (type: processor)
-    //   "Core i5"  priceAdjustment: 0
-    //   "Core i7"  priceAdjustment: 35000
-    //   "Core i9"  priceAdjustment: 55000
-    //
-    //  RAM group — DDR4  (type: ram, label: "RAM (DDR4)")
-    //   "8GB DDR4"   priceAdjustment: 0
-    //   "16GB DDR4"  priceAdjustment: 85000
-    //   "32GB DDR4"  priceAdjustment: 85000   ← delta: 170k − 85k
-    //
-    //  RAM group — DDR5  (type: ram, label: "RAM (DDR5)")
-    //   "8GB DDR5"   priceAdjustment: 0
-    //   "16GB DDR5"  priceAdjustment: 250000
-    //   "32GB DDR5"  priceAdjustment: 230000  ← delta: 480k − 250k
-    //
-    //  SSD group  (type: ssd, label: "Storage")
-    //   "256GB"  priceAdjustment: 0           ← base, already in price
-    //   "512GB"  priceAdjustment: 45000       ← delta: 45k − 0
-    //   "1TB"    priceAdjustment: 60000       ← delta: 105k − 45k
-    //   "2TB"    priceAdjustment: 105000      ← delta: 210k − 105k
-    //
     defineField({
       name: "variantGroups",
       title: "Variant groups",
       type: "array",
       group: "variants",
       description:
-        "Add one group per spec axis. Base price = Core i5 / 8GB / 256GB SSD. Each adjustment = component cost delta from the tier below it. See quick reference in schema comments.",
+        "Add one group per spec axis. Base price = Core i5 / 8GB / 256GB SSD. Each adjustment = component cost delta from the tier below it.",
       of: [
         {
           type: "object",
@@ -256,7 +235,7 @@ export const productType = defineType({
               title: "Display label",
               type: "string",
               description:
-                'Shown above the option chips on the product page. Be specific: "RAM (DDR4)", "RAM (DDR5)", "Storage", "Processor"',
+                'Shown above the option chips on the product page. e.g. "RAM (DDR4)", "Storage", "Processor"',
               validation: (rule) => rule.required(),
             }),
             defineField({
@@ -289,7 +268,7 @@ export const productType = defineType({
                       title: "Label",
                       type: "string",
                       description:
-                        'What the buyer sees on the chip. e.g. "Core i5", "Core i7", "16GB DDR4", "512GB", "1TB"',
+                        'What the buyer sees on the chip. e.g. "Core i5", "16GB DDR4", "512GB"',
                       validation: (rule) => rule.required(),
                     }),
                     defineField({
@@ -297,14 +276,14 @@ export const productType = defineType({
                       title: "Upgrade hint (optional)",
                       type: "string",
                       description:
-                        'Small subtext under the chip. e.g. "+256GB from base", "Faster memory", "Recommended"',
+                        'Small subtext under the chip. e.g. "+256GB from base", "Recommended"',
                     }),
                     defineField({
                       name: "priceAdjustment",
                       title: "Price adjustment (NGN) — DELTA only",
                       type: "number",
                       description:
-                        "Enter the DELTA from the tier below — NOT the full component price. See quick reference above. e.g. 1TB = +60,000 (because 105k − 45k = 60k).",
+                        "Enter the DELTA from the tier below — NOT the full component price.",
                       initialValue: 0,
                       validation: (rule) => rule.required(),
                     }),
@@ -313,7 +292,7 @@ export const productType = defineType({
                       title: "Default selection?",
                       type: "boolean",
                       description:
-                        "Pre-selected on page load. Set this on the base/lowest spec option (Core i5, 8GB, 256GB). Only ONE per group.",
+                        "Pre-selected on page load. Only ONE per group.",
                       initialValue: false,
                     }),
                     defineField({
@@ -321,7 +300,7 @@ export const productType = defineType({
                       title: "In stock?",
                       type: "boolean",
                       description:
-                        "Uncheck to grey out this option. Buyer can see it exists but cannot select it.",
+                        "Uncheck to grey out this option.",
                       initialValue: true,
                     }),
                     defineField({
@@ -329,7 +308,7 @@ export const productType = defineType({
                       title: "Hex colour code",
                       type: "string",
                       description:
-                        'Only for Color variants — e.g. "#1a1a1a". Leave empty for all other types.',
+                        'Only for Color variants — e.g. "#1a1a1a".',
                       hidden: ({ parent }) => (parent as any)?.type !== "color",
                     }),
                   ],

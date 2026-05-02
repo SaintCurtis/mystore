@@ -11,6 +11,7 @@ import { WhatsAppShare } from "@/components/app/WhatsAppShare";
 import { WishlistButton } from "@/components/app/WishlistButton";
 import { VariantSelector } from "@/components/app/VariantSelector";
 import { StickyAddToCart } from "@/components/app/StickyAddToCart";
+import { NegotiateButton } from "@/components/app/NegotiateButton";
 import { recordView } from "@/lib/hooks/useRecentlyViewed";
 import { useCurrency } from "@/lib/store/currency-store-provider";
 import { useCartActions } from "@/lib/store/cart-store-provider";
@@ -22,10 +23,10 @@ import {
   type VariantGroup,
   type SelectedVariant,
 } from "@/types/variants";
-import type { PRODUCT_BY_SLUG_QUERYResult} from "@/sanity.types";
+import type { PRODUCT_BY_SLUG_QUERY_RESULT } from "@/sanity.types";
 
 interface ProductInfoProps {
-  product: NonNullable<PRODUCT_BY_SLUG_QUERYResult>;
+  product: NonNullable<PRODUCT_BY_SLUG_QUERY_RESULT>;
 }
 
 export function ProductInfo({ product }: ProductInfoProps) {
@@ -69,7 +70,6 @@ export function ProductInfo({ product }: ProductInfoProps) {
       : `https://mystore-drab-nine.vercel.app/products/${product.slug}`;
 
   // ── Buy Now handler ───────────────────────────────────────────────────────
-  // Adds item to cart then navigates straight to checkout
   const handleBuyNow = () => {
     const variantKey =
       selectedVariants.length > 0
@@ -111,7 +111,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
           {product.name}
         </h1>
 
-        {/* Price + stock — shown ONCE */}
+        {/* Price + stock */}
         <div className="mt-5 flex items-center gap-4">
           <div className="flex flex-col gap-0.5">
             <p className="font-display text-3xl font-bold tracking-tight text-zinc-900 dark:text-amber-400">
@@ -164,7 +164,6 @@ export function ProductInfo({ product }: ProductInfoProps) {
             <>
               {/* Primary row: Buy Now + Add to Cart */}
               <div className="flex gap-2">
-                {/* Buy Now — amber, full width, goes to checkout */}
                 <button
                   type="button"
                   onClick={handleBuyNow}
@@ -174,7 +173,6 @@ export function ProductInfo({ product }: ProductInfoProps) {
                   Buy Now
                 </button>
 
-                {/* Add to Cart — dark, icon + label */}
                 <AddToCartButton
                   productId={product._id}
                   name={product.name ?? "Unknown Product"}
@@ -187,7 +185,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
                 />
               </div>
 
-              {/* Secondary row */}
+              {/* Secondary row: Wishlist + Ask AI */}
               <div className="grid grid-cols-2 gap-2">
                 <WishlistButton
                   productId={product._id}
@@ -200,6 +198,20 @@ export function ProductInfo({ product }: ProductInfoProps) {
                 />
                 <AskAISimilarButton productName={product.name ?? "this product"} />
               </div>
+
+              {/* Negotiate Price — only on negotiable products */}
+              {(product as any).isNegotiable && (
+                <NegotiateButton
+                  product={{
+                    _id: product._id,
+                    slug: product.slug ?? "",
+                    name: product.name ?? "",
+                    price: displayPrice,
+                    images: product.images as any,
+                  }}
+                  selectedVariants={selectedVariants}
+                />
+              )}
             </>
           ) : (
             /* Out of stock */
