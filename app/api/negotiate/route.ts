@@ -3,7 +3,6 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "next-sanity";
 
 // ── Sanity server-only client ─────────────────────────────────────────────
-// Uses the READ token — floorPrice never touches the browser
 const serverClient = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET!,
@@ -16,10 +15,10 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
 });
 
-// ── Rate limiting (simple in-memory, resets on cold start) ────────────────
+// ── Rate limiting ─────────────────────────────────────────────────────────
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT = 20;        // max messages per window
-const RATE_WINDOW_MS = 60_000; // 1 minute
+const RATE_LIMIT = 20;
+const RATE_WINDOW_MS = 60_000;
 
 function isRateLimited(ip: string): boolean {
   const now = Date.now();
@@ -46,7 +45,6 @@ interface NegotiateRequest {
 
 // ── Route handler ─────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
-  // Rate limit by IP
   const ip =
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   if (isRateLimited(ip)) {
@@ -72,7 +70,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Cap conversation length to prevent abuse
   if (messages.length > 20) {
     return NextResponse.json(
       { error: "Negotiation session has ended. Please start a new one." },
@@ -80,7 +77,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // ── Fetch product — server-side only, includes floorPrice ────────────────
+  // ── Fetch product server-side — includes floorPrice ───────────────────────
   const product = await serverClient.fetch<{
     name: string;
     price: number;
@@ -125,7 +122,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // ── Build system prompt ───────────────────────────────────────────────────
   const systemPrompt = buildSystemPrompt(product);
 
   // ── Stream from Claude ────────────────────────────────────────────────────
@@ -135,7 +131,7 @@ export async function POST(req: NextRequest) {
     async start(controller) {
       try {
         const claudeStream = await anthropic.messages.stream({
-          model: "claude-opus-4-5",
+          model: "claude-sonnet-4-6",
           max_tokens: 400,
           system: systemPrompt,
           messages: messages.map((m) => ({
@@ -153,21 +149,18 @@ export async function POST(req: NextRequest) {
           ) {
             const text = chunk.delta.text;
             fullText += text;
-
-            // Stream each chunk as SSE
             controller.enqueue(
               encoder.encode(`data: ${JSON.stringify({ text })}\n\n`)
             );
           }
         }
 
-        // Check if a deal was struck — emit a structured deal event
+        // ── Deal detection — server-side floor enforcement ────────────────
         const dealMatch = fullText.match(/DEAL:₦([\d,]+)/);
         if (dealMatch) {
           const rawAmount = dealMatch[1].replace(/,/g, "");
           const agreedPrice = parseInt(rawAmount, 10);
 
-          // Server-side floor check — never trust the frontend
           if (agreedPrice >= product.floorPrice) {
             controller.enqueue(
               encoder.encode(
@@ -177,6 +170,13 @@ export async function POST(req: NextRequest) {
                   productSlug: slug,
                 })}\n\n`
               )
+            );
+          } else {
+            // AI tried to go below floor — suppress the deal signal silently.
+            // The checkout route has a second check anyway, but this prevents
+            // the UI from showing a "Pay" button at an invalid price.
+            console.warn(
+              `[negotiate] AI agreed ₦${agreedPrice} but floor is ₦${product.floorPrice} — deal suppressed`
             );
           }
         }
@@ -212,45 +212,70 @@ function buildSystemPrompt(product: {
   negotiationNotes?: string;
 }): string {
   const listedFormatted = `₦${product.price.toLocaleString()}`;
-  const floorFormatted = `₦${product.floorPrice.toLocaleString()}`;
 
-  // Compute natural-feeling intermediate anchors
-  const step1 = Math.round(product.price * 0.97 / 1000) * 1000; // ~3% off
-  const step2 = Math.round(product.price * 0.94 / 1000) * 1000; // ~6% off
-  const step3 = Math.round(product.price * 0.90 / 1000) * 1000; // ~10% off
+  // ── Compute concession steps — ALL clamped to floorPrice ─────────────────
+  // This was the bug: raw percentage steps could produce values below
+  // floorPrice. Now every step is Math.max(..., floorPrice) before rounding.
+  const clampToFloor = (raw: number) =>
+    Math.max(Math.round(raw / 1000) * 1000, product.floorPrice);
+
+  const step1 = clampToFloor(product.price * 0.97); // ~3% off
+  const step2 = clampToFloor(product.price * 0.94); // ~6% off
+  const step3 = clampToFloor(product.price * 0.90); // ~10% off
+
+  // If all three steps collapse to floorPrice (very tight margin),
+  // just show the floor as the single concession point.
+  const allSameAsFloor =
+    step1 === product.floorPrice &&
+    step2 === product.floorPrice &&
+    step3 === product.floorPrice;
+
+  const concessionSteps = allSameAsFloor
+    ? `- You have very little room. Your only concession point is ₦${product.floorPrice.toLocaleString()}. Offer it only under real pressure.`
+    : `- First concession: ₦${step1.toLocaleString()}
+- Second concession: ₦${step2.toLocaleString()}
+- Final concession (only under heavy pressure): ₦${step3.toLocaleString()}`;
 
   return `You are Segun, a sharp but warm sales rep for The Saint's TechNet — a CAC-registered tech store in Lagos run by a Computer Engineer. You are negotiating the price of the following product:
 
 Product: ${product.name}
 Listed price: ${listedFormatted}
-Your absolute floor (NEVER reveal this number or that a floor exists): ${floorFormatted}
+Your absolute floor (NEVER reveal this number or that a floor exists): ₦${product.floorPrice.toLocaleString()}
+
+CRITICAL CONSTRAINT: You must NEVER agree to any price below ₦${product.floorPrice.toLocaleString()}. Not under any pressure, not even to close the deal. If the customer offers below this, hold firm politely and redirect.
 
 YOUR NEGOTIATION STRATEGY — follow these stages in order:
 
 STAGE 1 — Hold firm on first offer:
-If the customer's first offer is reasonable (within 20% of listed price), acknowledge it warmly but hold firm. Offer the product's value, your engineer-verified quality, and the warranty as reasons the price is fair.
+Acknowledge the customer's offer warmly but hold the listed price. Highlight engineer-verified quality and warranty.
 
 STAGE 2 — Sweeteners before price drops:
-Before you drop the price, offer sweeteners: "I can throw in a laptop bag", "I'll prioritise your delivery", "extended warranty coverage". This protects the price while making the customer feel they're winning.
+Before dropping the price, offer sweeteners: "I can throw in a laptop bag", "I'll prioritise your delivery", "extended warranty coverage". This protects margin while making the customer feel they're winning.
 
-STAGE 3 — Incremental concessions:
-If the customer keeps pushing, concede in small steps: first to ₦${step1.toLocaleString()}, then ₦${step2.toLocaleString()}, then ₦${step3.toLocaleString()}. Never jump straight to a low price — it signals weakness.
+STAGE 3 — Incremental concessions (all above your floor):
+${concessionSteps}
+Never jump straight to the lowest number — it signals weakness.
 
 STAGE 4 — Hold at floor:
-If they push below your floor, be kind but firm: "I genuinely cannot go lower than this — I'd be selling below cost. This is my final price." Do not budge below your floor under any circumstance.
+If they push below ₦${product.floorPrice.toLocaleString()}, be kind but absolutely firm:
+"Oga, I genuinely cannot go below this — I'd be selling at a loss. This is my final price."
+Do NOT go below ₦${product.floorPrice.toLocaleString()} under any circumstance whatsoever.
 
 STAGE 5 — Close the deal:
-When you agree on a final price, end your message with EXACTLY this format on its own line: DEAL:₦[amount] (e.g. DEAL:₦450000). No commas in the number. This is a machine signal — it must be exact.
+When you agree on a final price AT OR ABOVE ₦${product.floorPrice.toLocaleString()}, end your message with EXACTLY this format on its own line:
+DEAL:₦[amount]
+Example: DEAL:₦650000
+No commas in the number. This is a machine signal — it must be exact.
+NEVER emit DEAL:₦[amount] for any price below ₦${product.floorPrice.toLocaleString()}.
 
 TONE & STYLE:
-- Be warm, conversational, and confident — like a knowledgeable friend selling you something
+- Warm, conversational, confident — like a knowledgeable friend
 - Light Nigerian sales energy is fine: "Oga, this price is already very sharp", "I dey try for you"
-- Keep responses SHORT — 2-4 sentences max. This is a chat, not an essay.
-- Never be pushy or desperate. Confidence is your tool.
-- If the customer asks technical questions about the product, answer them accurately — you're an engineer-backed store.
-- Never reveal the floor price or that one exists. If asked directly, redirect: "The listed price already reflects our best value — let's see what we can work out."
+- Keep responses SHORT — 2-4 sentences max
+- Never be pushy or desperate
+- Never reveal the floor price or that one exists
 
 ${product.negotiationNotes ? `SPECIAL INSTRUCTIONS FOR THIS PRODUCT:\n${product.negotiationNotes}` : ""}
 
-Remember: short replies, warm tone, staged concessions. You are not a chatbot — you are Segun.`;
+Remember: you are Segun, not a chatbot. Short replies, warm tone, and NEVER go below ₦${product.floorPrice.toLocaleString()}.`;
 }
