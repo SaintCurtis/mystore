@@ -14,7 +14,7 @@ import { useCartActions } from "@/lib/store/cart-store-provider";
 // ── Types ────────────────────────────────────────────────────────
 
 type UseCase = "gaming" | "work" | "content-creation" | "student";
-type Budget = "under-300k" | "300k-700k" | "700k-1.5m" | "1.5m-plus";
+type Budget = "under-600k" | "600k-1.2m" | "1.2m-2.5m" | "2.5m-plus";
 type Step = "use-case" | "budget" | "preferences" | "result";
 
 interface SetupItem {
@@ -37,17 +37,17 @@ interface SetupResult {
 // ── Config ───────────────────────────────────────────────────────
 
 const USE_CASES = [
-  { id: "gaming" as UseCase, label: "Gaming", icon: Gamepad2, desc: "High-performance gaming setup" },
-  { id: "work" as UseCase, label: "Work / Business", icon: Briefcase, desc: "Productivity & professional use" },
-  { id: "content-creation" as UseCase, label: "Content Creation", icon: Video, desc: "Video, photo, streaming" },
-  { id: "student" as UseCase, label: "Student", icon: GraduationCap, desc: "Study, assignments, portability" },
+  { id: "gaming" as UseCase,            label: "Gaming",           icon: Gamepad2,      desc: "High-performance gaming setup"       },
+  { id: "work" as UseCase,              label: "Work / Business",  icon: Briefcase,     desc: "Productivity & professional use"     },
+  { id: "content-creation" as UseCase,  label: "Content Creation", icon: Video,         desc: "Video, photo, streaming"             },
+  { id: "student" as UseCase,           label: "Student",          icon: GraduationCap, desc: "Study, assignments, portability"     },
 ];
 
 const BUDGETS = [
-  { id: "under-300k" as Budget, label: "Under ₦300,000", sub: "Entry level" },
-  { id: "300k-700k" as Budget, label: "₦300k – ₦700k", sub: "Mid range" },
-  { id: "700k-1.5m" as Budget, label: "₦700k – ₦1.5M", sub: "High performance" },
-  { id: "1.5m-plus" as Budget, label: "₦1.5M+", sub: "Premium / flagship" },
+  { id: "under-600k" as Budget,  label: "Under ₦600,000",    sub: "Entry level"        },
+  { id: "600k-1.2m" as Budget,   label: "₦600k – ₦1.2M",    sub: "Mid range"          },
+  { id: "1.2m-2.5m" as Budget,   label: "₦1.2M – ₦2.5M",   sub: "High performance"   },
+  { id: "2.5m-plus" as Budget,   label: "₦2.5M+",            sub: "Premium / flagship" },
 ];
 
 // ── Main Component ────────────────────────────────────────────────
@@ -329,19 +329,14 @@ export function BuildMySetupClient() {
                   {result.items.map((item, index) => (
                     <div key={item._id}
                       className="flex gap-4 rounded-xl border border-zinc-200 dark:border-[#1f1f1f] bg-white dark:bg-[#111111] p-4 transition-colors">
-                      {/* Number */}
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 dark:bg-amber-500/8 text-sm font-bold text-amber-600 dark:text-amber-400">
                         {index + 1}
                       </div>
-
-                      {/* Image */}
                       {item.image && (
                         <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-zinc-100 dark:bg-[#0d0d0d]">
                           <Image src={item.image} alt={item.name} fill className="object-cover" sizes="64px" />
                         </div>
                       )}
-
-                      {/* Info */}
                       <div className="flex-1 min-w-0">
                         {item.categoryTitle && (
                           <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
@@ -359,8 +354,6 @@ export function BuildMySetupClient() {
                           {formatPrice(item.price)}
                         </p>
                       </div>
-
-                      {/* Add to cart */}
                       <Button
                         size="sm"
                         onClick={() => addItem({ productId: item._id, name: item.name, price: item.price, image: item.image })}
