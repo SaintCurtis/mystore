@@ -5,11 +5,13 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   Wand2, Gamepad2, Briefcase, Video, GraduationCap,
-  ChevronRight, Loader2, ShoppingCart, ArrowLeft, Sparkles,
+  ChevronRight, Loader2, ShoppingCart, ArrowLeft, Sparkles, Zap, Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils";
 import { useCartActions } from "@/lib/store/cart-store-provider";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 // ── Types ────────────────────────────────────────────────────────
 
@@ -37,17 +39,17 @@ interface SetupResult {
 // ── Config ───────────────────────────────────────────────────────
 
 const USE_CASES = [
-  { id: "gaming" as UseCase,            label: "Gaming",           icon: Gamepad2,      desc: "High-performance gaming setup"       },
-  { id: "work" as UseCase,              label: "Work / Business",  icon: Briefcase,     desc: "Productivity & professional use"     },
-  { id: "content-creation" as UseCase,  label: "Content Creation", icon: Video,         desc: "Video, photo, streaming"             },
-  { id: "student" as UseCase,           label: "Student",          icon: GraduationCap, desc: "Study, assignments, portability"     },
+  { id: "gaming" as UseCase,            label: "Gaming",           icon: Gamepad2,      desc: "High-performance gaming setup"    },
+  { id: "work" as UseCase,              label: "Work / Business",  icon: Briefcase,     desc: "Productivity & professional use"  },
+  { id: "content-creation" as UseCase,  label: "Content Creation", icon: Video,         desc: "Video, photo, streaming"          },
+  { id: "student" as UseCase,           label: "Student",          icon: GraduationCap, desc: "Study, assignments, portability"  },
 ];
 
 const BUDGETS = [
-  { id: "under-600k" as Budget,  label: "Under ₦600,000",    sub: "Entry level"        },
-  { id: "600k-1.2m" as Budget,   label: "₦600k – ₦1.2M",    sub: "Mid range"          },
-  { id: "1.2m-2.5m" as Budget,   label: "₦1.2M – ₦2.5M",   sub: "High performance"   },
-  { id: "2.5m-plus" as Budget,   label: "₦2.5M+",            sub: "Premium / flagship" },
+  { id: "under-600k" as Budget,  label: "Under ₦600,000",  sub: "Entry level"        },
+  { id: "600k-1.2m" as Budget,   label: "₦600k – ₦1.2M",  sub: "Mid range"          },
+  { id: "1.2m-2.5m" as Budget,   label: "₦1.2M – ₦2.5M",  sub: "High performance"   },
+  { id: "2.5m-plus" as Budget,   label: "₦2.5M+",          sub: "Premium / flagship" },
 ];
 
 // ── Main Component ────────────────────────────────────────────────
@@ -61,7 +63,11 @@ export function BuildMySetupClient() {
   const [result, setResult] = useState<SetupResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Local items state so the user can delete individual items
+  const [items, setItems] = useState<SetupItem[]>([]);
+
   const { addItem } = useCartActions();
+  const router = useRouter();
 
   async function generateSetup() {
     if (!useCase || !budget) return;
@@ -79,6 +85,7 @@ export function BuildMySetupClient() {
       if (!res.ok) throw new Error("Failed to generate setup");
       const data = await res.json();
       setResult(data);
+      setItems(data.items);
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -86,16 +93,33 @@ export function BuildMySetupClient() {
     }
   }
 
+  function removeItem(id: string) {
+    setItems((prev) => prev.filter((i) => i._id !== id));
+  }
+
+  // Derived total reflects only remaining items
+  const currentTotal = items.reduce((sum, i) => sum + i.price, 0);
+
   function addAllToCart() {
-    if (!result) return;
-    result.items.forEach((item) => {
-      addItem({
-        productId: item._id,
-        name: item.name,
-        price: item.price,
-        image: item.image,
-      });
-    });
+    if (!items.length) return;
+    items.forEach((item) =>
+      addItem({ productId: item._id, name: item.name, price: item.price, image: item.image })
+    );
+    toast.success(`${items.length} item${items.length !== 1 ? "s" : ""} added to cart`);
+  }
+
+  function buyAll() {
+    if (!items.length) return;
+    items.forEach((item) =>
+      addItem({ productId: item._id, name: item.name, price: item.price, image: item.image })
+    );
+    toast.success("Proceeding to checkout…");
+    router.push("/checkout");
+  }
+
+  function addSingleToCart(item: SetupItem) {
+    addItem({ productId: item._id, name: item.name, price: item.price, image: item.image });
+    toast.success(`${item.name} added to cart`);
   }
 
   function reset() {
@@ -105,6 +129,7 @@ export function BuildMySetupClient() {
     setPreferences("");
     setResult(null);
     setError(null);
+    setItems([]);
   }
 
   return (
@@ -298,7 +323,7 @@ export function BuildMySetupClient() {
 
             {result && !isLoading && (
               <>
-                {/* Result header */}
+                {/* Result header card */}
                 <div className="rounded-2xl border border-amber-200 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/5 p-6">
                   <div className="flex items-center gap-2 mb-2">
                     <Sparkles className="h-5 w-5 text-amber-600 dark:text-amber-400" />
@@ -309,74 +334,137 @@ export function BuildMySetupClient() {
                   <p className="text-sm text-zinc-600 dark:text-[#a3a3a3] leading-relaxed">
                     {result.summary}
                   </p>
-                  <div className="mt-4 flex items-center justify-between">
+
+                  {/* Total + CTA row */}
+                  <div className="mt-4 flex flex-col sm:flex-row sm:items-end gap-4 justify-between">
                     <div>
-                      <p className="text-xs text-zinc-500 dark:text-[#555]">Total bundle price</p>
+                      <p className="text-xs text-zinc-500 dark:text-[#555]">
+                        Total bundle price
+                        {items.length !== result.items.length && items.length > 0 && (
+                          <span className="ml-1 text-amber-600 dark:text-amber-400">
+                            ({items.length} of {result.items.length} items)
+                          </span>
+                        )}
+                      </p>
                       <p className="text-2xl font-extrabold text-zinc-900 dark:text-amber-400">
-                        {formatPrice(result.totalPrice)}
+                        {formatPrice(currentTotal)}
                       </p>
                     </div>
-                    <Button onClick={addAllToCart}
-                      className="gap-2 bg-amber-500 text-zinc-950 font-bold hover:bg-amber-400 shadow-lg shadow-amber-500/20">
-                      <ShoppingCart className="h-4 w-4" />
-                      Add All to Cart
-                    </Button>
+
+                    {/* Two CTA buttons side by side */}
+                    <div className="flex gap-2 shrink-0">
+                      <Button
+                        onClick={addAllToCart}
+                        disabled={items.length === 0}
+                        className="flex-1 sm:flex-none gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 font-bold hover:bg-zinc-700 dark:hover:bg-zinc-100 disabled:opacity-40 text-sm"
+                      >
+                        <ShoppingCart className="h-4 w-4 shrink-0" />
+                        Add All
+                      </Button>
+                      <Button
+                        onClick={buyAll}
+                        disabled={items.length === 0}
+                        className="flex-1 sm:flex-none gap-1.5 bg-amber-500 text-zinc-950 font-bold hover:bg-amber-400 shadow-lg shadow-amber-500/25 disabled:opacity-40 text-sm"
+                      >
+                        <Zap className="h-4 w-4 shrink-0" />
+                        Buy All
+                      </Button>
+                    </div>
                   </div>
                 </div>
 
-                {/* Items */}
-                <div className="space-y-3">
-                  {result.items.map((item, index) => (
-                    <div key={item._id}
-                      className="flex gap-4 rounded-xl border border-zinc-200 dark:border-[#1f1f1f] bg-white dark:bg-[#111111] p-4 transition-colors">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 dark:bg-amber-500/8 text-sm font-bold text-amber-600 dark:text-amber-400">
-                        {index + 1}
-                      </div>
-                      {item.image && (
-                        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-zinc-100 dark:bg-[#0d0d0d]">
-                          <Image src={item.image} alt={item.name} fill className="object-cover" sizes="64px" />
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        {item.categoryTitle && (
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                            {item.categoryTitle}
-                          </p>
-                        )}
-                        <Link href={`/products/${item.slug}`}
-                          className="font-semibold text-zinc-900 dark:text-[#f1f1f1] hover:text-amber-600 dark:hover:text-amber-400 transition-colors text-sm line-clamp-1">
-                          {item.name}
-                        </Link>
-                        <p className="mt-0.5 text-xs text-zinc-500 dark:text-[#a3a3a3] line-clamp-2">
-                          {item.reason}
-                        </p>
-                        <p className="mt-1.5 font-bold text-zinc-900 dark:text-amber-400">
-                          {formatPrice(item.price)}
-                        </p>
-                      </div>
-                      <Button
-                        size="sm"
-                        onClick={() => addItem({ productId: item._id, name: item.name, price: item.price, image: item.image })}
-                        className="shrink-0 self-center bg-amber-500 text-zinc-950 hover:bg-amber-400 text-xs font-bold"
+                {/* Items list */}
+                {items.length === 0 ? (
+                  <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 p-8 text-center">
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                      You've removed all items.
+                    </p>
+                    <Button onClick={reset} variant="outline" className="mt-3 text-sm">
+                      Start Over
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {items.map((item, index) => (
+                      <div
+                        key={item._id}
+                        className="flex gap-4 rounded-xl border border-zinc-200 dark:border-[#1f1f1f] bg-white dark:bg-[#111111] p-4 transition-all duration-200"
                       >
-                        Add
-                      </Button>
-                    </div>
-                  ))}
-                </div>
+                        {/* Number badge */}
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 dark:bg-amber-500/8 text-sm font-bold text-amber-600 dark:text-amber-400">
+                          {index + 1}
+                        </div>
 
-                {/* Actions */}
-                <div className="flex gap-3 pt-2">
-                  <Button variant="outline" onClick={reset}
-                    className="flex-1 border-zinc-200 dark:border-[#2a2a2a] dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]">
-                    Start Over
-                  </Button>
-                  <Button onClick={addAllToCart}
-                    className="flex-1 h-12 gap-2 bg-amber-500 text-zinc-950 font-bold hover:bg-amber-400">
-                    <ShoppingCart className="h-4 w-4" />
-                    Add All to Cart ({result.items.length} items)
-                  </Button>
-                </div>
+                        {/* Product image */}
+                        {item.image && (
+                          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-zinc-100 dark:bg-[#0d0d0d]">
+                            <Image src={item.image} alt={item.name} fill className="object-cover" sizes="64px" />
+                          </div>
+                        )}
+
+                        {/* Product info */}
+                        <div className="flex-1 min-w-0">
+                          {item.categoryTitle && (
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                              {item.categoryTitle}
+                            </p>
+                          )}
+                          <Link
+                            href={`/products/${item.slug}`}
+                            className="font-semibold text-zinc-900 dark:text-[#f1f1f1] hover:text-amber-600 dark:hover:text-amber-400 transition-colors text-sm line-clamp-1"
+                          >
+                            {item.name}
+                          </Link>
+                          <p className="mt-0.5 text-xs text-zinc-500 dark:text-[#a3a3a3] line-clamp-2">
+                            {item.reason}
+                          </p>
+                          <p className="mt-1.5 font-bold text-zinc-900 dark:text-amber-400">
+                            {formatPrice(item.price)}
+                          </p>
+                        </div>
+
+                        {/* Add + Delete stacked */}
+                        <div className="flex flex-col gap-2 shrink-0 self-center">
+                          <Button
+                            size="sm"
+                            onClick={() => addSingleToCart(item)}
+                            className="bg-amber-500 text-zinc-950 hover:bg-amber-400 text-xs font-bold px-3 h-8"
+                          >
+                            Add
+                          </Button>
+                          <button
+                            type="button"
+                            onClick={() => removeItem(item._id)}
+                            aria-label={`Remove ${item.name}`}
+                            className="flex items-center justify-center h-8 w-full rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-400 hover:text-red-500 hover:border-red-300 dark:hover:border-red-500/40 hover:bg-red-50 dark:hover:bg-red-500/8 transition-all duration-150 active:scale-95"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Bottom action bar */}
+                {items.length > 0 && (
+                  <div className="flex gap-3 pt-2">
+                    <Button
+                      variant="outline"
+                      onClick={reset}
+                      className="flex-1 border-zinc-200 dark:border-[#2a2a2a] dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"
+                    >
+                      Start Over
+                    </Button>
+                    <Button
+                      onClick={buyAll}
+                      className="flex-1 h-12 gap-2 bg-amber-500 text-zinc-950 font-bold hover:bg-amber-400 shadow-lg shadow-amber-500/20"
+                    >
+                      <Zap className="h-4 w-4" />
+                      Buy All ({items.length} item{items.length !== 1 ? "s" : ""})
+                    </Button>
+                  </div>
+                )}
               </>
             )}
           </div>

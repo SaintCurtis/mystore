@@ -21,7 +21,7 @@ export function AskAISimilarButton({ productName }: AskAISimilarButtonProps) {
       className="w-full gap-2 bg-linear-to-r from-amber-500 to-orange-600 text-white shadow-lg hover:from-amber-600 hover:to-orange-700 hover:shadow-xl dark:from-amber-600 dark:to-orange-700 dark:hover:from-amber-700 dark:hover:to-orange-800"
     >
       <Sparkles className="h-4 w-4" />
-      Ask AI for similar products
+      Find Similar
     </Button>
   );
 }
