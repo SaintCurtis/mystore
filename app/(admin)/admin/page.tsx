@@ -1,4 +1,4 @@
-import { sanityFetch } from "@/sanity/lib/live";
+import { client } from "@/sanity/lib/client";
 import { groq } from "next-sanity";
 import Link from "next/link";
 import {
@@ -6,7 +6,7 @@ import {
   ArrowRight, CheckCircle, Clock, XCircle,
 } from "lucide-react";
 
-// ── Quick queries (local to this page — not exported, no conflict with orders.ts) ──
+// ── Queries ───────────────────────────────────────────────────────────────
 
 const ADMIN_STATS_QUERY = groq`{
   "totalProducts": count(*[_type == "product"]),
@@ -19,8 +19,6 @@ const ADMIN_STATS_QUERY = groq`{
   "totalCategories": count(*[_type == "category"]),
 }`;
 
-// Renamed from RECENT_ORDERS_QUERY → ADMIN_RECENT_ORDERS_QUERY to avoid
-// duplicate with the exported RECENT_ORDERS_QUERY in lib/sanity/queries/orders.ts
 const ADMIN_RECENT_ORDERS_QUERY = groq`*[_type == "order"] | order(_createdAt desc) [0...8] {
   _id,
   _createdAt,
@@ -40,13 +38,13 @@ const LOW_STOCK_QUERY = groq`*[_type == "product" && stock > 0 && stock <= 3] | 
   "category": category->title,
 }`;
 
-// ── Status badge ─────────────────────────────────────────────────────────
+// ── Status badge ──────────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; className: string; icon: React.ReactNode }> = {
-    pending:   { label: "Pending",   className: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",        icon: <Clock className="h-3 w-3" /> },
+    pending:   { label: "Pending",   className: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",         icon: <Clock className="h-3 w-3" />       },
     completed: { label: "Completed", className: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400", icon: <CheckCircle className="h-3 w-3" /> },
-    cancelled: { label: "Cancelled", className: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",                icon: <XCircle className="h-3 w-3" /> },
+    cancelled: { label: "Cancelled", className: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",                 icon: <XCircle className="h-3 w-3" />     },
   };
   const s = map[status] ?? map["pending"];
   return (
@@ -56,15 +54,14 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-// ── Page ─────────────────────────────────────────────────────────────────
+// ── Page ──────────────────────────────────────────────────────────────────
 
 export default async function AdminDashboardPage() {
-  const [{ data: stats }, { data: recentOrders }, { data: lowStock }] =
-    await Promise.all([
-      sanityFetch({ query: ADMIN_STATS_QUERY }),
-      sanityFetch({ query: ADMIN_RECENT_ORDERS_QUERY }),  // ← updated
-      sanityFetch({ query: LOW_STOCK_QUERY }),
-    ]);
+  const [stats, recentOrders, lowStock] = await Promise.all([
+    client.fetch(ADMIN_STATS_QUERY),
+    client.fetch(ADMIN_RECENT_ORDERS_QUERY),
+    client.fetch(LOW_STOCK_QUERY),
+  ]);
 
   const s = stats as {
     totalProducts: number; inStock: number; outOfStock: number;
@@ -83,13 +80,13 @@ export default async function AdminDashboardPage() {
         </p>
       </div>
 
-      {/* ── Stat cards ─────────────────────────────────────────────────── */}
+      {/* Stat cards */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {[
-          { label: "Total Products", value: s?.totalProducts ?? 0, icon: Package,       color: "text-blue-600 dark:text-blue-400",     bg: "bg-blue-50 dark:bg-blue-900/20"     },
+          { label: "Total Products", value: s?.totalProducts ?? 0, icon: Package,       color: "text-blue-600 dark:text-blue-400",      bg: "bg-blue-50 dark:bg-blue-900/20"       },
           { label: "In Stock",       value: s?.inStock ?? 0,       icon: CheckCircle,   color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
-          { label: "Out of Stock",   value: s?.outOfStock ?? 0,    icon: AlertTriangle, color: "text-red-600 dark:text-red-400",       bg: "bg-red-50 dark:bg-red-900/20"       },
-          { label: "Total Orders",   value: s?.totalOrders ?? 0,   icon: ShoppingCart,  color: "text-amber-600 dark:text-amber-400",   bg: "bg-amber-50 dark:bg-amber-900/20"   },
+          { label: "Out of Stock",   value: s?.outOfStock ?? 0,    icon: AlertTriangle, color: "text-red-600 dark:text-red-400",         bg: "bg-red-50 dark:bg-red-900/20"         },
+          { label: "Total Orders",   value: s?.totalOrders ?? 0,   icon: ShoppingCart,  color: "text-amber-600 dark:text-amber-400",     bg: "bg-amber-50 dark:bg-amber-900/20"     },
         ].map(({ label, value, icon: Icon, color, bg }) => (
           <div key={label} className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
             <div className="flex items-center justify-between">
@@ -103,7 +100,7 @@ export default async function AdminDashboardPage() {
         ))}
       </div>
 
-      {/* ── Secondary stats ────────────────────────────────────────────── */}
+      {/* Secondary stats */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {[
           { label: "Pending Orders",    value: s?.pendingOrders ?? 0   },
@@ -120,7 +117,7 @@ export default async function AdminDashboardPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 
-        {/* ── Recent Orders ──────────────────────────────────────────────── */}
+        {/* Recent Orders */}
         <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
           <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 px-5 py-4">
             <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">Recent Orders</h2>
@@ -132,7 +129,7 @@ export default async function AdminDashboardPage() {
             {!recentOrders || (recentOrders as any[]).length === 0 ? (
               <p className="px-5 py-8 text-center text-sm text-zinc-400">No orders yet</p>
             ) : (
-              (recentOrders as any[]).map((order) => (
+              (recentOrders as any[]).map((order: any) => (
                 <div key={order._id} className="flex items-center justify-between px-5 py-3">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
@@ -158,7 +155,7 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* ── Low Stock Alert ─────────────────────────────────────────────── */}
+        {/* Low Stock */}
         <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
           <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 px-5 py-4">
             <h2 className="font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
@@ -175,7 +172,7 @@ export default async function AdminDashboardPage() {
                 ✅ All products are well stocked
               </p>
             ) : (
-              (lowStock as any[]).map((product) => (
+              (lowStock as any[]).map((product: any) => (
                 <div key={product._id} className="flex items-center justify-between px-5 py-3">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{product.name}</p>
@@ -201,7 +198,7 @@ export default async function AdminDashboardPage() {
 
       </div>
 
-      {/* ── Quick actions ──────────────────────────────────────────────────── */}
+      {/* Quick actions */}
       <div>
         <h2 className="mb-4 font-semibold text-zinc-900 dark:text-zinc-100">Quick Actions</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

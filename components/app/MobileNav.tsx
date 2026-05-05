@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import {
   X, Menu, Wand2, Package, Monitor, Cpu, Headphones,
@@ -28,6 +29,7 @@ const NAV_ITEMS = [
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const totalItems = useTotalItems();
   const wishlistCount = useWishlistCount();
   const { openCart } = useCartActions();
@@ -40,11 +42,16 @@ export function MobileNav() {
     !!process.env.NEXT_PUBLIC_ADMIN_CLERK_USER_ID &&
     user.id === process.env.NEXT_PUBLIC_ADMIN_CLERK_USER_ID;
 
+  // Mount portal after hydration
+  useEffect(() => { setMounted(true); }, []);
+
+  // Lock body scroll
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
+  // Close on scroll / swipe
   useEffect(() => {
     if (!open) return;
     scrollYRef.current = window.scrollY;
@@ -60,6 +67,7 @@ export function MobileNav() {
     };
   }, [open]);
 
+  // Close on Escape
   useEffect(() => {
     if (!open) return;
     const handleKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
@@ -69,22 +77,12 @@ export function MobileNav() {
 
   function close() { setOpen(false); }
 
-  return (
+  const drawer = (
     <>
-      {/* Hamburger */}
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="md:hidden flex items-center justify-center h-9 w-9 rounded-lg text-zinc-600 dark:text-[#a3a3a3] hover:bg-zinc-100 dark:hover:bg-[#1a1a1a] transition-colors"
-        aria-label="Open navigation menu"
-      >
-        <Menu className="h-5 w-5" />
-      </button>
-
-      {/* Backdrop — tap anywhere outside to close */}
+      {/* Backdrop */}
       <div
         className={`
-          fixed inset-0 z-60 bg-black/60 backdrop-blur-sm
+          fixed inset-0 z-9998 bg-black/60 backdrop-blur-sm
           transition-opacity duration-300 ease-in-out
           ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}
         `}
@@ -92,14 +90,21 @@ export function MobileNav() {
         aria-hidden="true"
       />
 
-      {/* Drawer */}
-      <div className={`
-        fixed left-0 top-0 z-70 h-full w-[82vw] max-w-[310px]
-        flex flex-col bg-white dark:bg-[#0d0d0d] shadow-2xl
-        transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
-        ${open ? "translate-x-0" : "-translate-x-full"}
-      `}>
-
+      {/* Drawer — renders at document root, never clipped by header */}
+      <div
+        className={`
+          fixed left-0 top-0 z-9999
+          h-100dvh w-[82vw] max-w-[310px]
+          flex flex-col
+          bg-white dark:bg-[#0d0d0d]
+          shadow-2xl
+          transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
+          ${open ? "translate-x-0" : "-translate-x-full"}
+        `}
+        aria-modal="true"
+        role="dialog"
+        aria-label="Navigation menu"
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 shrink-0 border-b border-zinc-100 dark:border-[#1c1c1c]">
           <div>
@@ -120,10 +125,10 @@ export function MobileNav() {
           </button>
         </div>
 
-        {/* Nav */}
-        <nav className="flex-1 overflow-y-auto overscroll-contain py-2">
+        {/* Scrollable nav */}
+        <nav className="flex-1 overflow-y-auto overscroll-contain py-2 min-h-0">
 
-          {/* Admin Dashboard — owner only */}
+          {/* Admin — owner only */}
           {isOwner && (
             <>
               <Link
@@ -154,7 +159,7 @@ export function MobileNav() {
                 border-l-2 transition-colors
                 ${highlight
                   ? "border-amber-500 bg-amber-50/70 dark:bg-amber-500/8 text-amber-700 dark:text-amber-400"
-                  : "border-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1a1a1a]"
+                  : "border-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1a1a1a] hover:text-zinc-900 dark:hover:text-white"
                 }
               `}
             >
@@ -166,34 +171,52 @@ export function MobileNav() {
           <div className="mx-5 my-1.5 border-t border-zinc-100 dark:border-[#1c1c1c]" />
 
           <SignedIn>
-            <Link href="/orders" onClick={close}
-              className="flex items-center gap-3 px-5 py-3.5 text-sm font-medium border-l-2 border-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1a1a1a] transition-colors">
+            <Link
+              href="/orders"
+              onClick={close}
+              className="flex items-center gap-3 px-5 py-3.5 text-sm font-medium border-l-2 border-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1a1a1a] transition-colors"
+            >
               <Package className="h-4 w-4 text-zinc-400 dark:text-zinc-500" />
               My Orders
             </Link>
-            <Link href="/referral" onClick={close}
-              className="flex items-center gap-3 px-5 py-3.5 text-sm font-medium border-l-2 border-emerald-500 bg-emerald-50/70 dark:bg-emerald-500/8 text-emerald-700 dark:text-emerald-400 transition-colors">
+            <Link
+              href="/referral"
+              onClick={close}
+              className="flex items-center gap-3 px-5 py-3.5 text-sm font-medium border-l-2 border-emerald-500 bg-emerald-50/70 dark:bg-emerald-500/8 text-emerald-700 dark:text-emerald-400 transition-colors"
+            >
               <Gift className="h-4 w-4 shrink-0 text-emerald-500 dark:text-emerald-400" />
               Refer & Earn 🎁
-              <span className="ml-auto rounded-full bg-emerald-500 px-2 py-0.5 text-[9px] font-black text-white uppercase tracking-wide">New</span>
+              <span className="ml-auto rounded-full bg-emerald-500 px-2 py-0.5 text-[9px] font-black text-white uppercase tracking-wide">
+                New
+              </span>
             </Link>
           </SignedIn>
 
-          <button type="button" onClick={() => { openWishlist(); close(); }}
-            className="flex w-full items-center gap-3 px-5 py-3.5 text-sm font-medium border-l-2 border-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1a1a1a] transition-colors">
+          <button
+            type="button"
+            onClick={() => { openWishlist(); close(); }}
+            className="flex w-full items-center gap-3 px-5 py-3.5 text-sm font-medium border-l-2 border-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1a1a1a] transition-colors"
+          >
             <Heart className={`h-4 w-4 shrink-0 ${wishlistCount > 0 ? "fill-red-500 text-red-500" : "text-zinc-400 dark:text-zinc-500"}`} />
             Wishlist
             {wishlistCount > 0 && (
-              <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">{wishlistCount}</span>
+              <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                {wishlistCount}
+              </span>
             )}
           </button>
 
-          <button type="button" onClick={() => { openCart(); close(); }}
-            className="flex w-full items-center gap-3 px-5 py-3.5 text-sm font-medium border-l-2 border-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1a1a1a] transition-colors">
+          <button
+            type="button"
+            onClick={() => { openCart(); close(); }}
+            className="flex w-full items-center gap-3 px-5 py-3.5 text-sm font-medium border-l-2 border-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1a1a1a] transition-colors"
+          >
             <ShoppingBag className="h-4 w-4 text-zinc-400 dark:text-zinc-500" />
             Cart
             {totalItems > 0 && (
-              <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-[10px] font-bold text-zinc-950">{totalItems}</span>
+              <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-[10px] font-bold text-zinc-950">
+                {totalItems}
+              </span>
             )}
           </button>
         </nav>
@@ -201,13 +224,20 @@ export function MobileNav() {
         {/* Footer */}
         <div className="border-t border-zinc-100 dark:border-[#1c1c1c] px-5 py-4 space-y-3.5 shrink-0">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Theme</span>
+            <span className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
+              Theme
+            </span>
             <ThemeToggle />
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Account</span>
+            <span className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
+              Account
+            </span>
             <SignedIn>
-              <UserButton afterSwitchSessionUrl="/" appearance={{ elements: { avatarBox: "h-8 w-8" } }} />
+              <UserButton
+                afterSwitchSessionUrl="/"
+                appearance={{ elements: { avatarBox: "h-8 w-8" } }}
+              />
             </SignedIn>
             <SignedOut>
               <SignInButton mode="modal">
@@ -222,6 +252,24 @@ export function MobileNav() {
           </p>
         </div>
       </div>
+    </>
+  );
+
+  return (
+    <>
+      {/* Trigger button — stays inside header */}
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="md:hidden flex items-center justify-center h-9 w-9 rounded-lg text-zinc-600 dark:text-[#a3a3a3] hover:bg-zinc-100 dark:hover:bg-[#1a1a1a] transition-colors"
+        aria-label="Open navigation menu"
+        aria-expanded={open}
+      >
+        <Menu className="h-5 w-5" />
+      </button>
+
+      {/* Drawer — portaled to document.body, completely outside header */}
+      {mounted && createPortal(drawer, document.body)}
     </>
   );
 }
