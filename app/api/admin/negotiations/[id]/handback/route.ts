@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "next-sanity";
- 
+
 const writeClient = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET!,
@@ -8,25 +8,26 @@ const writeClient = createClient({
   useCdn: false,
   token: process.env.SANITY_API_WRITE_TOKEN,
 });
- 
-async function getSessionDoc(sessionId: string) {
-  return writeClient.fetch(
-    `*[_type == "negotiationSession" && sessionId == $sessionId][0]{ _id, status }`,
-    { sessionId }
-  );
-}
 
-// ── HAND BACK ─────────────────────────────────────────────────────────────
-export async function POST_handback(
+export async function POST(
   _req: NextRequest,
-  sessionId: string
-): Promise<NextResponse> {
-  const session = await getSessionDoc(sessionId);
-  if (!session) return NextResponse.json({ error: "Not found" }, { status: 404 });
- 
-  await writeClient.patch(session._id)
-    .set({ status: "ai_active", lastActivityAt: new Date().toISOString() })
-    .commit();
- 
-  return NextResponse.json({ success: true });
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  try {
+    const session = await writeClient.fetch<{ _id: string } | null>(
+      `*[_type == "negotiationSession" && sessionId == $sessionId][0]{ _id }`,
+      { sessionId: id }
+    );
+    if (!session) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+    await writeClient.patch(session._id)
+      .set({ status: "ai_active", lastActivityAt: new Date().toISOString() })
+      .commit();
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("[handback]", err);
+    return NextResponse.json({ error: "Failed" }, { status: 500 });
+  }
 }
