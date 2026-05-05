@@ -686,6 +686,21 @@ export type CUSTOMER_BY_STRIPE_ID_QUERY_RESULT = {
   createdAt: string | null;
 } | null;
 
+// Source: lib/sanity/queries/negotiations.ts
+// Variable: NEGOTIATION_SESSIONS_QUERY
+// Query: *[  _type == "negotiationSession"] | order(closeBidAlert desc, lastActivityAt desc) {  _id,  sessionId,  productName,  productSlug,  listedPrice,  floorPrice,  customerBid,  agreedPrice,  status,  closeBidAlert,  startedAt,  lastActivityAt,  "messageCount": count(messages),  "lastMessage": messages[-1] {    role,    content,    sender,    timestamp,  },}
+export type NEGOTIATION_SESSIONS_QUERY_RESULT = Array<never>;
+
+// Source: lib/sanity/queries/negotiations.ts
+// Variable: NEGOTIATION_SESSION_BY_ID_QUERY
+// Query: *[  _type == "negotiationSession"  && sessionId == $sessionId][0] {  _id,  sessionId,  productName,  productSlug,  listedPrice,  floorPrice,  customerBid,  agreedPrice,  status,  closeBidAlert,  startedAt,  lastActivityAt,  messages[] {    role,    content,    sender,    timestamp,  },}
+export type NEGOTIATION_SESSION_BY_ID_QUERY_RESULT = null;
+
+// Source: lib/sanity/queries/negotiations.ts
+// Variable: NEGOTIATION_ALERT_COUNT_QUERY
+// Query: count(*[  _type == "negotiationSession"  && closeBidAlert == true  && status == "ai_active"])
+export type NEGOTIATION_ALERT_COUNT_QUERY_RESULT = number;
+
 // Source: lib/sanity/queries/orders.ts
 // Variable: ORDERS_BY_USER_QUERY
 // Query: *[  _type == "order"  && clerkUserId == $clerkUserId] | order(createdAt desc) {  _id,  orderNumber,  total,  status,  createdAt,  "itemCount": count(items),  "itemNames": items[].product->name,  "itemImages": items[].product->images[0].asset->url}
@@ -1443,6 +1458,9 @@ declare module "@sanity/client" {
     '*[\n  _type == "model"\n  && brand->slug.current == $brandSlug\n] | order(title asc) {\n  _id,\n  "title": coalesce(title, name),\n  "slug": slug.current\n}': MODELS_BY_BRAND_QUERY_RESULT;
     '*[\n  _type == "customer"\n  && email == $email\n][0]{\n  _id,\n  email,\n  name,\n  clerkUserId,\n  stripeCustomerId,\n  createdAt\n}': CUSTOMER_BY_EMAIL_QUERY_RESULT;
     '*[\n  _type == "customer"\n  && stripeCustomerId == $stripeCustomerId\n][0]{\n  _id,\n  email,\n  name,\n  clerkUserId,\n  stripeCustomerId,\n  createdAt\n}': CUSTOMER_BY_STRIPE_ID_QUERY_RESULT;
+    '*[\n  _type == "negotiationSession"\n] | order(closeBidAlert desc, lastActivityAt desc) {\n  _id,\n  sessionId,\n  productName,\n  productSlug,\n  listedPrice,\n  floorPrice,\n  customerBid,\n  agreedPrice,\n  status,\n  closeBidAlert,\n  startedAt,\n  lastActivityAt,\n  "messageCount": count(messages),\n  "lastMessage": messages[-1] {\n    role,\n    content,\n    sender,\n    timestamp,\n  },\n}': NEGOTIATION_SESSIONS_QUERY_RESULT;
+    '*[\n  _type == "negotiationSession"\n  && sessionId == $sessionId\n][0] {\n  _id,\n  sessionId,\n  productName,\n  productSlug,\n  listedPrice,\n  floorPrice,\n  customerBid,\n  agreedPrice,\n  status,\n  closeBidAlert,\n  startedAt,\n  lastActivityAt,\n  messages[] {\n    role,\n    content,\n    sender,\n    timestamp,\n  },\n}': NEGOTIATION_SESSION_BY_ID_QUERY_RESULT;
+    'count(*[\n  _type == "negotiationSession"\n  && closeBidAlert == true\n  && status == "ai_active"\n])': NEGOTIATION_ALERT_COUNT_QUERY_RESULT;
     '*[\n  _type == "order"\n  && clerkUserId == $clerkUserId\n] | order(createdAt desc) {\n  _id,\n  orderNumber,\n  total,\n  status,\n  createdAt,\n  "itemCount": count(items),\n  "itemNames": items[].product->name,\n  "itemImages": items[].product->images[0].asset->url\n}': ORDERS_BY_USER_QUERY_RESULT;
     '*[\n  _type == "order"\n  && _id == $id\n][0] {\n  _id,\n  orderNumber,\n  clerkUserId,\n  email,\n  items[]{\n    _key,\n    quantity,\n    priceAtPurchase,\n    product->{\n      _id,\n      name,\n      "slug": slug.current,\n      "image": images[0]{\n        asset->{\n          _id,\n          url\n        }\n      }\n    }\n  },\n  total,\n  status,\n  address{\n    name,\n    line1,\n    line2,\n    city,\n    postcode,\n    country\n  },\n  paystackReference,\n  createdAt\n}': ORDER_BY_ID_QUERY_RESULT;
     '*[\n  _type == "order"\n] | order(createdAt desc) [0...$limit] {\n  _id,\n  orderNumber,\n  email,\n  total,\n  status,\n  createdAt\n}': RECENT_ORDERS_QUERY_RESULT;
