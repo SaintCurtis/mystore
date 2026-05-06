@@ -53,7 +53,6 @@ function PinGate({ onAuth }: { onAuth: () => void }) {
     if (value && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
-    // Auto-submit when all 6 filled
     if (value && index === 5) {
       const pin = [...next.slice(0, 5), value].join("");
       if (pin.length === 6) submit(pin);
@@ -101,7 +100,6 @@ function PinGate({ onAuth }: { onAuth: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950 px-4">
       <div className="w-full max-w-sm rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-8 shadow-sm">
-        {/* Icon */}
         <div className="flex justify-center mb-6">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800">
             <Lock className="h-6 w-6 text-zinc-600 dark:text-zinc-400" />
@@ -115,7 +113,6 @@ function PinGate({ onAuth }: { onAuth: () => void }) {
           Enter your 6-digit PIN to continue
         </p>
 
-        {/* PIN inputs */}
         <div className="flex justify-center gap-3 mb-6" onPaste={handlePaste}>
           {digits.map((d, i) => (
             <input
@@ -141,14 +138,12 @@ function PinGate({ onAuth }: { onAuth: () => void }) {
           ))}
         </div>
 
-        {/* Error */}
         {error && (
           <p className="text-center text-sm text-red-500 dark:text-red-400 mb-4">
             {error}
           </p>
         )}
 
-        {/* Submit button */}
         <Button
           onClick={() => submit(digits.join(""))}
           disabled={digits.join("").length < 6 || loading}
@@ -165,7 +160,7 @@ function PinGate({ onAuth }: { onAuth: () => void }) {
   );
 }
 
-// ── Sidebar + layout ─────────────────────────────────────────────────────
+// ── Sidebar ───────────────────────────────────────────────────────────────
 function AdminSidebar({
   sidebarOpen,
   setSidebarOpen,
@@ -237,12 +232,11 @@ function AdminSidebar({
   );
 }
 
-// ── Root layout ──────────────────────────────────────────────────────────
+// ── Root layout ───────────────────────────────────────────────────────────
 function AdminLayout({ children }: { children: React.ReactNode }) {
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Check session on mount
   useEffect(() => {
     const ts = sessionStorage.getItem(SESSION_KEY);
     if (ts && Date.now() - parseInt(ts) < SESSION_TTL) {
@@ -262,16 +256,14 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
+  // ── Not authed — show PIN gate with NO providers (prevents Sanity auth redirect)
   if (!authed) {
-    return (
-      // <Providers>
-        <PinGate onAuth={() => setAuthed(true)} />
-      // {/* </Providers> */}
-    );
+    return <PinGate onAuth={() => setAuthed(true)} />;
   }
 
+  // ── Authed — wrap with Providers so Sanity SDK hooks work
   return (
-    // <Providers>
+    <Providers>
       <CartStoreProvider>
         <WishlistStoreProvider>
           <CompareStoreProvider>
@@ -314,7 +306,7 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
           </CompareStoreProvider>
         </WishlistStoreProvider>
       </CartStoreProvider>
-    // </Providers>
+    </Providers>
   );
 }
 
