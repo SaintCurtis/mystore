@@ -1,11 +1,24 @@
 import { defineLive } from "next-sanity/live";
 import { client } from "./client";
 
+// ── Both tokens required to prevent redirect to sanity.io/login ──────────
+// Without serverToken + browserToken, SanityLive redirects any visitor
+// (including your admin dashboard) to Sanity's own login page.
+const token = process.env.SANITY_API_READ_TOKEN;
+
+if (!token) {
+  throw new Error(
+    "Missing SANITY_API_READ_TOKEN — add it to .env.local and Vercel environment variables"
+  );
+}
+
 const {
   sanityFetch: _sanityFetch,
   SanityLive,
 } = defineLive({
   client: client.withConfig({ useCdn: false, stega: false }),
+  serverToken: token,
+  browserToken: token,
 });
 
 // Every $param that appears in any defineQuery() across the codebase.

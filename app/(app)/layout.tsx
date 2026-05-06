@@ -19,7 +19,7 @@ import { Footer } from "@/components/app/Footer";
 import { MobileBottomBar } from "@/components/app/MobileBottomBar";
 import { MobileCategoryPills } from "@/components/app/MobileCategoryPills";
 import { BuildMySetupFAB } from "@/components/app/BuildMySetupFAB";
-import { ReferralTracker } from "@/components/app/ReferralTracker"; // ← NEW
+import { ReferralTracker } from "@/components/app/ReferralTracker";
 import { Suspense } from "react";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -38,7 +38,6 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                 <AppShell>
                   <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#0a0a0a] transition-colors duration-200">
                     <Header />
-                    {/* Sticky horizontal category pills — mobile only */}
                     <Suspense fallback={<div className="h-10 md:hidden" />}>
                       <MobileCategoryPills />
                     </Suspense>
@@ -57,7 +56,6 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                 <WelcomePopup />
                 <Toaster position="bottom-center" />
                 <SanityLive />
-                {/* Tracks ?ref=CODE clicks silently */}
                 <Suspense fallback={null}>
                   <ReferralTracker />
                 </Suspense>
