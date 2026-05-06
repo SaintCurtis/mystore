@@ -21,6 +21,7 @@ import {
 import { formatPrice, formatDate } from "@/lib/utils";
 import { SanityWrapper } from "@/components/providers/SanityWrapper";
 
+
 interface OrderDetailProjection {
   orderNumber: string;
   email: string;
