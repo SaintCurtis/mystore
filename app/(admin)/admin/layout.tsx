@@ -271,7 +271,7 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <Providers>
+    // <Providers>
       <CartStoreProvider>
         <WishlistStoreProvider>
           <CompareStoreProvider>
@@ -314,7 +314,7 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
           </CompareStoreProvider>
         </WishlistStoreProvider>
       </CartStoreProvider>
-    </Providers>
+    // </Providers>
   );
 }
 
