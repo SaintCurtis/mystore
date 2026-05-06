@@ -19,6 +19,7 @@ import {
   useProductSearchFilter,
   ProductTableHeader,
 } from "@/components/admin";
+import { SanityWrapper } from "@/components/providers/SanityWrapper";
 
 interface ProductListContentProps {
   filter?: string;
@@ -182,5 +183,9 @@ function InventoryContent() {
 }
 
 export default function InventoryPage() {
-  return <InventoryContent />;
+  return (
+    <SanityWrapper>
+      <InventoryContent />
+    </SanityWrapper>
+  );
 }

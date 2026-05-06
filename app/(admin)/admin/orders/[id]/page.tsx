@@ -19,6 +19,7 @@ import {
   RevertButton,
 } from "@/components/admin";
 import { formatPrice, formatDate } from "@/lib/utils";
+import { SanityWrapper } from "@/components/providers/SanityWrapper";
 
 interface OrderDetailProjection {
   orderNumber: string;
@@ -98,7 +99,6 @@ function OrderDetailContent({ handle }: { handle: DocumentHandle }) {
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 sm:text-2xl">
@@ -109,12 +109,9 @@ function OrderDetailContent({ handle }: { handle: DocumentHandle }) {
           </p>
         </div>
 
-        {/* Status and Actions */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
           <div className="flex items-center gap-3">
-            <span className="text-sm text-zinc-500 dark:text-zinc-400">
-              Status:
-            </span>
+            <span className="text-sm text-zinc-500 dark:text-zinc-400">Status:</span>
             <Suspense fallback={<Skeleton className="h-10 w-[140px]" />}>
               <StatusSelect {...handle} />
             </Suspense>
@@ -131,7 +128,6 @@ function OrderDetailContent({ handle }: { handle: DocumentHandle }) {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-5 lg:gap-8">
-        {/* Order Items */}
         <div className="space-y-6 lg:col-span-3">
           <div className="rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
             <div className="border-b border-zinc-200 px-4 py-3 dark:border-zinc-800 sm:px-6 sm:py-4">
@@ -145,7 +141,6 @@ function OrderDetailContent({ handle }: { handle: DocumentHandle }) {
                   key={item._key}
                   className="flex gap-3 px-4 py-3 sm:gap-4 sm:px-6 sm:py-4"
                 >
-                  {/* Image */}
                   <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md bg-zinc-100 dark:bg-zinc-800 sm:h-20 sm:w-20">
                     {item.product?.image?.asset?.url ? (
                       <Image
@@ -162,7 +157,6 @@ function OrderDetailContent({ handle }: { handle: DocumentHandle }) {
                     )}
                   </div>
 
-                  {/* Details */}
                   <div className="flex flex-1 flex-col justify-between">
                     <div>
                       <div className="flex items-start gap-2">
@@ -180,18 +174,14 @@ function OrderDetailContent({ handle }: { handle: DocumentHandle }) {
                         )}
                       </div>
                       <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400 sm:text-sm">
-                        Qty: {item.quantity} ×{" "}
-                        {formatPrice(item.priceAtPurchase)}
+                        Qty: {item.quantity} × {formatPrice(item.priceAtPurchase)}
                       </p>
                     </div>
                   </div>
 
-                  {/* Price */}
                   <div className="text-right">
                     <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 sm:text-base">
-                      {formatPrice(
-                        (item.priceAtPurchase ?? 0) * (item.quantity ?? 1),
-                      )}
+                      {formatPrice((item.priceAtPurchase ?? 0) * (item.quantity ?? 1))}
                     </p>
                   </div>
                 </div>
@@ -199,48 +189,31 @@ function OrderDetailContent({ handle }: { handle: DocumentHandle }) {
             </div>
           </div>
 
-          {/* Order Summary */}
           <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
-            <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">
-              Order Summary
-            </h2>
+            <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">Order Summary</h2>
             <div className="mt-4 space-y-3">
               <div className="flex justify-between text-sm">
-                <span className="text-zinc-500 dark:text-zinc-400">
-                  Subtotal
-                </span>
-                <span className="text-zinc-900 dark:text-zinc-100">
-                  {formatPrice(data.total)}
-                </span>
+                <span className="text-zinc-500 dark:text-zinc-400">Subtotal</span>
+                <span className="text-zinc-900 dark:text-zinc-100">{formatPrice(data.total)}</span>
               </div>
               <div className="border-t border-zinc-200 pt-3 dark:border-zinc-800">
                 <div className="flex justify-between font-semibold">
-                  <span className="text-zinc-900 dark:text-zinc-100">
-                    Total
-                  </span>
-                  <span className="text-zinc-900 dark:text-zinc-100">
-                    {formatPrice(data.total)}
-                  </span>
+                  <span className="text-zinc-900 dark:text-zinc-100">Total</span>
+                  <span className="text-zinc-900 dark:text-zinc-100">{formatPrice(data.total)}</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Sidebar */}
         <div className="space-y-6 lg:col-span-2">
-          {/* Customer Info */}
           <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
             <div className="flex items-center gap-2">
               <CreditCard className="h-5 w-5 text-zinc-400" />
-              <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">
-                Customer
-              </h2>
+              <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">Customer</h2>
             </div>
             <div className="mt-4 space-y-2 text-sm">
-              <p className="break-all text-zinc-900 dark:text-zinc-100">
-                {data.email}
-              </p>
+              <p className="break-all text-zinc-900 dark:text-zinc-100">{data.email}</p>
               {data.stripePaymentId && (
                 <p className="break-all text-xs text-zinc-500 dark:text-zinc-400">
                   Payment: {data.stripePaymentId}
@@ -249,14 +222,11 @@ function OrderDetailContent({ handle }: { handle: DocumentHandle }) {
             </div>
           </div>
 
-          {/* Editable Shipping Address */}
           <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-zinc-400" />
-                <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">
-                  Shipping Address
-                </h2>
+                <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">Shipping Address</h2>
               </div>
               <Edit2 className="h-4 w-4 text-zinc-400" />
             </div>
@@ -275,11 +245,8 @@ function OrderDetailContent({ handle }: { handle: DocumentHandle }) {
             </div>
           </div>
 
-          {/* Studio Link */}
           <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
-            <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">
-              Advanced Editing
-            </h2>
+            <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">Advanced Editing</h2>
             <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
               For additional changes, edit this order in Sanity Studio.
             </p>
@@ -329,27 +296,26 @@ interface PageProps {
 
 export default function OrderDetailPage({ params }: PageProps) {
   const { id } = use(params);
-
   const handle: DocumentHandle = {
     documentId: id,
     documentType: "order",
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      {/* Back Link */}
-      <Link
-        href="/admin/orders"
-        className="inline-flex items-center text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to Orders
-      </Link>
+    <SanityWrapper>
+      <div className="space-y-4 sm:space-y-6">
+        <Link
+          href="/admin/orders"
+          className="inline-flex items-center text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Orders
+        </Link>
 
-      {/* Order Detail */}
-      <Suspense fallback={<OrderDetailSkeleton />}>
-        <OrderDetailContent handle={handle} />
-      </Suspense>
-    </div>
+        <Suspense fallback={<OrderDetailSkeleton />}>
+          <OrderDetailContent handle={handle} />
+        </Suspense>
+      </div>
+    </SanityWrapper>
   );
 }

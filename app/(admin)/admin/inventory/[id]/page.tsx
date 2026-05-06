@@ -27,6 +27,7 @@ import {
   ImageUploader,
   DeleteButton,
 } from "@/components/admin";
+import { SanityWrapper } from "@/components/providers/SanityWrapper";
 
 const MATERIALS = [
   { value: "wood", label: "Wood" },
@@ -45,11 +46,9 @@ const COLORS = [
   { value: "natural", label: "Natural" },
 ];
 
-// Field editor components
 function NameEditor(handle: DocumentHandle) {
   const { data: name } = useDocument({ ...handle, path: "name" });
   const editName = useEditDocument({ ...handle, path: "name" });
-
   return (
     <Input
       value={(name as string) ?? ""}
@@ -63,7 +62,6 @@ function SlugEditor(handle: DocumentHandle) {
   const { data: slug } = useDocument({ ...handle, path: "slug" });
   const editSlug = useEditDocument({ ...handle, path: "slug" });
   const slugValue = (slug as { current?: string })?.current ?? "";
-
   return (
     <Input
       value={slugValue}
@@ -76,7 +74,6 @@ function SlugEditor(handle: DocumentHandle) {
 function DescriptionEditor(handle: DocumentHandle) {
   const { data: description } = useDocument({ ...handle, path: "description" });
   const editDescription = useEditDocument({ ...handle, path: "description" });
-
   return (
     <Textarea
       value={(description as string) ?? ""}
@@ -90,7 +87,6 @@ function DescriptionEditor(handle: DocumentHandle) {
 function PriceEditor(handle: DocumentHandle) {
   const { data: price } = useDocument({ ...handle, path: "price" });
   const editPrice = useEditDocument({ ...handle, path: "price" });
-
   return (
     <Input
       type="number"
@@ -108,7 +104,6 @@ function PriceEditor(handle: DocumentHandle) {
 function StockEditor(handle: DocumentHandle) {
   const { data: stock } = useDocument({ ...handle, path: "stock" });
   const editStock = useEditDocument({ ...handle, path: "stock" });
-
   return (
     <Input
       type="number"
@@ -123,7 +118,6 @@ function StockEditor(handle: DocumentHandle) {
 function MaterialEditor(handle: DocumentHandle) {
   const { data: material } = useDocument({ ...handle, path: "material" });
   const editMaterial = useEditDocument({ ...handle, path: "material" });
-
   return (
     <Select
       value={(material as string) ?? ""}
@@ -146,7 +140,6 @@ function MaterialEditor(handle: DocumentHandle) {
 function ColorEditor(handle: DocumentHandle) {
   const { data: color } = useDocument({ ...handle, path: "color" });
   const editColor = useEditDocument({ ...handle, path: "color" });
-
   return (
     <Select
       value={(color as string) ?? ""}
@@ -169,7 +162,6 @@ function ColorEditor(handle: DocumentHandle) {
 function DimensionsEditor(handle: DocumentHandle) {
   const { data: dimensions } = useDocument({ ...handle, path: "dimensions" });
   const editDimensions = useEditDocument({ ...handle, path: "dimensions" });
-
   return (
     <Input
       value={(dimensions as string) ?? ""}
@@ -182,7 +174,6 @@ function DimensionsEditor(handle: DocumentHandle) {
 function FeaturedEditor(handle: DocumentHandle) {
   const { data: featured } = useDocument({ ...handle, path: "featured" });
   const editFeatured = useEditDocument({ ...handle, path: "featured" });
-
   return (
     <Switch
       checked={(featured as boolean) ?? false}
@@ -196,11 +187,7 @@ function AssemblyEditor(handle: DocumentHandle) {
     ...handle,
     path: "assemblyRequired",
   });
-  const editAssembly = useEditDocument({
-    ...handle,
-    path: "assemblyRequired",
-  });
-
+  const editAssembly = useEditDocument({ ...handle, path: "assemblyRequired" });
   return (
     <Switch
       checked={(assemblyRequired as boolean) ?? false}
@@ -210,9 +197,7 @@ function AssemblyEditor(handle: DocumentHandle) {
 }
 
 interface ProductSlugProjection {
-  slug: {
-    current: string;
-  } | null;
+  slug: { current: string } | null;
 }
 
 function ProductStoreLink(handle: DocumentHandle) {
@@ -220,11 +205,8 @@ function ProductStoreLink(handle: DocumentHandle) {
     ...handle,
     projection: `{ slug }`,
   });
-
   const slug = data?.slug?.current;
-
   if (!slug) return null;
-
   return (
     <Link
       href={`/products/${slug}`}
@@ -242,7 +224,6 @@ function ProductDetailContent({ handle }: { handle: DocumentHandle }) {
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 sm:text-2xl">
@@ -264,13 +245,9 @@ function ProductDetailContent({ handle }: { handle: DocumentHandle }) {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">
-        {/* Main Form */}
         <div className="space-y-6 lg:col-span-2">
-          {/* Basic Info */}
           <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
-            <h2 className="mb-4 font-semibold text-zinc-900 dark:text-zinc-100">
-              Basic Information
-            </h2>
+            <h2 className="mb-4 font-semibold text-zinc-900 dark:text-zinc-100">Basic Information</h2>
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
@@ -293,11 +270,8 @@ function ProductDetailContent({ handle }: { handle: DocumentHandle }) {
             </div>
           </div>
 
-          {/* Pricing & Inventory */}
           <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
-            <h2 className="mb-4 font-semibold text-zinc-900 dark:text-zinc-100">
-              Pricing & Inventory
-            </h2>
+            <h2 className="mb-4 font-semibold text-zinc-900 dark:text-zinc-100">Pricing & Inventory</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="price">Price (₦)</Label>
@@ -314,11 +288,8 @@ function ProductDetailContent({ handle }: { handle: DocumentHandle }) {
             </div>
           </div>
 
-          {/* Attributes */}
           <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
-            <h2 className="mb-4 font-semibold text-zinc-900 dark:text-zinc-100">
-              Attributes
-            </h2>
+            <h2 className="mb-4 font-semibold text-zinc-900 dark:text-zinc-100">Attributes</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Material</Label>
@@ -341,20 +312,13 @@ function ProductDetailContent({ handle }: { handle: DocumentHandle }) {
             </div>
           </div>
 
-          {/* Options */}
           <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
-            <h2 className="mb-4 font-semibold text-zinc-900 dark:text-zinc-100">
-              Options
-            </h2>
+            <h2 className="mb-4 font-semibold text-zinc-900 dark:text-zinc-100">Options</h2>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-zinc-900 dark:text-zinc-100">
-                    Featured Product
-                  </p>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    Show on homepage and promotions
-                  </p>
+                  <p className="font-medium text-zinc-900 dark:text-zinc-100">Featured Product</p>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">Show on homepage and promotions</p>
                 </div>
                 <Suspense fallback={<Skeleton className="h-6 w-11" />}>
                   <FeaturedEditor {...handle} />
@@ -362,12 +326,8 @@ function ProductDetailContent({ handle }: { handle: DocumentHandle }) {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-zinc-900 dark:text-zinc-100">
-                    Assembly Required
-                  </p>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    Customer will need to assemble
-                  </p>
+                  <p className="font-medium text-zinc-900 dark:text-zinc-100">Assembly Required</p>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">Customer will need to assemble</p>
                 </div>
                 <Suspense fallback={<Skeleton className="h-6 w-11" />}>
                   <AssemblyEditor {...handle} />
@@ -377,13 +337,9 @@ function ProductDetailContent({ handle }: { handle: DocumentHandle }) {
           </div>
         </div>
 
-        {/* Sidebar */}
         <div className="space-y-6">
-          {/* Image Upload */}
           <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
-            <h2 className="mb-4 font-semibold text-zinc-900 dark:text-zinc-100">
-              Product Images
-            </h2>
+            <h2 className="mb-4 font-semibold text-zinc-900 dark:text-zinc-100">Product Images</h2>
             <ImageUploader {...handle} />
             <div className="mt-4">
               <Suspense fallback={null}>
@@ -392,11 +348,8 @@ function ProductDetailContent({ handle }: { handle: DocumentHandle }) {
             </div>
           </div>
 
-          {/* Studio Link */}
           <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 sm:p-6">
-            <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">
-              Advanced Editing
-            </h2>
+            <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">Advanced Editing</h2>
             <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
               Set category and other options in Sanity Studio.
             </p>
@@ -446,27 +399,26 @@ interface PageProps {
 
 export default function ProductDetailPage({ params }: PageProps) {
   const { id } = use(params);
-
   const handle: DocumentHandle = {
     documentId: id,
     documentType: "product",
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      {/* Back Link */}
-      <Link
-        href="/admin/inventory"
-        className="inline-flex items-center text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to Inventory
-      </Link>
+    <SanityWrapper>
+      <div className="space-y-4 sm:space-y-6">
+        <Link
+          href="/admin/inventory"
+          className="inline-flex items-center text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Inventory
+        </Link>
 
-      {/* Product Detail */}
-      <Suspense fallback={<ProductDetailSkeleton />}>
-        <ProductDetailContent handle={handle} />
-      </Suspense>
-    </div>
+        <Suspense fallback={<ProductDetailSkeleton />}>
+          <ProductDetailContent handle={handle} />
+        </Suspense>
+      </div>
+    </SanityWrapper>
   );
 }
