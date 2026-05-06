@@ -1,3 +1,11 @@
+// Force all admin routes to render dynamically — never cache on CDN.
+// Without this, Vercel prebuilds and caches /admin at build time,
+// serving stale/broken HTML instead of the live PIN gate.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+ 
+
+
 import { client } from "@/sanity/lib/client";
 import { groq } from "next-sanity";
 import Link from "next/link";
