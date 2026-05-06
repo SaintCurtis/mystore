@@ -264,9 +264,9 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
 
   if (!authed) {
     return (
-      <Providers>
+      // <Providers>
         <PinGate onAuth={() => setAuthed(true)} />
-      </Providers>
+      // {/* </Providers> */}
     );
   }
 
