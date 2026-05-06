@@ -4,7 +4,6 @@ import { WishlistStoreProvider } from "@/lib/store/wishlist-store-provider";
 import { CompareStoreProvider } from "@/lib/store/compare-store-provider";
 import { CurrencyProvider } from "@/lib/store/currency-store-provider";
 import { ClerkProvider } from "@clerk/nextjs";
-import { SanityLive } from "@/sanity/lib/live";
 import { Toaster } from "@/components/ui/sonner";
 import { Header } from "@/components/app/Header";
 import { CartSheet } from "@/components/app/CartSheet";
@@ -21,6 +20,13 @@ import { MobileCategoryPills } from "@/components/app/MobileCategoryPills";
 import { BuildMySetupFAB } from "@/components/app/BuildMySetupFAB";
 import { ReferralTracker } from "@/components/app/ReferralTracker";
 import { Suspense } from "react";
+
+// ── SanityLive removed ────────────────────────────────────────────────────
+// SanityLive is only needed for Sanity's Presentation Tool / visual editing
+// preview workflow. We don't use that — we use webhook-based revalidation
+// instead. SanityLive was causing a redirect to sanity.io/login for all
+// visitors on the deployed site regardless of token configuration.
+// Content freshness is handled by app/api/revalidate/route.ts + webhooks.
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -55,7 +61,6 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                 <WhatsAppFAB />
                 <WelcomePopup />
                 <Toaster position="bottom-center" />
-                <SanityLive />
                 <Suspense fallback={null}>
                   <ReferralTracker />
                 </Suspense>
