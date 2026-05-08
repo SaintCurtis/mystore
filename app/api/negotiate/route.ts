@@ -39,7 +39,10 @@ function isRateLimited(ip: string): boolean {
   return false;
 }
 
+// Alert fires when bid is within this % ABOVE floor (e.g. 0.15 = 15% above)
 const CLOSE_TO_FLOOR_THRESHOLD = 0.15;
+// Alert also fires when bid is within this % BELOW floor (catches "670k vs 685k floor" cases)
+const BELOW_FLOOR_THRESHOLD = 0.20;
 
 // ── Persist session to Sanity ─────────────────────────────────────────────
 async function upsertSession({
@@ -60,7 +63,6 @@ async function upsertSession({
   dealAgreedPrice?: number;
 }) {
   try {
-    // Check if session already exists
     const existing = await writeClient.fetch<{ _id: string } | null>(
       `*[_type == "negotiationSession" && sessionId == $sessionId][0]{ _id }`,
       { sessionId }
@@ -83,7 +85,6 @@ async function upsertSession({
     };
 
     if (existing) {
-      // Append new messages to existing session
       const patch = writeClient.patch(existing._id)
         .setIfMissing({ messages: [] })
         .append("messages", [customerMsg, aiMsg])
@@ -98,7 +99,6 @@ async function upsertSession({
 
       await patch.commit();
     } else {
-      // Create new session document
       await writeClient.create({
         _type: "negotiationSession",
         sessionId,
@@ -116,12 +116,11 @@ async function upsertSession({
       });
     }
   } catch (err) {
-    // Non-blocking — log but don't fail the stream
     console.error("[negotiate] Failed to persist session:", err);
   }
 }
 
-// ── Owner message polling — check if owner has taken over ─────────────────
+// ── Owner message polling ─────────────────────────────────────────────────
 async function getOwnerMessages(sessionId: string, afterTimestamp: string) {
   try {
     const session = await serverClient.fetch<{
@@ -137,7 +136,6 @@ async function getOwnerMessages(sessionId: string, afterTimestamp: string) {
 
     if (!session || session.status !== "owner_active") return null;
 
-    // Return only owner messages after the given timestamp
     const ownerMessages = (session.messages ?? []).filter(
       (m) => m.sender === "owner" && m.timestamp > afterTimestamp
     );
@@ -160,6 +158,39 @@ interface NegotiateRequest {
   messages: Message[];
 }
 
+// ── Bid parser ────────────────────────────────────────────────────────────
+/**
+ * Extracts the highest plausible bid amount from a user message.
+ * Handles: "670k", "670K", "₦670k", "₦670,000", "685000", "let's do 670k"
+ */
+function extractBidAmount(text: string): number | undefined {
+  // Match patterns (order matters — k-suffix first to avoid partial matches):
+  // 1. Optional ₦, digits+commas, optional decimal, then k/K  e.g. ₦670k, 670K, 670,000k
+  // 2. ₦ followed by digits+commas+optional decimal           e.g. ₦685,000
+  // 3. Standalone 4–7 digit number not part of a longer number e.g. 685000
+  const pattern = /₦?([\d,]+(?:\.\d+)?)[kK]\b|₦([\d,]+(?:\.\d+)?)|(?<!\d)([\d,]{4,7})(?!\d)/g;
+
+  let best: number | undefined;
+  let match: RegExpExecArray | null;
+
+  while ((match = pattern.exec(text)) !== null) {
+    const raw = (match[1] ?? match[2] ?? match[3]).replace(/,/g, "");
+    let amount = parseFloat(raw);
+    if (isNaN(amount)) continue;
+
+    // Apply k multiplier only for group 1 (the k-suffix group)
+    if (match[1] !== undefined) amount *= 1000;
+
+    // Sanity bounds: must be a plausible naira price (₦10k–₦100M)
+    if (amount < 10_000 || amount > 100_000_000) continue;
+
+    // Keep the highest plausible bid found in the message
+    if (best === undefined || amount > best) best = amount;
+  }
+
+  return best;
+}
+
 // ── Route handler ─────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
@@ -175,7 +206,6 @@ export async function POST(req: NextRequest) {
   }
 
   const { slug, messages } = body;
-  // Use provided sessionId or generate a new one for this negotiation
   const sessionId = body.sessionId ?? randomUUID();
 
   if (!slug || !messages || messages.length === 0) {
@@ -185,7 +215,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Negotiation session has ended. Please start a new one." }, { status: 400 });
   }
 
-  // ── Fetch product server-side ─────────────────────────────────────────
+  // ── Fetch product ─────────────────────────────────────────────────────
   const product = await serverClient.fetch<{
     name: string;
     price: number;
@@ -207,12 +237,11 @@ export async function POST(req: NextRequest) {
   if (!product.floorPrice || product.floorPrice <= 0) return NextResponse.json({ error: "Negotiation is temporarily unavailable" }, { status: 503 });
   if (product.stock <= 0) return NextResponse.json({ error: "This product is out of stock" }, { status: 400 });
 
-  // ── Check if owner has taken over this session ────────────────────────
-  const lastMsgTimestamp = new Date(Date.now() - 30000).toISOString(); // last 30s
+  // ── Check if owner has taken over ────────────────────────────────────
+  const lastMsgTimestamp = new Date(Date.now() - 30000).toISOString();
   const ownerMessages = await getOwnerMessages(sessionId, lastMsgTimestamp);
 
   if (ownerMessages && ownerMessages.length > 0) {
-    // Owner is live — stream their latest message back to the customer
     const latestOwnerMsg = ownerMessages[ownerMessages.length - 1];
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
@@ -235,39 +264,67 @@ export async function POST(req: NextRequest) {
   let detectedBid: number | undefined;
 
   if (lastUserMessage) {
-    const bidMatches = lastUserMessage.content.match(/₦?([\d,]+(?:\.\d+)?)\s*[kK]?/g);
-    if (bidMatches) {
-      for (const match of bidMatches) {
-        const raw = match.replace(/[₦,\s]/g, "");
-        let amount = parseFloat(raw);
-        if (/[kK]/.test(match)) amount *= 1000;
-        if (amount >= 10_000) {
-          const ceiling = product.floorPrice * (1 + CLOSE_TO_FLOOR_THRESHOLD);
-          if (amount >= product.floorPrice && amount <= ceiling) {
-            closeBidAlert = true;
-            detectedBid = amount;
-          }
-        }
+    const bidAmount = extractBidAmount(lastUserMessage.content);
+
+    if (bidAmount !== undefined) {
+      // Fire alert when bid is within BELOW_FLOOR_THRESHOLD below floor
+      // OR within CLOSE_TO_FLOOR_THRESHOLD above floor.
+      // e.g. floor=685k → alert range: ₦548k–₦787,750
+      const lowerBound = product.floorPrice * (1 - BELOW_FLOOR_THRESHOLD);
+      const upperBound = product.floorPrice * (1 + CLOSE_TO_FLOOR_THRESHOLD);
+
+      if (bidAmount >= lowerBound && bidAmount <= upperBound) {
+        closeBidAlert = true;
+        detectedBid = bidAmount;
       }
     }
   }
 
-  // Send owner email notification for close bids
-  if (closeBidAlert && detectedBid && process.env.RESEND_API_KEY && process.env.OWNER_EMAIL) {
-    const adminUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/admin/negotiations/${sessionId}`;
-    fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: "The Saint's TechNet <notifications@saintstechnet.com>",
-        to: [process.env.OWNER_EMAIL],
-        subject: `🔔 Close Bid: ${product.name} — ₦${detectedBid.toLocaleString()}`,
-        html: `<p>A customer bid <strong>₦${detectedBid.toLocaleString()}</strong> on <strong>${product.name}</strong> (floor: ₦${product.floorPrice.toLocaleString()}).</p><p><a href="${adminUrl}">View negotiation and take over →</a></p>`,
-      }),
-    }).catch(console.error);
+  // ── Send owner alert email ────────────────────────────────────────────
+  if (closeBidAlert && detectedBid) {
+    // Log so you can verify in Vercel logs even if email fails
+    console.log(
+      `[alert] Close bid detected — product: ${product.name}, bid: ₦${detectedBid.toLocaleString()}, floor: ₦${product.floorPrice.toLocaleString()}, session: ${sessionId}`
+    );
+
+    if (process.env.RESEND_API_KEY && process.env.OWNER_EMAIL) {
+      const adminUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/admin/negotiations/${sessionId}`;
+      const isAboveFloor = detectedBid >= product.floorPrice;
+      const bidLabel = isAboveFloor
+        ? `₦${detectedBid.toLocaleString()} (at/above floor ✅)`
+        : `₦${detectedBid.toLocaleString()} (below floor — room to negotiate 🔥)`;
+
+      fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: "The Saint's TechNet <notifications@saintstechnet.com>",
+          to: [process.env.OWNER_EMAIL],
+          subject: `🔔 Close Bid Alert: ${product.name} — ₦${detectedBid.toLocaleString()}`,
+          html: `
+            <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+              <h2 style="color:#f59e0b">🔔 Close Bid Alert</h2>
+              <p>A customer is negotiating close to your floor price.</p>
+              <table style="width:100%;border-collapse:collapse;margin:16px 0">
+                <tr><td style="padding:8px;color:#666">Product</td><td style="padding:8px;font-weight:bold">${product.name}</td></tr>
+                <tr style="background:#f9f9f9"><td style="padding:8px;color:#666">Listed Price</td><td style="padding:8px">₦${product.price.toLocaleString()}</td></tr>
+                <tr><td style="padding:8px;color:#666">Floor Price</td><td style="padding:8px">₦${product.floorPrice.toLocaleString()}</td></tr>
+                <tr style="background:#fef3c7"><td style="padding:8px;color:#666">Customer Bid</td><td style="padding:8px;font-weight:bold;color:#d97706">${bidLabel}</td></tr>
+              </table>
+              <a href="${adminUrl}" style="display:inline-block;background:#f59e0b;color:#000;font-weight:bold;padding:12px 24px;border-radius:8px;text-decoration:none;margin-top:8px">
+                View Negotiation &amp; Take Over →
+              </a>
+              <p style="color:#999;font-size:12px;margin-top:24px">Session ID: ${sessionId}</p>
+            </div>
+          `,
+        }),
+      }).catch((err) => console.error("[alert] Email send failed:", err));
+    } else {
+      console.warn("[alert] Skipping email — RESEND_API_KEY or OWNER_EMAIL not set in env");
+    }
   }
 
   const systemPrompt = buildSystemPrompt(product);
@@ -279,7 +336,7 @@ export async function POST(req: NextRequest) {
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        // Emit the sessionId first so the frontend can store it
+        // Emit sessionId first so the frontend can persist it
         controller.enqueue(
           encoder.encode(`data: ${JSON.stringify({ sessionId })}\n\n`)
         );

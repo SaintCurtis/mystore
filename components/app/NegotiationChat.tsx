@@ -63,6 +63,11 @@ export function NegotiationChat({
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
+  // ── FIX: persist sessionId across all messages in this negotiation ──────
+  // Without this, each message round creates a new session in Sanity,
+  // making the admin alert link point to an orphaned 1-message document.
+  const sessionIdRef = useRef<string | null>(null);
+
   // Auto-scroll to bottom on new messages
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -105,7 +110,11 @@ export function NegotiationChat({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           slug: product.slug,
-          // Send only role + content (no streaming flag)
+          // ── FIX: send the persisted sessionId on every round ──────────
+          // On the first message sessionIdRef.current is null, so the server
+          // generates a fresh UUID and returns it. We store it and send it
+          // back on every subsequent message so all rounds belong to one session.
+          sessionId: sessionIdRef.current ?? undefined,
           messages: updatedMessages.map(({ role, content }) => ({
             role,
             content,
@@ -142,6 +151,13 @@ export function NegotiationChat({
 
             if (parsed.error) {
               throw new Error(parsed.error);
+            }
+
+            // ── FIX: capture sessionId from server on first response ───
+            // The server always emits { sessionId } as the very first SSE event.
+            // Store it so all future rounds are appended to the same Sanity doc.
+            if (parsed.sessionId && !sessionIdRef.current) {
+              sessionIdRef.current = parsed.sessionId;
             }
 
             if (parsed.text) {
@@ -229,13 +245,11 @@ export function NegotiationChat({
         throw new Error(data.error ?? "Could not initialize payment");
       }
 
-      // Show deal summary briefly before redirect
       toast.success(
         `Deal locked! You saved ${formatInCurrency(data.summary.savedAmount)} (${data.summary.savedPercent}% off)`,
         { duration: 3000 }
       );
 
-      // Redirect to Paystack
       window.location.href = data.url;
     } catch (err: unknown) {
       const errorMsg =
@@ -253,7 +267,6 @@ export function NegotiationChat({
       {/* ── Header ── */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shrink-0">
         <div className="flex items-center gap-3">
-          {/* Avatar */}
           <div className="w-9 h-9 rounded-full bg-amber-500/15 flex items-center justify-center shrink-0">
             <HandshakeIcon className="w-4 h-4 text-amber-500" />
           </div>
@@ -268,7 +281,6 @@ export function NegotiationChat({
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Rounds indicator */}
           {!deal.struck && roundsLeft <= 5 && roundsLeft > 0 && (
             <span className="text-xs text-zinc-400 dark:text-zinc-500">
               {roundsLeft} round{roundsLeft !== 1 ? "s" : ""} left
