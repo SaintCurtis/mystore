@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { X, Send, Loader2, HandshakeIcon, BadgePercent, Zap } from "lucide-react";
 import { useCurrency } from "@/lib/store/currency-store-provider";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -11,6 +10,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   streaming?: boolean;
+  fromOwner?: boolean;
 }
 
 interface DealState {
@@ -31,7 +31,6 @@ interface NegotiationChatProps {
   onClose: () => void;
 }
 
-// ── Strip the DEAL signal from displayed text ──────────────────────────────
 function stripDealSignal(text: string): string {
   return text.replace(/DEAL:₦[\d,]+/g, "").trim();
 }
@@ -42,7 +41,6 @@ export function NegotiationChat({
   selectedVariants = [],
   onClose,
 }: NegotiationChatProps) {
-  const router = useRouter();
   const { formatInCurrency } = useCurrency();
 
   const [messages, setMessages] = useState<Message[]>([
@@ -53,39 +51,93 @@ export function NegotiationChat({
   ]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
-  const [deal, setDeal] = useState<DealState>({
-    struck: false,
-    agreedPrice: null,
-    loading: false,
-  });
+  const [deal, setDeal] = useState<DealState>({ struck: false, agreedPrice: null, loading: false });
+  const [sessionReady, setSessionReady] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  // ── FIX: persist sessionId across all messages in this negotiation ──────
-  // Without this, each message round creates a new session in Sanity,
-  // making the admin alert link point to an orphaned 1-message document.
+  // Persists sessionId so every message round appends to the same Sanity doc
   const sessionIdRef = useRef<string | null>(null);
+  // Watermark: timestamp of the last owner message we've already shown
+  const lastOwnerTimestampRef = useRef<string | null>(null);
+  // Whether the owner has taken over (skip AI, just show owner messages via poll)
+  const ownerActiveRef = useRef(false);
 
-  // Auto-scroll to bottom on new messages
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Focus input on mount
   useEffect(() => {
     setTimeout(() => inputRef.current?.focus(), 300);
   }, []);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => abortRef.current?.abort();
   }, []);
 
+  // ── Poll for owner messages every 3 seconds ───────────────────────────
+  // KEY FIX: The customer no longer has to send a message to receive the
+  // owner's reply. This loop independently fetches new owner messages.
+  const pollOwnerMessages = useCallback(async () => {
+    const sid = sessionIdRef.current;
+    if (!sid || deal.struck) return;
+
+    try {
+      const params = new URLSearchParams({ sessionId: sid });
+      if (lastOwnerTimestampRef.current) {
+        params.set("after", lastOwnerTimestampRef.current);
+      }
+
+      const res = await fetch(`/api/negotiate/owner-messages?${params}`);
+      if (!res.ok) return;
+
+      const data = await res.json();
+
+      if (data.status === "owner_active") ownerActiveRef.current = true;
+      else if (data.status === "ai_active") ownerActiveRef.current = false;
+
+      if (data.messages && data.messages.length > 0) {
+        const sorted = [...data.messages].sort(
+          (a: { timestamp: string }, b: { timestamp: string }) =>
+            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        );
+
+        setMessages((prev) => [
+          ...prev,
+          ...sorted.map((m: { content: string }) => ({
+            role: "assistant" as const,
+            content: m.content,
+            fromOwner: true,
+          })),
+        ]);
+
+        lastOwnerTimestampRef.current = sorted[sorted.length - 1].timestamp;
+      }
+    } catch {
+      // Silent fail — polling is best-effort
+    }
+  }, [deal.struck]);
+
+  // Start polling as soon as we have a sessionId
+  useEffect(() => {
+    if (!sessionReady) return;
+    const interval = setInterval(pollOwnerMessages, 3_000);
+    return () => clearInterval(interval);
+  }, [sessionReady, pollOwnerMessages]);
+
+  // ── Send message ──────────────────────────────────────────────────────
   const sendMessage = async () => {
     const text = input.trim();
     if (!text || isStreaming || deal.struck) return;
+
+    // Owner is live — show customer message locally; polling will deliver reply
+    if (ownerActiveRef.current) {
+      setMessages((prev) => [...prev, { role: "user", content: text }]);
+      setInput("");
+      return;
+    }
 
     const userMessage: Message = { role: "user", content: text };
     const updatedMessages = [...messages, userMessage];
@@ -93,14 +145,7 @@ export function NegotiationChat({
     setMessages(updatedMessages);
     setInput("");
     setIsStreaming(true);
-
-    // Placeholder for streaming assistant reply
-    const assistantPlaceholder: Message = {
-      role: "assistant",
-      content: "",
-      streaming: true,
-    };
-    setMessages((prev) => [...prev, assistantPlaceholder]);
+    setMessages((prev) => [...prev, { role: "assistant", content: "", streaming: true }]);
 
     abortRef.current = new AbortController();
 
@@ -110,15 +155,8 @@ export function NegotiationChat({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           slug: product.slug,
-          // ── FIX: send the persisted sessionId on every round ──────────
-          // On the first message sessionIdRef.current is null, so the server
-          // generates a fresh UUID and returns it. We store it and send it
-          // back on every subsequent message so all rounds belong to one session.
           sessionId: sessionIdRef.current ?? undefined,
-          messages: updatedMessages.map(({ role, content }) => ({
-            role,
-            content,
-          })),
+          messages: updatedMessages.map(({ role, content }) => ({ role, content })),
         }),
         signal: abortRef.current.signal,
       });
@@ -148,16 +186,12 @@ export function NegotiationChat({
 
           try {
             const parsed = JSON.parse(data);
+            if (parsed.error) throw new Error(parsed.error);
 
-            if (parsed.error) {
-              throw new Error(parsed.error);
-            }
-
-            // ── FIX: capture sessionId from server on first response ───
-            // The server always emits { sessionId } as the very first SSE event.
-            // Store it so all future rounds are appended to the same Sanity doc.
+            // Capture sessionId on first event and activate polling
             if (parsed.sessionId && !sessionIdRef.current) {
               sessionIdRef.current = parsed.sessionId;
+              setSessionReady(true);
             }
 
             if (parsed.text) {
@@ -174,11 +208,7 @@ export function NegotiationChat({
             }
 
             if (parsed.deal && parsed.agreedPrice) {
-              setDeal({
-                struck: true,
-                agreedPrice: parsed.agreedPrice,
-                loading: false,
-              });
+              setDeal({ struck: true, agreedPrice: parsed.agreedPrice, loading: false });
             }
           } catch {
             // Skip malformed chunks
@@ -186,7 +216,6 @@ export function NegotiationChat({
         }
       }
 
-      // Finalise the streaming message
       setMessages((prev) => {
         const updated = [...prev];
         updated[updated.length - 1] = {
@@ -198,10 +227,7 @@ export function NegotiationChat({
       });
     } catch (err: unknown) {
       if (err instanceof Error && err.name === "AbortError") return;
-
-      const errorMsg =
-        err instanceof Error ? err.message : "Something went wrong";
-
+      const errorMsg = err instanceof Error ? err.message : "Something went wrong";
       setMessages((prev) => {
         const updated = [...prev];
         updated[updated.length - 1] = {
@@ -225,7 +251,6 @@ export function NegotiationChat({
 
   const handleProceedToPayment = async () => {
     if (!deal.agreedPrice) return;
-
     setDeal((prev) => ({ ...prev, loading: true }));
 
     try {
@@ -240,21 +265,15 @@ export function NegotiationChat({
       });
 
       const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.error ?? "Could not initialize payment");
-      }
+      if (!response.ok || !data.success) throw new Error(data.error ?? "Could not initialize payment");
 
       toast.success(
         `Deal locked! You saved ${formatInCurrency(data.summary.savedAmount)} (${data.summary.savedPercent}% off)`,
         { duration: 3000 }
       );
-
       window.location.href = data.url;
     } catch (err: unknown) {
-      const errorMsg =
-        err instanceof Error ? err.message : "Something went wrong";
-      toast.error(errorMsg);
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
       setDeal((prev) => ({ ...prev, loading: false }));
     }
   };
@@ -318,10 +337,7 @@ export function NegotiationChat({
       {/* ── Messages ── */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 min-h-0">
         {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-          >
+          <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             <div
               className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
                 msg.role === "user"
@@ -337,15 +353,12 @@ export function NegotiationChat({
           </div>
         ))}
 
-        {/* Deal confirmation card */}
         {deal.struck && deal.agreedPrice && (
           <div className="mx-auto max-w-xs rounded-2xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/40 p-4 text-center">
             <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center mx-auto mb-2">
               <HandshakeIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
             </div>
-            <p className="text-sm font-semibold text-green-800 dark:text-green-300 mb-0.5">
-              Deal agreed!
-            </p>
+            <p className="text-sm font-semibold text-green-800 dark:text-green-300 mb-0.5">Deal agreed!</p>
             <p className="text-xs text-green-600 dark:text-green-500 mb-3">
               {formatInCurrency(deal.agreedPrice)} · You save{" "}
               {formatInCurrency(product.price - deal.agreedPrice)}
@@ -356,20 +369,13 @@ export function NegotiationChat({
               className="w-full h-11 flex items-center justify-center gap-2 rounded-xl bg-green-600 hover:bg-green-500 active:scale-[0.98] disabled:opacity-60 text-white text-sm font-bold transition-all duration-150 shadow-lg shadow-green-500/20"
             >
               {deal.loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Setting up payment…
-                </>
+                <><Loader2 className="w-4 h-4 animate-spin" /> Setting up payment…</>
               ) : (
-                <>
-                  <Zap className="w-4 h-4" />
-                  Pay {formatInCurrency(deal.agreedPrice)} now
-                </>
+                <><Zap className="w-4 h-4" /> Pay {formatInCurrency(deal.agreedPrice)} now</>
               )}
             </button>
           </div>
         )}
-
         <div ref={bottomRef} />
       </div>
 
@@ -379,12 +385,7 @@ export function NegotiationChat({
           {roundsLeft === 0 ? (
             <p className="text-xs text-center text-zinc-400 py-2">
               Negotiation session ended.{" "}
-              <button
-                onClick={onClose}
-                className="text-amber-500 underline underline-offset-2"
-              >
-                Close
-              </button>
+              <button onClick={onClose} className="text-amber-500 underline underline-offset-2">Close</button>
             </p>
           ) : (
             <div className="flex items-end gap-2">
@@ -405,11 +406,10 @@ export function NegotiationChat({
                 className="w-10 h-10 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center shrink-0 transition-all duration-150 shadow-md shadow-amber-500/20"
                 aria-label="Send message"
               >
-                {isStreaming ? (
-                  <Loader2 className="w-4 h-4 text-zinc-950 animate-spin" />
-                ) : (
-                  <Send className="w-4 h-4 text-zinc-950" />
-                )}
+                {isStreaming
+                  ? <Loader2 className="w-4 h-4 text-zinc-950 animate-spin" />
+                  : <Send className="w-4 h-4 text-zinc-950" />
+                }
               </button>
             </div>
           )}

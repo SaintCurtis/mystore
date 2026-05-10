@@ -1,18 +1,19 @@
-const CACHE_NAME = "saints-technet-v1";
-const STATIC_ASSETS = [
-  "/",
-  "/manifest.json",
-];
+// Saint's TechNet — Service Worker
+// Handles: PWA offline caching + Web Push notifications
 
-// Install — cache static assets
+const CACHE_NAME = "saints-technet-v1";
+
+// ── Install ───────────────────────────────────────────────────────────────
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(["/", "/manifest.json"]);
+    })
   );
   self.skipWaiting();
 });
 
-// Activate — clean up old caches
+// ── Activate ──────────────────────────────────────────────────────────────
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -22,63 +23,59 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// Fetch — network first, fallback to cache
+// ── Fetch (basic cache-first for static assets) ───────────────────────────
 self.addEventListener("fetch", (event) => {
-  // Skip non-GET and chrome-extension requests
+  // Only cache GET requests
   if (event.request.method !== "GET") return;
-  if (event.request.url.startsWith("chrome-extension://")) return;
-  if (event.request.url.includes("/api/")) return; // never cache API routes
 
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // Cache successful HTML and image responses
-        if (
-          response.ok &&
-          (event.request.destination === "document" ||
-            event.request.destination === "image")
-        ) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-        }
-        return response;
-      })
-      .catch(() => {
-        // Offline fallback
-        return caches.match(event.request).then(
-          (cached) => cached ?? caches.match("/")
-        );
-      })
+    caches.match(event.request).then((cached) => {
+      return cached ?? fetch(event.request);
+    })
   );
 });
 
-// Push notifications
+// ── Push notification received ────────────────────────────────────────────
 self.addEventListener("push", (event) => {
-  const data = event.data?.json() ?? {};
-  const title = data.title ?? "The Saint's TechNet";
-  const options = {
-    body: data.body ?? "New update from The Saint's TechNet",
-    icon: "/icons/icon-192x192.png",
-    badge: "/icons/icon-72x72.png",
-    data: { url: data.url ?? "/" },
-    actions: [
-      { action: "open", title: "View Now" },
-      { action: "close", title: "Dismiss" },
-    ],
-  };
-  event.waitUntil(self.registration.showNotification(title, options));
+  let data = { title: "Saint's TechNet", body: "You have a new notification", url: "/admin/negotiations" };
+
+  try {
+    if (event.data) {
+      data = { ...data, ...JSON.parse(event.data.text()) };
+    }
+  } catch {
+    // Use defaults
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: "/icons/android-chrome-192x192.png",
+      badge: "/icons/favicon-32x32.png",
+      tag: "negotiation-alert",       // replaces previous alert instead of stacking
+      renotify: true,                 // vibrate/sound even if same tag
+      requireInteraction: true,       // stays visible until tapped (important on mobile)
+      data: { url: data.url },
+    })
+  );
 });
 
-// Notification click
+// ── Notification click — open/focus admin page ────────────────────────────
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  if (event.action === "close") return;
-  const url = event.notification.data?.url ?? "/";
+
+  const url = event.notification.data?.url ?? "/admin/negotiations";
+
   event.waitUntil(
-    clients.matchAll({ type: "window" }).then((clientList) => {
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+      // If admin tab is already open, focus it
       for (const client of clientList) {
-        if (client.url === url && "focus" in client) return client.focus();
+        if (client.url.includes("/admin") && "focus" in client) {
+          client.navigate(url);
+          return client.focus();
+        }
       }
+      // Otherwise open a new tab
       return clients.openWindow(url);
     })
   );
