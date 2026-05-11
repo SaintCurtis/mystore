@@ -13,6 +13,12 @@ interface Message {
   fromOwner?: boolean;
 }
 
+interface StoredSession {
+  sessionId: string;
+  messages: Message[];
+  lastOwnerTimestamp: string | null;
+}
+
 interface DealState {
   struck: boolean;
   agreedPrice: number | null;
@@ -35,6 +41,35 @@ function stripDealSignal(text: string): string {
   return text.replace(/DEAL:₦[\d,]+/g, "").trim();
 }
 
+// ── localStorage helpers ──────────────────────────────────────────────────
+function storageKey(slug: string) {
+  return `neg_session_${slug}`;
+}
+
+function loadSession(slug: string): StoredSession | null {
+  try {
+    const raw = localStorage.getItem(storageKey(slug));
+    if (!raw) return null;
+    return JSON.parse(raw) as StoredSession;
+  } catch {
+    return null;
+  }
+}
+
+function saveSession(slug: string, data: StoredSession) {
+  try {
+    localStorage.setItem(storageKey(slug), JSON.stringify(data));
+  } catch {
+    // localStorage full or unavailable — silent fail
+  }
+}
+
+function clearSession(slug: string) {
+  try {
+    localStorage.removeItem(storageKey(slug));
+  } catch {}
+}
+
 // ── Component ──────────────────────────────────────────────────────────────
 export function NegotiationChat({
   product,
@@ -43,31 +78,56 @@ export function NegotiationChat({
 }: NegotiationChatProps) {
   const { formatInCurrency } = useCurrency();
 
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "assistant",
-      content: `Hi! I'm Segun from The Saint's TechNet. You're looking at the ${product.name}, listed at ${formatInCurrency(product.price)}. What price did you have in mind?`,
-    },
-  ]);
+  const defaultWelcome: Message = {
+    role: "assistant",
+    content: `Hi! I'm Segun from The Saint's TechNet. You're looking at the ${product.name}, listed at ${formatInCurrency(product.price)}. What price did you have in mind?`,
+  };
+
+  // ── Restore from localStorage on mount ───────────────────────────────
+  const stored = loadSession(product.slug);
+
+  const [messages, setMessages] = useState<Message[]>(
+    stored?.messages?.length ? stored.messages : [defaultWelcome]
+  );
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+  const [ownerTyping, setOwnerTyping] = useState(false);
   const [deal, setDeal] = useState<DealState>({ struck: false, agreedPrice: null, loading: false });
-  const [sessionReady, setSessionReady] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  // Persists sessionId so every message round appends to the same Sanity doc
-  const sessionIdRef = useRef<string | null>(null);
-  // Watermark: timestamp of the last owner message we've already shown
-  const lastOwnerTimestampRef = useRef<string | null>(null);
-  // Whether the owner has taken over (skip AI, just show owner messages via poll)
+  // Refs — never cause stale closures inside callbacks
+  const sessionIdRef = useRef<string | null>(stored?.sessionId ?? null);
+  const lastOwnerTimestampRef = useRef<string | null>(stored?.lastOwnerTimestamp ?? null);
   const ownerActiveRef = useRef(false);
+  const dealStruckRef = useRef(false);
+  const messagesRef = useRef<Message[]>(messages);
+
+  // Keep messagesRef in sync so we can persist without closure issues
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
+  // Persist session to localStorage whenever messages or sessionId change
+  const persistSession = useCallback(() => {
+    const sid = sessionIdRef.current;
+    if (!sid) return;
+    saveSession(product.slug, {
+      sessionId: sid,
+      messages: messagesRef.current.filter((m) => !m.streaming), // never persist mid-stream
+      lastOwnerTimestamp: lastOwnerTimestampRef.current,
+    });
+  }, [product.slug]);
+
+  useEffect(() => {
+    persistSession();
+  }, [messages, persistSession]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, ownerTyping]);
 
   useEffect(() => {
     setTimeout(() => inputRef.current?.focus(), 300);
@@ -77,62 +137,67 @@ export function NegotiationChat({
     return () => abortRef.current?.abort();
   }, []);
 
-  // ── Poll for owner messages every 3 seconds ───────────────────────────
-  // KEY FIX: The customer no longer has to send a message to receive the
-  // owner's reply. This loop independently fetches new owner messages.
+  // ── Poll owner messages + typing indicator every 3s ───────────────────
   const pollOwnerMessages = useCallback(async () => {
     const sid = sessionIdRef.current;
-    if (!sid || deal.struck) return;
+    if (!sid || dealStruckRef.current) return;
 
     try {
+      // 1. Check owner messages
       const params = new URLSearchParams({ sessionId: sid });
       if (lastOwnerTimestampRef.current) {
         params.set("after", lastOwnerTimestampRef.current);
       }
-
       const res = await fetch(`/api/negotiate/owner-messages?${params}`);
-      if (!res.ok) return;
+      if (res.ok) {
+        const data = await res.json();
 
-      const data = await res.json();
+        if (data.status === "owner_active") ownerActiveRef.current = true;
+        else if (data.status === "ai_active") ownerActiveRef.current = false;
 
-      if (data.status === "owner_active") ownerActiveRef.current = true;
-      else if (data.status === "ai_active") ownerActiveRef.current = false;
+        if (data.messages?.length > 0) {
+          const sorted = [...data.messages].sort(
+            (a: { timestamp: string }, b: { timestamp: string }) =>
+              new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+          );
+          setMessages((prev) => [
+            ...prev,
+            ...sorted.map((m: { content: string }) => ({
+              role: "assistant" as const,
+              content: m.content,
+              fromOwner: true,
+            })),
+          ]);
+          lastOwnerTimestampRef.current = sorted[sorted.length - 1].timestamp;
+        }
+      }
 
-      if (data.messages && data.messages.length > 0) {
-        const sorted = [...data.messages].sort(
-          (a: { timestamp: string }, b: { timestamp: string }) =>
-            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-        );
-
-        setMessages((prev) => [
-          ...prev,
-          ...sorted.map((m: { content: string }) => ({
-            role: "assistant" as const,
-            content: m.content,
-            fromOwner: true,
-          })),
-        ]);
-
-        lastOwnerTimestampRef.current = sorted[sorted.length - 1].timestamp;
+      // 2. Check typing indicator (only when owner is active)
+      if (ownerActiveRef.current) {
+        const typingRes = await fetch(`/api/negotiate/typing?sessionId=${sid}`);
+        if (typingRes.ok) {
+          const { isTyping } = await typingRes.json();
+          setOwnerTyping(isTyping);
+        }
+      } else {
+        setOwnerTyping(false);
       }
     } catch {
-      // Silent fail — polling is best-effort
+      // Silent fail
     }
-  }, [deal.struck]);
+  }, []);
 
-  // Start polling as soon as we have a sessionId
+  // Start polling immediately on mount — safe before sessionId exists (exits early)
   useEffect(() => {
-    if (!sessionReady) return;
     const interval = setInterval(pollOwnerMessages, 3_000);
     return () => clearInterval(interval);
-  }, [sessionReady, pollOwnerMessages]);
+  }, [pollOwnerMessages]);
 
   // ── Send message ──────────────────────────────────────────────────────
   const sendMessage = async () => {
     const text = input.trim();
     if (!text || isStreaming || deal.struck) return;
 
-    // Owner is live — show customer message locally; polling will deliver reply
     if (ownerActiveRef.current) {
       setMessages((prev) => [...prev, { role: "user", content: text }]);
       setInput("");
@@ -188,10 +253,8 @@ export function NegotiationChat({
             const parsed = JSON.parse(data);
             if (parsed.error) throw new Error(parsed.error);
 
-            // Capture sessionId on first event and activate polling
             if (parsed.sessionId && !sessionIdRef.current) {
               sessionIdRef.current = parsed.sessionId;
-              setSessionReady(true);
             }
 
             if (parsed.text) {
@@ -208,6 +271,8 @@ export function NegotiationChat({
             }
 
             if (parsed.deal && parsed.agreedPrice) {
+              dealStruckRef.current = true;
+              clearSession(product.slug); // clear history on deal
               setDeal({ struck: true, agreedPrice: parsed.agreedPrice, loading: false });
             }
           } catch {
@@ -252,7 +317,6 @@ export function NegotiationChat({
   const handleProceedToPayment = async () => {
     if (!deal.agreedPrice) return;
     setDeal((prev) => ({ ...prev, loading: true }));
-
     try {
       const response = await fetch("/api/negotiate/checkout", {
         method: "POST",
@@ -263,10 +327,8 @@ export function NegotiationChat({
           selectedVariants,
         }),
       });
-
       const data = await response.json();
       if (!response.ok || !data.success) throw new Error(data.error ?? "Could not initialize payment");
-
       toast.success(
         `Deal locked! You saved ${formatInCurrency(data.summary.savedAmount)} (${data.summary.savedPercent}% off)`,
         { duration: 3000 }
@@ -298,7 +360,6 @@ export function NegotiationChat({
             </p>
           </div>
         </div>
-
         <div className="flex items-center gap-2">
           {!deal.struck && roundsLeft <= 5 && roundsLeft > 0 && (
             <span className="text-xs text-zinc-400 dark:text-zinc-500">
@@ -352,6 +413,22 @@ export function NegotiationChat({
             </div>
           </div>
         ))}
+
+        {/* ── Typing indicator ── */}
+        {ownerTyping && (
+          <div className="flex justify-start">
+            <div className="bg-zinc-100 dark:bg-zinc-800 rounded-2xl rounded-bl-sm px-3.5 py-2.5">
+              <p className="text-xs italic text-zinc-400 dark:text-zinc-500">
+                The Saint's TechNet is typing…
+              </p>
+              <span className="inline-flex gap-1 mt-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:0ms]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:150ms]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:300ms]" />
+              </span>
+            </div>
+          </div>
+        )}
 
         {deal.struck && deal.agreedPrice && (
           <div className="mx-auto max-w-xs rounded-2xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/40 p-4 text-center">

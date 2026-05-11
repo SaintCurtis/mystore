@@ -23,160 +23,84 @@ export const structure: StructureResolver = (S) =>
                 .child(S.documentTypeList("product").title("All Products")),
               S.divider(),
 
-              // ── Computers ────────────────────────────────────
               S.listItem()
                 .title("Computers")
                 .child(
-                  S.list()
-                    .title("Computers")
-                    .items([
-                      S.listItem().title("Gaming Laptops").child(
-                        S.documentTypeList("product").title("Gaming Laptops").filter(DEEP_FILTER("gaming-laptops")),
-                      ),
-                      S.listItem().title("Regular Laptops").child(
-                        S.documentTypeList("product").title("Regular Laptops").filter(DEEP_FILTER("regular-laptops")),
-                      ),
-                      S.listItem().title("MacBooks").child(
-                        S.documentTypeList("product").title("MacBooks").filter(DEEP_FILTER("macbook")),
-                      ),
-                      S.listItem().title("SFF Computers").child(
-                        S.documentTypeList("product").title("SFF Computers").filter(DEEP_FILTER("sff-computers")),
-                      ),
-                      S.listItem().title("Custom PCs").child(
-                        S.documentTypeList("product").title("Custom PCs").filter(DEEP_FILTER("custom-pcs")),
-                      ),
-                      S.listItem().title("eGPU & Enclosures").child(
-                        S.documentTypeList("product").title("eGPU & Enclosures").filter(DEEP_FILTER("egpu-enclosures")),
-                      ),
-                    ]),
+                  S.list().title("Computers").items([
+                    S.listItem().title("Gaming Laptops").child(S.documentTypeList("product").title("Gaming Laptops").filter(DEEP_FILTER("gaming-laptops"))),
+                    S.listItem().title("Regular Laptops").child(S.documentTypeList("product").title("Regular Laptops").filter(DEEP_FILTER("regular-laptops"))),
+                    S.listItem().title("MacBooks").child(S.documentTypeList("product").title("MacBooks").filter(DEEP_FILTER("macbook"))),
+                    S.listItem().title("SFF Computers").child(S.documentTypeList("product").title("SFF Computers").filter(DEEP_FILTER("sff-computers"))),
+                    S.listItem().title("Custom PCs").child(S.documentTypeList("product").title("Custom PCs").filter(DEEP_FILTER("custom-pcs"))),
+                    S.listItem().title("eGPU & Enclosures").child(S.documentTypeList("product").title("eGPU & Enclosures").filter(DEEP_FILTER("egpu-enclosures"))),
+                  ]),
                 ),
 
-              // ── Accessories ───────────────────────────────────
               S.listItem()
                 .title("Accessories")
                 .child(
-                  S.list()
-                    .title("Accessories")
-                    .items([
-                      S.listItem().title("Headsets").child(
-                        S.documentTypeList("product").title("Headsets").filter(DEEP_FILTER("headsets")),
-                      ),
-                      S.listItem().title("Keyboards").child(
-                        S.documentTypeList("product").title("Keyboards").filter(DEEP_FILTER("keyboards")),
-                      ),
-                      S.listItem().title("Mice").child(
-                        S.documentTypeList("product").title("Mice").filter(DEEP_FILTER("mice")),
-                      ),
-                      S.listItem().title("Webcams").child(
-                        S.documentTypeList("product").title("Webcams").filter(DEEP_FILTER("cameras-webcam")),
-                      ),
-                    ]),
+                  S.list().title("Accessories").items([
+                    S.listItem().title("Headsets").child(S.documentTypeList("product").title("Headsets").filter(DEEP_FILTER("headsets"))),
+                    S.listItem().title("Keyboards").child(S.documentTypeList("product").title("Keyboards").filter(DEEP_FILTER("keyboards"))),
+                    S.listItem().title("Mice").child(S.documentTypeList("product").title("Mice").filter(DEEP_FILTER("mice"))),
+                    S.listItem().title("Webcams").child(S.documentTypeList("product").title("Webcams").filter(DEEP_FILTER("cameras-webcam"))),
+                  ]),
                 ),
 
-              // ── Tech Setup Gears ──────────────────────────────
               S.listItem()
                 .title("Tech Setup Gears")
                 .child(
-                  S.list()
-                    .title("Tech Setup Gears")
-                    .items([
-                      S.listItem().title("Gaming Chairs").child(
-                        S.documentTypeList("product").title("Gaming Chairs").filter(DEEP_FILTER("gaming-chairs")),
-                      ),
-                      S.listItem().title("Ergonomic Chairs").child(
-                        S.documentTypeList("product").title("Ergonomic Chairs").filter(DEEP_FILTER("ergonomic-chairs")),
-                      ),
-                      S.listItem().title("Tables & Desks").child(
-                        S.documentTypeList("product").title("Tables & Desks").filter(DEEP_FILTER("tables-desks")),
-                      ),
-                    ]),
+                  S.list().title("Tech Setup Gears").items([
+                    S.listItem().title("Gaming Chairs").child(S.documentTypeList("product").title("Gaming Chairs").filter(DEEP_FILTER("gaming-chairs"))),
+                    S.listItem().title("Ergonomic Chairs").child(S.documentTypeList("product").title("Ergonomic Chairs").filter(DEEP_FILTER("ergonomic-chairs"))),
+                    S.listItem().title("Tables & Desks").child(S.documentTypeList("product").title("Tables & Desks").filter(DEEP_FILTER("tables-desks"))),
+                  ]),
                 ),
 
               S.divider(),
 
-              // ── Monitors ─────────────────────────────────────
               S.listItem()
                 .title("Monitors")
                 .child(
-                  S.list()
-                    .title("Monitors")
-                    .items([
-                      S.listItem().title("Professional Monitors").child(
-                        S.documentTypeList("product").title("Professional Monitors").filter(DEEP_FILTER("monitors-professional")),
-                      ),
-                      S.listItem().title("Gaming Monitors").child(
-                        S.documentTypeList("product").title("Gaming Monitors").filter(DEEP_FILTER("monitors-gaming")),
-                      ),
-                    ]),
+                  S.list().title("Monitors").items([
+                    S.listItem().title("Professional Monitors").child(S.documentTypeList("product").title("Professional Monitors").filter(DEEP_FILTER("monitors-professional"))),
+                    S.listItem().title("Gaming Monitors").child(S.documentTypeList("product").title("Gaming Monitors").filter(DEEP_FILTER("monitors-gaming"))),
+                  ]),
                 ),
 
               S.divider(),
 
-              // ── Content Creation ──────────────────────────────
               S.listItem()
                 .title("Content Creation Tools")
                 .child(
-                  S.list()
-                    .title("Content Creation Tools")
-                    .items([
-                      S.listItem().title("Cameras").child(
-                        S.documentTypeList("product").title("Cameras").filter(DEEP_FILTER("cameras")),
-                      ),
-                      S.listItem().title("Microphones").child(
-                        S.documentTypeList("product").title("Microphones").filter(DEEP_FILTER("microphones")),
-                      ),
-                      S.listItem().title("Lighting").child(
-                        S.documentTypeList("product").title("Lighting").filter(DEEP_FILTER("lighting")),
-                      ),
-                      S.listItem().title("Stabilization & Mounts").child(
-                        S.documentTypeList("product").title("Stabilization & Mounts").filter(DEEP_FILTER("stabilization-mounts")),
-                      ),
-                      S.listItem().title("Aerials & Drones").child(
-                        S.documentTypeList("product").title("Aerials & Drones").filter(DEEP_FILTER("aerials-drones")),
-                      ),
-                      S.listItem().title("Smart Wearables").child(
-                        S.documentTypeList("product").title("Smart Wearables").filter(DEEP_FILTER("smart-wearables")),
-                      ),
-                    ]),
+                  S.list().title("Content Creation Tools").items([
+                    S.listItem().title("Cameras").child(S.documentTypeList("product").title("Cameras").filter(DEEP_FILTER("cameras"))),
+                    S.listItem().title("Microphones").child(S.documentTypeList("product").title("Microphones").filter(DEEP_FILTER("microphones"))),
+                    S.listItem().title("Lighting").child(S.documentTypeList("product").title("Lighting").filter(DEEP_FILTER("lighting"))),
+                    S.listItem().title("Stabilization & Mounts").child(S.documentTypeList("product").title("Stabilization & Mounts").filter(DEEP_FILTER("stabilization-mounts"))),
+                    S.listItem().title("Aerials & Drones").child(S.documentTypeList("product").title("Aerials & Drones").filter(DEEP_FILTER("aerials-drones"))),
+                    S.listItem().title("Smart Wearables").child(S.documentTypeList("product").title("Smart Wearables").filter(DEEP_FILTER("smart-wearables"))),
+                  ]),
                 ),
 
               S.divider(),
 
-              S.listItem().title("EcoFlow").child(
-                S.documentTypeList("product").title("EcoFlow").filter(DEEP_FILTER("ecoflow")),
-              ),
-              S.listItem().title("Starlink").child(
-                S.documentTypeList("product").title("Starlink").filter(DEEP_FILTER("starlink")),
-              ),
+              S.listItem().title("EcoFlow").child(S.documentTypeList("product").title("EcoFlow").filter(DEEP_FILTER("ecoflow"))),
+              S.listItem().title("Starlink").child(S.documentTypeList("product").title("Starlink").filter(DEEP_FILTER("starlink"))),
 
               S.divider(),
 
-              // ── Acasis ────────────────────────────────────────
               S.listItem()
                 .title("Acasis")
                 .child(
-                  S.list()
-                    .title("Acasis")
-                    .items([
-                      S.listItem().title("Enclosures").child(
-                        S.documentTypeList("product").title("Enclosures").filter(DEEP_FILTER("acasis-enclosures")),
-                      ),
-                      S.listItem().title("Docking Stations").child(
-                        S.documentTypeList("product").title("Docking Stations").filter(DEEP_FILTER("acasis-docks")),
-                      ),
-                      S.listItem().title("USB Hubs").child(
-                        S.documentTypeList("product").title("USB Hubs").filter(DEEP_FILTER("acasis-hubs")),
-                      ),
-                      S.listItem().title("Cables & Adapters").child(
-                        S.documentTypeList("product").title("Cables & Adapters").filter(DEEP_FILTER("acasis-cables")),
-                      ),
-                      S.listItem().title("Capture Cards").child(
-                        S.documentTypeList("product").title("Capture Cards").filter(DEEP_FILTER("acasis-capture-cards")),
-                      ),
-                      S.listItem().title("Spare Parts & Accessories").child(
-                        S.documentTypeList("product").title("Spare Parts & Accessories").filter(DEEP_FILTER("acasis-spare-parts")),
-                      ),
-                    ]),
+                  S.list().title("Acasis").items([
+                    S.listItem().title("Enclosures").child(S.documentTypeList("product").title("Enclosures").filter(DEEP_FILTER("acasis-enclosures"))),
+                    S.listItem().title("Docking Stations").child(S.documentTypeList("product").title("Docking Stations").filter(DEEP_FILTER("acasis-docks"))),
+                    S.listItem().title("USB Hubs").child(S.documentTypeList("product").title("USB Hubs").filter(DEEP_FILTER("acasis-hubs"))),
+                    S.listItem().title("Cables & Adapters").child(S.documentTypeList("product").title("Cables & Adapters").filter(DEEP_FILTER("acasis-cables"))),
+                    S.listItem().title("Capture Cards").child(S.documentTypeList("product").title("Capture Cards").filter(DEEP_FILTER("acasis-capture-cards"))),
+                    S.listItem().title("Spare Parts & Accessories").child(S.documentTypeList("product").title("Spare Parts & Accessories").filter(DEEP_FILTER("acasis-spare-parts"))),
+                  ]),
                 ),
 
               S.divider(),
@@ -213,4 +137,37 @@ export const structure: StructureResolver = (S) =>
 
       S.listItem().title("Orders").child(S.documentTypeList("order").title("Orders")),
       S.listItem().title("Customers").child(S.documentTypeList("customer").title("Customers")),
+
+      S.divider(),
+
+      // ── Negotiations ─────────────────────────────────────────────────
+      S.listItem()
+        .title("🤝 Negotiations")
+        .child(
+          S.list().title("Negotiations").items([
+            S.listItem().title("All Sessions").child(
+              S.documentTypeList("negotiationSession").title("All Sessions"),
+            ),
+            S.listItem().title("🔔 Needs Attention").child(
+              S.documentTypeList("negotiationSession")
+                .title("Needs Attention")
+                .filter('_type == "negotiationSession" && closeBidAlert == true && status == "ai_active"'),
+            ),
+            S.listItem().title("👤 Owner Active").child(
+              S.documentTypeList("negotiationSession")
+                .title("Owner Active")
+                .filter('_type == "negotiationSession" && status == "owner_active"'),
+            ),
+            S.listItem().title("🤝 Deals Struck").child(
+              S.documentTypeList("negotiationSession")
+                .title("Deals Struck")
+                .filter('_type == "negotiationSession" && status == "deal_struck"'),
+            ),
+            S.listItem().title("❌ Closed").child(
+              S.documentTypeList("negotiationSession")
+                .title("Closed")
+                .filter('_type == "negotiationSession" && status == "closed"'),
+            ),
+          ]),
+        ),
     ]);

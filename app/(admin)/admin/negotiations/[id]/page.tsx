@@ -5,14 +5,12 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft, HandshakeIcon, User, Bot, Send,
-  Loader2, CheckCircle, XCircle, Bell, RefreshCw,
-  Zap,
+  Loader2, CheckCircle, XCircle, Bell, RefreshCw, Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-// ── Types ──────────────────────────────────────────────────────────────────
 interface Message {
   role: string;
   content: string;
@@ -46,7 +44,6 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-// ── Page ───────────────────────────────────────────────────────────────────
 export default function NegotiationSessionPage() {
   const params = useParams();
   const router = useRouter();
@@ -59,6 +56,8 @@ export default function NegotiationSessionPage() {
   const [takingOver, setTakingOver] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const typingHeartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const isTypingRef = useRef(false);
 
   const fetchSession = useCallback(async () => {
     try {
@@ -76,7 +75,6 @@ export default function NegotiationSessionPage() {
 
   useEffect(() => {
     fetchSession();
-    // Poll every 5 seconds for new messages when owner is watching
     const interval = setInterval(fetchSession, 5_000);
     return () => clearInterval(interval);
   }, [fetchSession]);
@@ -85,12 +83,57 @@ export default function NegotiationSessionPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [session?.messages]);
 
+  // ── Typing indicator heartbeat ────────────────────────────────────────
+  // When owner is typing, send a heartbeat every 2s so the customer sees it.
+  // When owner stops typing, clear the indicator.
+  const sendTypingSignal = useCallback(async (typing: boolean) => {
+    try {
+      await fetch("/api/negotiate/typing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId, isTyping: typing }),
+      });
+    } catch {}
+  }, [sessionId]);
+
+  const handleOwnerInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setOwnerInput(e.target.value);
+
+    if (e.target.value.trim()) {
+      // Start typing heartbeat if not already running
+      if (!isTypingRef.current) {
+        isTypingRef.current = true;
+        sendTypingSignal(true);
+        typingHeartbeatRef.current = setInterval(() => {
+          sendTypingSignal(true);
+        }, 2_000);
+      }
+    } else {
+      // Input cleared — stop typing
+      stopTyping();
+    }
+  };
+
+  const stopTyping = useCallback(() => {
+    if (isTypingRef.current) {
+      isTypingRef.current = false;
+      if (typingHeartbeatRef.current) {
+        clearInterval(typingHeartbeatRef.current);
+        typingHeartbeatRef.current = null;
+      }
+      sendTypingSignal(false);
+    }
+  }, [sendTypingSignal]);
+
+  // Clean up typing signal on unmount
+  useEffect(() => {
+    return () => stopTyping();
+  }, [stopTyping]);
+
   async function handleTakeover() {
     setTakingOver(true);
     try {
-      const res = await fetch(`/api/admin/negotiations/${sessionId}/takeover`, {
-        method: "POST",
-      });
+      const res = await fetch(`/api/admin/negotiations/${sessionId}/takeover`, { method: "POST" });
       if (res.ok) {
         toast.success("You've taken over this negotiation. The AI is now silent.");
         await fetchSession();
@@ -107,9 +150,7 @@ export default function NegotiationSessionPage() {
 
   async function handleHandBack() {
     try {
-      const res = await fetch(`/api/admin/negotiations/${sessionId}/handback`, {
-        method: "POST",
-      });
+      const res = await fetch(`/api/admin/negotiations/${sessionId}/handback`, { method: "POST" });
       if (res.ok) {
         toast.success("AI is back in control.");
         await fetchSession();
@@ -122,6 +163,7 @@ export default function NegotiationSessionPage() {
   async function sendOwnerMessage() {
     const text = ownerInput.trim();
     if (!text || sending) return;
+    stopTyping(); // clear typing indicator immediately on send
     setSending(true);
     setOwnerInput("");
     try {
@@ -182,13 +224,10 @@ export default function NegotiationSessionPage() {
 
   const isOwnerActive = session.status === "owner_active";
   const isClosed = session.status === "deal_struck" || session.status === "closed";
-  const savings = session.agreedPrice
-    ? session.listedPrice - session.agreedPrice
-    : null;
+  const savings = session.agreedPrice ? session.listedPrice - session.agreedPrice : null;
 
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
-      {/* Back */}
       <Link
         href="/admin/negotiations"
         className="inline-flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
@@ -214,9 +253,7 @@ export default function NegotiationSessionPage() {
                 </span>
               </div>
             )}
-            <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
-              {session.productName}
-            </h1>
+            <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{session.productName}</h1>
             <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-500 dark:text-zinc-400">
               <span>Listed <strong className="text-zinc-900 dark:text-zinc-100">₦{session.listedPrice?.toLocaleString()}</strong></span>
               <span>Floor <strong className="text-zinc-900 dark:text-zinc-100">₦{session.floorPrice?.toLocaleString()}</strong></span>
@@ -226,68 +263,43 @@ export default function NegotiationSessionPage() {
               {session.agreedPrice && (
                 <span>Agreed <strong className="text-green-600 dark:text-green-400">₦{session.agreedPrice.toLocaleString()}</strong></span>
               )}
-              {savings && savings > 0 && (
-                <span>You gave ₦{savings.toLocaleString()} discount</span>
-              )}
+              {savings && savings > 0 && <span>You gave ₦{savings.toLocaleString()} discount</span>}
             </div>
             <p className="mt-1 text-xs text-zinc-400">
               Started {timeAgo(session.startedAt)} · {session.messages?.length ?? 0} messages
             </p>
           </div>
 
-          {/* Action buttons */}
           <div className="flex gap-2 flex-wrap shrink-0">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={fetchSession}
-              className="gap-1.5"
-            >
-              <RefreshCw className="h-3.5 w-3.5" />
-              Refresh
+            <Button variant="outline" size="sm" onClick={fetchSession} className="gap-1.5">
+              <RefreshCw className="h-3.5 w-3.5" /> Refresh
             </Button>
-
             {session.status === "ai_active" && (
               <Button
-                size="sm"
-                onClick={handleTakeover}
-                disabled={takingOver}
+                size="sm" onClick={handleTakeover} disabled={takingOver}
                 className="gap-1.5 bg-amber-500 text-zinc-950 hover:bg-amber-400 font-bold"
               >
                 {takingOver
                   ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Taking over…</>
-                  : <><User className="h-3.5 w-3.5" /> Take Over</>
-                }
+                  : <><User className="h-3.5 w-3.5" /> Take Over</>}
               </Button>
             )}
-
             {isOwnerActive && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleHandBack}
-                className="gap-1.5"
-              >
-                <Bot className="h-3.5 w-3.5" />
-                Hand Back to AI
+              <Button size="sm" variant="outline" onClick={handleHandBack} className="gap-1.5">
+                <Bot className="h-3.5 w-3.5" /> Hand Back to AI
               </Button>
             )}
-
             {!isClosed && (
               <Button
-                size="sm"
-                variant="outline"
-                onClick={closeSession}
+                size="sm" variant="outline" onClick={closeSession}
                 className="gap-1.5 text-zinc-500 hover:text-red-600 hover:border-red-300"
               >
-                <XCircle className="h-3.5 w-3.5" />
-                Close Session
+                <XCircle className="h-3.5 w-3.5" /> Close Session
               </Button>
             )}
           </div>
         </div>
 
-        {/* Status pill */}
         <div className="mt-3 flex items-center gap-2">
           <span className={cn(
             "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold",
@@ -302,8 +314,7 @@ export default function NegotiationSessionPage() {
             {session.status === "closed"       && <><XCircle className="h-3 w-3" /> Closed</>}
           </span>
           <Link
-            href={`/products/${session.productSlug}`}
-            target="_blank"
+            href={`/products/${session.productSlug}`} target="_blank"
             className="text-xs text-zinc-400 hover:text-amber-600 dark:hover:text-amber-400 underline underline-offset-2 transition-colors"
           >
             View product →
@@ -326,7 +337,6 @@ export default function NegotiationSessionPage() {
               const isCustomer = msg.sender === "customer";
               const isOwner    = msg.sender === "owner";
               const isAI       = msg.sender === "ai";
-
               return (
                 <div key={i} className={cn("flex", isCustomer ? "justify-end" : "justify-start")}>
                   <div className={cn(
@@ -335,7 +345,6 @@ export default function NegotiationSessionPage() {
                     isAI       && "bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 rounded-bl-sm",
                     isOwner    && "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-bl-sm",
                   )}>
-                    {/* Sender label for non-customer */}
                     {!isCustomer && (
                       <p className={cn(
                         "text-[10px] font-semibold mb-1 uppercase tracking-wide",
@@ -346,13 +355,8 @@ export default function NegotiationSessionPage() {
                       </p>
                     )}
                     {msg.content}
-                    <p className={cn(
-                      "text-[10px] mt-1 opacity-60",
-                      isCustomer ? "text-right" : "text-left"
-                    )}>
-                      {new Date(msg.timestamp).toLocaleTimeString("en-NG", {
-                        hour: "2-digit", minute: "2-digit"
-                      })}
+                    <p className={cn("text-[10px] mt-1 opacity-60", isCustomer ? "text-right" : "text-left")}>
+                      {new Date(msg.timestamp).toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit" })}
                     </p>
                   </div>
                 </div>
@@ -362,7 +366,6 @@ export default function NegotiationSessionPage() {
           <div ref={bottomRef} />
         </div>
 
-        {/* Owner message input — only when owner_active */}
         {isOwnerActive && (
           <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3">
             <div className="mb-2 flex items-center gap-2">
@@ -375,8 +378,9 @@ export default function NegotiationSessionPage() {
               <textarea
                 ref={inputRef}
                 value={ownerInput}
-                onChange={(e) => setOwnerInput(e.target.value)}
+                onChange={handleOwnerInputChange}
                 onKeyDown={handleKeyDown}
+                onBlur={stopTyping}
                 placeholder="Type your message to the customer…"
                 rows={2}
                 disabled={sending}
@@ -393,13 +397,10 @@ export default function NegotiationSessionPage() {
                 }
               </button>
             </div>
-            <p className="text-[10px] text-zinc-400 mt-1.5">
-              Enter to send · Shift+Enter for new line
-            </p>
+            <p className="text-[10px] text-zinc-400 mt-1.5">Enter to send · Shift+Enter for new line</p>
           </div>
         )}
 
-        {/* Deal struck banner */}
         {session.status === "deal_struck" && session.agreedPrice && (
           <div className="border-t border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/30 px-5 py-4 flex items-center gap-3">
             <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 shrink-0" />
