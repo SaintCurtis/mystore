@@ -50,8 +50,15 @@ function loadSession(slug: string): StoredSession | null {
   try {
     const raw = localStorage.getItem(storageKey(slug));
     if (!raw) return null;
-    return JSON.parse(raw) as StoredSession;
+    const parsed = JSON.parse(raw) as StoredSession;
+    // Reject corrupted sessions — bad sessionId causes 400s on /api/negotiate
+    if (!parsed.sessionId || typeof parsed.sessionId !== "string") {
+      localStorage.removeItem(storageKey(slug));
+      return null;
+    }
+    return parsed;
   } catch {
+    localStorage.removeItem(storageKey(slug));
     return null;
   }
 }
