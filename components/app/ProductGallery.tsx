@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon, MagnifyingGlassPlusIcon } from "@heroicons/react/24/outline";
 import type { PRODUCT_BY_SLUG_QUERY_RESULT } from "@/sanity.types";
 
 type ProductImages = NonNullable<
@@ -15,18 +15,34 @@ interface ProductGalleryProps {
   productName: string | null;
 }
 
+// ── Animation state machine ───────────────────────────────────────────────
+// FIX: The original implementation had a race condition where slideDir was
+// set and immediately read by getTransform() in the same render cycle,
+// causing inconsistent animation directions and "stuck" states.
+//
+// New approach: we track the DISPLAYED index separately from the TARGET index.
+// Transitions are:
+//  idle → entering (new image slides in from side, old slides out)
+//  entering → idle (transition complete, new image fully visible)
+//
+// The key insight: we always keep both the current and next image in the DOM
+// during the transition, absolutely positioned, and CSS transitions handle
+// the movement. No setTimeout race conditions.
+
+type AnimState = "idle" | "entering";
+
 export function ProductGallery({ images, productName }: ProductGalleryProps) {
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [current, setCurrent] = useState(0);
+  const [next, setNext] = useState<number | null>(null);
+  const [animState, setAnimState] = useState<AnimState>("idle");
+  const [enterFrom, setEnterFrom] = useState<"left" | "right">("right");
 
-  // ── Drag/swipe animation state ──────────────────────────────────────────
-  const [dragX, setDragX] = useState(0);           // live offset while dragging
-  const [isAnimating, setIsAnimating] = useState(false); // true during snap
-  const [slideDir, setSlideDir] = useState<"left" | "right" | null>(null);
-
+  // Touch/drag state
+  const [dragX, setDragX] = useState(0);
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
-  const isDragging = useRef(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const isDraggingHoriz = useRef(false);
+  const transitionLock = useRef(false);
 
   if (!images || images.length === 0) {
     return (
@@ -37,54 +53,74 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
   }
 
   const total = images.length;
-  const selectedImage = images[selectedIndex];
 
-  function goTo(index: number, direction: "left" | "right") {
-    if (isAnimating) return;
-    const next = (index + total) % total;
-    setSlideDir(direction);
-    setIsAnimating(true);
+  // ── Navigate to index ─────────────────────────────────────────────────
+  const goTo = useCallback((targetIndex: number, direction: "left" | "right") => {
+    if (transitionLock.current || total <= 1) return;
+    const safeTarget = ((targetIndex % total) + total) % total;
+    if (safeTarget === current) return;
+
+    transitionLock.current = true;
+    setEnterFrom(direction);
+    setNext(safeTarget);
+    setAnimState("entering");
     setDragX(0);
-    setTimeout(() => {
-      setSelectedIndex(next);
-      setSlideDir(null);
-      setIsAnimating(false);
-    }, 280);
-  }
+  }, [current, total]);
 
-  function prev() { goTo(selectedIndex - 1, "right"); }
-  function next() { goTo(selectedIndex + 1, "left"); }
+  const prev = useCallback(() => goTo(current - 1, "right"), [current, goTo]);
+  const nextSlide = useCallback(() => goTo(current + 1, "left"), [current, goTo]);
 
-  function goToIndex(index: number) {
-    if (index === selectedIndex || isAnimating) return;
-    goTo(index, index > selectedIndex ? "left" : "right");
-  }
+  const goToIndex = useCallback((index: number) => {
+    if (index === current) return;
+    goTo(index, index > current ? "left" : "right");
+  }, [current, goTo]);
 
-  // ── Touch handlers ───────────────────────────────────────────────────────
+  // When transition ends, promote next → current
+  const handleTransitionEnd = useCallback(() => {
+    if (next !== null) {
+      setCurrent(next);
+      setNext(null);
+      setAnimState("idle");
+      transitionLock.current = false;
+    }
+  }, [next]);
+
+  // Safety timeout — if transitionend doesn't fire (e.g. reduced-motion), unlock anyway
+  useEffect(() => {
+    if (animState === "entering") {
+      const t = setTimeout(() => {
+        if (transitionLock.current) {
+          handleTransitionEnd();
+        }
+      }, 400);
+      return () => clearTimeout(t);
+    }
+  }, [animState, handleTransitionEnd]);
+
+  // ── Touch handlers ────────────────────────────────────────────────────
   function handleTouchStart(e: React.TouchEvent) {
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
-    isDragging.current = false;
+    isDraggingHoriz.current = false;
   }
 
   function handleTouchMove(e: React.TouchEvent) {
+    if (transitionLock.current) return;
     if (touchStartX.current === null || touchStartY.current === null) return;
     const dx = e.touches[0].clientX - touchStartX.current;
     const dy = e.touches[0].clientY - touchStartY.current;
 
-    if (!isDragging.current) {
+    if (!isDraggingHoriz.current) {
       if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) {
-        isDragging.current = true;
+        isDraggingHoriz.current = true;
       } else if (Math.abs(dy) > 10) {
-        // vertical scroll — don't hijack
-        return;
+        return; // vertical scroll — don't intercept
       }
     }
 
-    if (isDragging.current) {
+    if (isDraggingHoriz.current) {
       e.preventDefault();
-      // Rubber-band resistance at edges
-      const resistance = total === 1 ? 0.1 : 0.85;
+      const resistance = total === 1 ? 0.05 : 0.8;
       setDragX(dx * resistance);
     }
   }
@@ -93,70 +129,78 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
     if (touchStartX.current === null) return;
     const dx = e.changedTouches[0].clientX - touchStartX.current;
 
-    if (isDragging.current && Math.abs(dx) > 50) {
-      // Committed swipe
-      if (dx < 0) next();
-      else prev();
-    } else {
-      // Snap back with spring
-      setIsAnimating(true);
-      setDragX(0);
-      setTimeout(() => setIsAnimating(false), 300);
+    if (isDraggingHoriz.current) {
+      if (Math.abs(dx) > 60) {
+        if (dx < 0) nextSlide();
+        else prev();
+      } else {
+        // Snap back
+        setDragX(0);
+      }
     }
 
     touchStartX.current = null;
     touchStartY.current = null;
-    isDragging.current = false;
+    isDraggingHoriz.current = false;
+    if (animState === "idle") setDragX(0);
   }
 
-  // ── Slide animation transform ─────────────────────────────────────────
-  // During drag: follow finger
-  // During slide: animate out/in
-  function getTransform() {
-    if (dragX !== 0 && !isAnimating) {
-      return `translateX(${dragX}px)`;
+  // ── Slide positions ───────────────────────────────────────────────────
+  // Current image: slides OUT in the direction we're going
+  // Next image: slides IN from the opposite side
+  function getCurrentTransform() {
+    if (animState === "idle") {
+      return dragX !== 0 ? `translateX(${dragX}px)` : "translateX(0)";
     }
-    if (isAnimating && slideDir === "left") {
-      return `translateX(-100%)`;
-    }
-    if (isAnimating && slideDir === "right") {
-      return `translateX(100%)`;
-    }
-    return `translateX(0px)`;
+    // Slide out
+    return enterFrom === "left" ? "translateX(-100%)" : "translateX(100%)";
   }
 
-  function getTransition() {
-    if (dragX !== 0 && !isAnimating) return "none"; // live drag — no transition
-    return "transform 280ms cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+  function getNextTransform() {
+    if (animState === "idle") return "translateX(0)";
+    // Start position (before animation), then animate to 0
+    // CSS transition will move it from its start to 0
+    return "translateX(0)";
   }
+
+  function getNextInitialTransform() {
+    // Where the next image starts (off-screen)
+    return enterFrom === "left" ? "translateX(100%)" : "translateX(-100%)";
+  }
+
+  const transition = animState === "entering"
+    ? "transform 280ms cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+    : dragX !== 0 ? "none" : "transform 200ms ease-out";
+
+  const displayedImage = images[current];
+  const nextImage = next !== null ? images[next] : null;
 
   return (
     <div className="space-y-3">
-
       {/* ── Main image frame ─────────────────────────────────────────────── */}
       <div className="group relative">
         <div className="relative overflow-hidden rounded-2xl border-2 border-zinc-200 dark:border-[#1f1f1f] bg-white dark:bg-[#0d0d0d] shadow-md shadow-zinc-200/60 dark:shadow-black/40">
 
-          {/* Aspect ratio container — clips the sliding images */}
           <div
-            ref={containerRef}
             className="relative aspect-square select-none overflow-hidden cursor-grab active:cursor-grabbing"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            {/* Sliding image wrapper */}
+            {/* Current image */}
             <div
-              style={{
-                transform: getTransform(),
-                transition: getTransition(),
-                willChange: "transform",
-              }}
               className="absolute inset-0"
+              style={{
+                transform: getCurrentTransform(),
+                transition,
+                willChange: "transform",
+                zIndex: 1,
+              }}
+              onTransitionEnd={animState === "entering" ? handleTransitionEnd : undefined}
             >
-              {selectedImage?.asset?.url ? (
+              {displayedImage?.asset?.url ? (
                 <Image
-                  src={selectedImage.asset.url}
+                  src={displayedImage.asset.url}
                   alt={productName ?? "Product image"}
                   fill
                   className="object-contain p-4"
@@ -165,57 +209,38 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                   draggable={false}
                 />
               ) : (
-                <div className="flex h-full items-center justify-center text-zinc-400 text-sm">
-                  No image
-                </div>
+                <div className="flex h-full items-center justify-center text-zinc-400 text-sm">No image</div>
               )}
             </div>
 
-            {/* Peek of next image during drag — right side */}
-            {dragX < -20 && selectedIndex < total - 1 && (
+            {/* Next image (only during transition) */}
+            {animState === "entering" && nextImage && (
               <div
+                className="absolute inset-0"
                 style={{
-                  transform: `translateX(calc(100% + ${dragX}px))`,
-                  transition: "none",
+                  // Starts off-screen, transitions to center
+                  transform: "translateX(0)",
+                  transition,
+                  willChange: "transform",
+                  zIndex: 2,
+                  // Use CSS animation to enter from the correct side
+                  animation: `slideIn${enterFrom === "left" ? "FromRight" : "FromLeft"} 280ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`,
                 }}
-                className="absolute inset-0 opacity-60"
               >
-                {images[selectedIndex + 1]?.asset?.url && (
+                {nextImage.asset?.url && (
                   <Image
-                    src={images[selectedIndex + 1].asset!.url!}
-                    alt="Next"
+                    src={nextImage.asset.url}
+                    alt="Next product view"
                     fill
                     className="object-contain p-4"
-                    sizes="50vw"
+                    sizes="(max-width: 1024px) 100vw, 50vw"
                     draggable={false}
                   />
                 )}
               </div>
             )}
 
-            {/* Peek of prev image during drag — left side */}
-            {dragX > 20 && selectedIndex > 0 && (
-              <div
-                style={{
-                  transform: `translateX(calc(-100% + ${dragX}px))`,
-                  transition: "none",
-                }}
-                className="absolute inset-0 opacity-60"
-              >
-                {images[selectedIndex - 1]?.asset?.url && (
-                  <Image
-                    src={images[selectedIndex - 1].asset!.url!}
-                    alt="Previous"
-                    fill
-                    className="object-contain p-4"
-                    sizes="50vw"
-                    draggable={false}
-                  />
-                )}
-              </div>
-            )}
-
-            {/* Arrow buttons — desktop hover */}
+            {/* Arrow buttons */}
             {total > 1 && (
               <>
                 <button
@@ -224,51 +249,49 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                   className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 dark:bg-[#111111]/90 border border-zinc-200 dark:border-[#2a2a2a] shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-white dark:hover:bg-[#1a1a1a] z-10"
                   aria-label="Previous image"
                 >
-                  <ChevronLeft className="h-4 w-4 text-zinc-700 dark:text-zinc-300" />
+                  <ChevronLeftIcon className="h-4 w-4 text-zinc-700 dark:text-zinc-300" />
                 </button>
                 <button
                   type="button"
-                  onClick={next}
+                  onClick={nextSlide}
                   className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 dark:bg-[#111111]/90 border border-zinc-200 dark:border-[#2a2a2a] shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-white dark:hover:bg-[#1a1a1a] z-10"
                   aria-label="Next image"
                 >
-                  <ChevronRight className="h-4 w-4 text-zinc-700 dark:text-zinc-300" />
+                  <ChevronRightIcon className="h-4 w-4 text-zinc-700 dark:text-zinc-300" />
                 </button>
               </>
             )}
 
-            {/* Counter badge */}
+            {/* Counter */}
             {total > 1 && (
               <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-black/50 px-2.5 py-1 backdrop-blur-sm z-10">
                 <span className="text-[11px] font-semibold text-white">
-                  {selectedIndex + 1} / {total}
+                  {current + 1} / {total}
                 </span>
               </div>
             )}
 
-            {/* Swipe hint — mobile only, fades after first swipe */}
-            {total > 1 && dragX === 0 && !isAnimating && selectedIndex === 0 && (
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 sm:hidden flex items-center gap-1.5 rounded-full bg-black/40 px-3 py-1 backdrop-blur-sm animate-pulse">
+            {/* Swipe hint — mobile only */}
+            {total > 1 && dragX === 0 && animState === "idle" && current === 0 && (
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 sm:hidden flex items-center gap-1.5 rounded-full bg-black/40 px-3 py-1 backdrop-blur-sm animate-pulse pointer-events-none">
                 <span className="text-[10px] text-white/90 font-medium">← swipe →</span>
               </div>
             )}
 
             {/* Zoom hint — desktop */}
-            <div className="absolute bottom-3 left-3 hidden sm:flex items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <ZoomIn className="h-3 w-3 text-white/80" />
+            <div className="absolute bottom-3 left-3 hidden sm:flex items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+              <MagnifyingGlassPlusIcon className="h-3 w-3 text-white/80" />
               <span className="text-[10px] text-white/80 font-medium">Click to zoom</span>
             </div>
           </div>
 
-          {/* Amber accent line */}
           <div className="h-0.5 w-full bg-linear-to-r from-transparent via-amber-500/60 to-transparent" />
         </div>
 
-        {/* Outer glow ring */}
         <div className="pointer-events-none absolute -inset-px rounded-2xl ring-1 ring-amber-500/10" />
       </div>
 
-      {/* ── Dot indicators — mobile ──────────────────────────────────────── */}
+      {/* Dot indicators — mobile */}
       {total > 1 && (
         <div className="flex items-center justify-center gap-1.5 sm:hidden">
           {images.map((_, i) => (
@@ -278,7 +301,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
               onClick={() => goToIndex(i)}
               className={cn(
                 "rounded-full transition-all duration-300",
-                i === selectedIndex
+                i === current
                   ? "h-2 w-6 bg-amber-500"
                   : "h-2 w-2 bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400",
               )}
@@ -288,7 +311,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
         </div>
       )}
 
-      {/* ── Thumbnail strip — desktop ────────────────────────────────────── */}
+      {/* Thumbnail strip — desktop */}
       {total > 1 && (
         <div className="hidden sm:flex gap-2 overflow-x-auto scrollbar-hide pb-1">
           {images.map((image, index) => (
@@ -297,10 +320,10 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
               type="button"
               onClick={() => goToIndex(index)}
               aria-label={`View image ${index + 1}`}
-              aria-pressed={selectedIndex === index}
+              aria-pressed={current === index}
               className={cn(
                 "relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 transition-all duration-200",
-                selectedIndex === index
+                current === index
                   ? "border-amber-500 shadow-sm shadow-amber-500/20 scale-105"
                   : "border-zinc-200 dark:border-[#1f1f1f] hover:border-zinc-400 dark:hover:border-[#3a3a3a] opacity-70 hover:opacity-100",
               )}
@@ -316,7 +339,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
               ) : (
                 <div className="flex h-full items-center justify-center text-[10px] text-zinc-400">N/A</div>
               )}
-              {selectedIndex === index && (
+              {current === index && (
                 <div className="absolute inset-0 bg-amber-500/5 rounded-xl" />
               )}
             </button>
@@ -324,7 +347,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
         </div>
       )}
 
-      {/* ── Thumbnail strip — mobile ─────────────────────────────────────── */}
+      {/* Thumbnail strip — mobile */}
       {total > 1 && (
         <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 sm:hidden">
           {images.map((image, index) => (
@@ -335,7 +358,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
               aria-label={`View image ${index + 1}`}
               className={cn(
                 "relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border-2 transition-all duration-200",
-                selectedIndex === index
+                current === index
                   ? "border-amber-500 shadow-md shadow-amber-500/30 scale-105"
                   : "border-zinc-200 dark:border-[#1f1f1f] opacity-60 hover:opacity-100",
               )}
@@ -355,6 +378,18 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
           ))}
         </div>
       )}
+
+      {/* Keyframe animations for slide transitions */}
+      <style jsx global>{`
+        @keyframes slideInFromRight {
+          from { transform: translateX(100%); }
+          to   { transform: translateX(0); }
+        }
+        @keyframes slideInFromLeft {
+          from { transform: translateX(-100%); }
+          to   { transform: translateX(0); }
+        }
+      `}</style>
     </div>
   );
 }

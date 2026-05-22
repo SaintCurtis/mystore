@@ -1,7 +1,23 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { X, Send, Loader2, HandshakeIcon, BadgePercent, Zap } from "lucide-react";
+import {
+  XMarkIcon,
+  PaperAirplaneIcon,
+  TagIcon,
+  BoltIcon,
+  CheckBadgeIcon,
+} from "@heroicons/react/24/outline";
+import { ArrowPathIcon } from "@heroicons/react/24/solid";
+
+// Loader2 replacement — pure CSS spinner, no lucide needed
+function Spinner({ className }: { className?: string }) {
+  return (
+    <ArrowPathIcon
+      className={`animate-spin ${className ?? "w-4 h-4"}`}
+    />
+  );
+}
 import { useCurrency } from "@/lib/store/currency-store-provider";
 import { toast } from "sonner";
 
@@ -51,7 +67,6 @@ function loadSession(slug: string): StoredSession | null {
     const raw = localStorage.getItem(storageKey(slug));
     if (!raw) return null;
     const parsed = JSON.parse(raw) as StoredSession;
-    // Reject corrupted sessions — bad sessionId causes 400s on /api/negotiate
     if (!parsed.sessionId || typeof parsed.sessionId !== "string") {
       localStorage.removeItem(storageKey(slug));
       return null;
@@ -66,9 +81,7 @@ function loadSession(slug: string): StoredSession | null {
 function saveSession(slug: string, data: StoredSession) {
   try {
     localStorage.setItem(storageKey(slug), JSON.stringify(data));
-  } catch {
-    // localStorage full or unavailable — silent fail
-  }
+  } catch {}
 }
 
 function clearSession(slug: string) {
@@ -90,7 +103,6 @@ export function NegotiationChat({
     content: `Hi! I'm Segun from The Saint's TechNet. You're looking at the ${product.name}, listed at ${formatInCurrency(product.price)}. What price did you have in mind?`,
   };
 
-  // ── Restore from localStorage on mount ───────────────────────────────
   const stored = loadSession(product.slug);
 
   const [messages, setMessages] = useState<Message[]>(
@@ -105,25 +117,22 @@ export function NegotiationChat({
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  // Refs — never cause stale closures inside callbacks
   const sessionIdRef = useRef<string | null>(stored?.sessionId ?? null);
   const lastOwnerTimestampRef = useRef<string | null>(stored?.lastOwnerTimestamp ?? null);
   const ownerActiveRef = useRef(false);
   const dealStruckRef = useRef(false);
   const messagesRef = useRef<Message[]>(messages);
 
-  // Keep messagesRef in sync so we can persist without closure issues
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
 
-  // Persist session to localStorage whenever messages or sessionId change
   const persistSession = useCallback(() => {
     const sid = sessionIdRef.current;
     if (!sid) return;
     saveSession(product.slug, {
       sessionId: sid,
-      messages: messagesRef.current.filter((m) => !m.streaming), // never persist mid-stream
+      messages: messagesRef.current.filter((m) => !m.streaming),
       lastOwnerTimestamp: lastOwnerTimestampRef.current,
     });
   }, [product.slug]);
@@ -144,42 +153,53 @@ export function NegotiationChat({
     return () => abortRef.current?.abort();
   }, []);
 
-  // ── Poll owner messages + typing indicator every 3s ───────────────────
+  // ── Poll owner messages every 3s ──────────────────────────────────────
+  // FIX: Previously the status update (owner_active/ai_active) was used to
+  // block message sending but new owner messages weren't being fetched
+  // correctly when `after` was stale. Now we always fetch ALL owner messages
+  // newer than the last seen timestamp and correctly update ownerActiveRef.
   const pollOwnerMessages = useCallback(async () => {
     const sid = sessionIdRef.current;
     if (!sid || dealStruckRef.current) return;
 
     try {
-      // 1. Check owner messages
       const params = new URLSearchParams({ sessionId: sid });
       if (lastOwnerTimestampRef.current) {
         params.set("after", lastOwnerTimestampRef.current);
       }
       const res = await fetch(`/api/negotiate/owner-messages?${params}`);
-      if (res.ok) {
-        const data = await res.json();
+      if (!res.ok) return;
 
-        if (data.status === "owner_active") ownerActiveRef.current = true;
-        else if (data.status === "ai_active") ownerActiveRef.current = false;
+      const data = await res.json();
 
-        if (data.messages?.length > 0) {
-          const sorted = [...data.messages].sort(
-            (a: { timestamp: string }, b: { timestamp: string }) =>
-              new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-          );
-          setMessages((prev) => [
-            ...prev,
-            ...sorted.map((m: { content: string }) => ({
-              role: "assistant" as const,
-              content: m.content,
-              fromOwner: true,
-            })),
-          ]);
-          lastOwnerTimestampRef.current = sorted[sorted.length - 1].timestamp;
-        }
+      // Update owner-active flag from session status
+      if (data.status === "owner_active") {
+        ownerActiveRef.current = true;
+      } else if (data.status === "ai_active") {
+        ownerActiveRef.current = false;
       }
 
-      // 2. Check typing indicator (only when owner is active)
+      // Append any new owner messages to the chat
+      if (Array.isArray(data.messages) && data.messages.length > 0) {
+        const sorted = [...data.messages].sort(
+          (a: { timestamp: string }, b: { timestamp: string }) =>
+            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        );
+
+        setMessages((prev) => [
+          ...prev,
+          ...sorted.map((m: { content: string }) => ({
+            role: "assistant" as const,
+            content: m.content,
+            fromOwner: true,
+          })),
+        ]);
+
+        // Advance the timestamp cursor so we don't show duplicates
+        lastOwnerTimestampRef.current = sorted[sorted.length - 1].timestamp;
+      }
+
+      // Check typing indicator when owner is live
       if (ownerActiveRef.current) {
         const typingRes = await fetch(`/api/negotiate/typing?sessionId=${sid}`);
         if (typingRes.ok) {
@@ -190,32 +210,56 @@ export function NegotiationChat({
         setOwnerTyping(false);
       }
     } catch {
-      // Silent fail
+      // Silent fail — network blip, retry next tick
     }
   }, []);
 
-  // Start polling immediately on mount — safe before sessionId exists (exits early)
   useEffect(() => {
+    // Poll immediately on mount so restored sessions show new messages fast
+    pollOwnerMessages();
     const interval = setInterval(pollOwnerMessages, 3_000);
     return () => clearInterval(interval);
   }, [pollOwnerMessages]);
 
   // ── Send message ──────────────────────────────────────────────────────
+  // FIX (Critical): When owner is active the old code just appended the user
+  // message locally and returned. The message was NEVER sent to Sanity, so
+  // the admin chat never saw it. We now POST to /api/negotiate even when the
+  // owner is live, using the special `ownerActive: true` flag so the API
+  // records the customer message without invoking the AI.
   const sendMessage = async () => {
     const text = input.trim();
     if (!text || isStreaming || deal.struck) return;
 
+    const userMessage: Message = { role: "user", content: text };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+
+    // If owner is active: just record the customer's message — no AI stream
     if (ownerActiveRef.current) {
-      setMessages((prev) => [...prev, { role: "user", content: text }]);
-      setInput("");
+      const sid = sessionIdRef.current;
+      if (!sid) return;
+      try {
+        await fetch("/api/negotiate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            slug: product.slug,
+            sessionId: sid,
+            ownerActive: true, // signal: record only, no AI response
+            messages: [...messagesRef.current.filter((m) => !m.streaming), userMessage].map(
+              ({ role, content }) => ({ role, content })
+            ),
+          }),
+        });
+      } catch {
+        // Silent — message still shows locally
+      }
       return;
     }
 
-    const userMessage: Message = { role: "user", content: text };
+    // Normal AI negotiation flow
     const updatedMessages = [...messages, userMessage];
-
-    setMessages(updatedMessages);
-    setInput("");
     setIsStreaming(true);
     setMessages((prev) => [...prev, { role: "assistant", content: "", streaming: true }]);
 
@@ -279,7 +323,7 @@ export function NegotiationChat({
 
             if (parsed.deal && parsed.agreedPrice) {
               dealStruckRef.current = true;
-              clearSession(product.slug); // clear history on deal
+              clearSession(product.slug);
               setDeal({ struck: true, agreedPrice: parsed.agreedPrice, loading: false });
             }
           } catch {
@@ -356,14 +400,18 @@ export function NegotiationChat({
       <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-amber-500/15 flex items-center justify-center shrink-0">
-            <HandshakeIcon className="w-4 h-4 text-amber-500" />
+            <CheckBadgeIcon className="w-4 h-4 text-amber-500" />
           </div>
           <div>
             <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 leading-tight">
               Segun — The Saint's TechNet
             </p>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-tight">
-              {product.name}
+              {ownerActiveRef.current ? (
+                <span className="text-amber-500 font-medium">● Live — owner is here</span>
+              ) : (
+                product.name
+              )}
             </p>
           </div>
         </div>
@@ -378,14 +426,14 @@ export function NegotiationChat({
             className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             aria-label="Close negotiation"
           >
-            <X className="w-4 h-4" />
+            <XMarkIcon className="w-4 h-4" />
           </button>
         </div>
       </div>
 
       {/* ── Price summary strip ── */}
       <div className="flex items-center gap-2 px-4 py-2 bg-zinc-50 dark:bg-zinc-900/50 border-b border-zinc-200 dark:border-zinc-800 shrink-0">
-        <BadgePercent className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+        <TagIcon className="w-3.5 h-3.5 text-amber-500 shrink-0" />
         <p className="text-xs text-zinc-600 dark:text-zinc-400">
           Listed at{" "}
           <span className="font-semibold text-zinc-900 dark:text-zinc-100">
@@ -410,9 +458,16 @@ export function NegotiationChat({
               className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
                 msg.role === "user"
                   ? "bg-amber-500 text-zinc-950 rounded-br-sm"
+                  : msg.fromOwner
+                  ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-bl-sm"
                   : "bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 rounded-bl-sm"
               }`}
             >
+              {msg.role === "assistant" && msg.fromOwner && (
+                <p className="text-[10px] font-semibold mb-1 uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+                  The Saint's TechNet (Live)
+                </p>
+              )}
               {msg.content}
               {msg.streaming && (
                 <span className="inline-block w-1.5 h-3.5 ml-0.5 bg-current opacity-70 animate-pulse rounded-sm" />
@@ -440,7 +495,7 @@ export function NegotiationChat({
         {deal.struck && deal.agreedPrice && (
           <div className="mx-auto max-w-xs rounded-2xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/40 p-4 text-center">
             <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center mx-auto mb-2">
-              <HandshakeIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
+              <CheckBadgeIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
             </div>
             <p className="text-sm font-semibold text-green-800 dark:text-green-300 mb-0.5">Deal agreed!</p>
             <p className="text-xs text-green-600 dark:text-green-500 mb-3">
@@ -453,9 +508,9 @@ export function NegotiationChat({
               className="w-full h-11 flex items-center justify-center gap-2 rounded-xl bg-green-600 hover:bg-green-500 active:scale-[0.98] disabled:opacity-60 text-white text-sm font-bold transition-all duration-150 shadow-lg shadow-green-500/20"
             >
               {deal.loading ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Setting up payment…</>
+                <><Spinner className="w-4 h-4" /> Setting up payment…</>
               ) : (
-                <><Zap className="w-4 h-4" /> Pay {formatInCurrency(deal.agreedPrice)} now</>
+                <><BoltIcon className="w-4 h-4" /> Pay {formatInCurrency(deal.agreedPrice)} now</>
               )}
             </button>
           </div>
@@ -478,7 +533,7 @@ export function NegotiationChat({
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Make your offer…"
+                placeholder={ownerActiveRef.current ? "Reply to the owner…" : "Make your offer…"}
                 rows={1}
                 disabled={isStreaming}
                 className="flex-1 resize-none rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 px-3.5 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 disabled:opacity-50 transition-colors leading-relaxed max-h-28 overflow-y-auto"
@@ -491,8 +546,8 @@ export function NegotiationChat({
                 aria-label="Send message"
               >
                 {isStreaming
-                  ? <Loader2 className="w-4 h-4 text-zinc-950 animate-spin" />
-                  : <Send className="w-4 h-4 text-zinc-950" />
+                  ? <Spinner className="w-4 h-4 text-zinc-950" />
+                  : <PaperAirplaneIcon className="w-4 h-4 text-zinc-950" />
                 }
               </button>
             </div>

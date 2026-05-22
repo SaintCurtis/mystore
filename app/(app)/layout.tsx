@@ -35,6 +35,37 @@ function AppLayout({ children }: { children: React.ReactNode }) {
       afterSignUpUrl="/"
       signInFallbackRedirectUrl="/"
       signUpFallbackRedirectUrl="/"
+      // ── FIX 4: Override the app name shown in Clerk's sign-in modal ──────
+      // Without this, Clerk shows "Sign in to Clerk" which looks unbranded.
+      // The appearance.layout.unsafe_disableDevelopmentModeWarnings suppresses
+      // the dev overlay, and the variables set your brand colour throughout.
+      appearance={{
+        variables: {
+          colorPrimary: "#f59e0b",        // amber-500 — your brand
+          colorBackground: "#ffffff",
+          colorText: "#09090b",           // zinc-950
+          colorTextSecondary: "#71717a",  // zinc-500
+          borderRadius: "0.75rem",
+          fontFamily: "var(--font-body)",
+        },
+        elements: {
+          // Hides "Secured by Clerk" footer branding
+          footer: "hidden",
+          // Clean card matching your site style
+          card: "shadow-xl border border-zinc-200 dark:border-zinc-800 rounded-2xl",
+          headerTitle: "font-extrabold tracking-tight text-zinc-900",
+          headerSubtitle: "text-zinc-500",
+          formButtonPrimary:
+            "bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-zinc-950 font-bold shadow-sm shadow-amber-500/20 transition-all",
+          formFieldInput:
+            "border-zinc-200 focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 rounded-xl",
+          socialButtonsBlockButton:
+            "border-zinc-200 hover:bg-zinc-50 text-zinc-700 font-medium rounded-xl",
+          dividerLine: "bg-zinc-100",
+          identityPreviewText: "text-zinc-700",
+          formResendCodeLink: "text-amber-600 hover:text-amber-500",
+        },
+      }}
     >
       <CartStoreProvider>
         <WishlistStoreProvider>

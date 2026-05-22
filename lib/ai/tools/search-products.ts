@@ -1,3 +1,7 @@
+// lib/ai/tools/search-products.ts  — PATCHED
+// KEY CHANGE: The category description now lists ALL actual store categories
+// so the AI knows what to search for instead of guessing.
+
 import { tool } from "ai";
 import { z } from "zod";
 import { sanityFetch } from "@/sanity/lib/live";
@@ -5,7 +9,7 @@ import { AI_SEARCH_PRODUCTS_QUERY } from "@/lib/sanity/queries/products";
 import { formatPrice } from "@/lib/utils";
 import { getStockStatus, getStockMessage } from "@/lib/constants/stock";
 import { MATERIAL_VALUES, COLOR_VALUES } from "@/lib/constants/filters";
-import type { AI_SEARCH_PRODUCTS_QUERY_RESULT, } from "@/sanity.types";
+import type { AI_SEARCH_PRODUCTS_QUERY_RESULT } from "@/sanity.types";
 import type { SearchProduct } from "@/lib/ai/types";
 
 const productSearchSchema = z.object({
@@ -14,14 +18,35 @@ const productSearchSchema = z.object({
     .optional()
     .default("")
     .describe(
-      "Search term to find products by name, description, or category (e.g., 'wireless earbuds', 'smartwatch', 'power bank')"
+      "Search term to find products by name, description, or category. Examples: 'gaming laptop', 'Mac mini', 'wireless keyboard', 'Starlink', 'EcoFlow', 'monitor', 'webcam', 'power station', 'dock', 'SSD'"
     ),
   category: z
     .string()
     .optional()
     .default("")
     .describe(
-      "Filter by category slug (e.g., 'phones', 'laptops', 'accessories', 'audio', 'wearables')"
+      `Filter by category slug. Available categories in this store:
+      - "computers" → Laptops, MacBooks, desktops, Mac mini, SFF PCs
+      - "gaming-laptops" → Gaming laptops (ASUS ROG, MSI, Lenovo Legion, etc.)
+      - "accessories" → Keyboards, mice, docking stations, USB hubs, cables
+      - "tech-setup-gears" → Desks, chairs, LED strips, monitor arms, desk mats
+      - "monitors" → Gaming monitors, professional displays, ultrawide screens
+      - "content-creation-tools" → Cameras, microphones, lights, capture cards, webcams
+      - "acasis" → ACASIS brand docks, hubs, NVMe enclosures, SSD enclosures
+      - "ecoflow" → EcoFlow portable power stations and solar panels
+      - "starlink" → Starlink satellite internet kits
+      - "handheld-and-gaming-console" → Steam Deck, Nintendo Switch, PlayStation, Xbox
+      - "networking-tools" → Routers, switches, network adapters, Ethernet tools
+      - "storage" → External SSDs, hard drives, NVMe enclosures, memory cards
+      - "custom-pcs" → Custom-built gaming and workstation PCs
+      - "speaker-and-audio-equipments" → Speakers, headsets, soundbars, speakerphones
+      - "webcams" → Webcams for streaming and video calls
+      - "va-monitors" → VA panel monitors
+      - "fast-ips-monitors" → IPS fast gaming monitors
+      - "oled-monitors" → OLED display monitors
+      - "sff-computers" → Small form factor computers (Mac mini, NUC, etc.)
+      - "tables" → Sit-stand desks and computer tables
+      Leave empty to search across all categories.`
     ),
   material: z
     .enum(["", ...MATERIAL_VALUES])
@@ -37,17 +62,35 @@ const productSearchSchema = z.object({
     .number()
     .optional()
     .default(0)
-    .describe("Minimum price in NGN (e.g., 50000). Use 0 for no minimum."),
+    .describe("Minimum price in NGN (e.g., 50000 for ₦50,000). Use 0 for no minimum."),
   maxPrice: z
     .number()
     .optional()
     .default(0)
-    .describe("Maximum price in NGN (e.g., 8000000). Use 0 for no maximum."),
+    .describe("Maximum price in NGN (e.g., 2000000 for ₦2,000,000). Use 0 for no maximum."),
 });
 
 export const searchProductsTool = tool({
-  description:
-    "Search for products in the gadget store. Can search by name, description, or category, and filter by material, color, and price range in NGN. Returns product details including stock availability.",
+  description: `Search for products in The Saint's TechNet store — a premium Nigerian tech retailer.
+  
+  The store sells:
+  • Laptops & computers (brand new + foreign used) — Dell, HP, Lenovo, ASUS ROG, Apple MacBooks, Mac mini
+  • Gaming setups — gaming laptops, monitors, custom PCs, gaming consoles
+  • Accessories — keyboards, mice, webcams, docking stations, USB hubs
+  • Tech setup gear — ergonomic desks, chairs, monitor arms, LED lighting
+  • Monitors — gaming, professional, ultrawide, OLED, VA, IPS panels
+  • Content creation — cameras, microphones, lights, capture cards
+  • ACASIS brand — professional-grade docks, enclosures, hubs
+  • EcoFlow — portable power stations and solar kits (great for Nigerian power outages)
+  • Starlink — satellite internet kits
+  • Storage — external SSDs, hard drives, NVMe enclosures
+  • Networking — routers, switches, adapters
+  • Handheld consoles — Steam Deck, Switch, PlayStation portables
+  • Audio — speakers, headsets, speakerphones
+
+  All products include warranty. Prices in Nigerian Naira (NGN/₦). Ships worldwide.
+  
+  Use this tool to find products matching the customer's needs, budget, or specifications.`,
   inputSchema: productSearchSchema,
   execute: async ({ query, category, material, color, minPrice, maxPrice }) => {
     console.log("[SearchProducts] Query received:", {
@@ -78,13 +121,13 @@ export const searchProductsTool = tool({
         return {
           found: false,
           message:
-            "No products found matching your criteria. Try different search terms or filters.",
+            "No products found matching your criteria. Try different search terms or a broader category.",
           products: [],
+          suggestion: "Try searching without a category filter, or use a simpler query term.",
           filters: { query, category, material, color, minPrice, maxPrice },
         };
       }
 
-      // Format the results with stock status for the AI to communicate
       const formattedProducts: SearchProduct[] = (
         products as AI_SEARCH_PRODUCTS_QUERY_RESULT
       ).map((product) => ({
@@ -127,5 +170,3 @@ export const searchProductsTool = tool({
     }
   },
 });
-
-
