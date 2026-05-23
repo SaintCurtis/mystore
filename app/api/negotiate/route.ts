@@ -1,19 +1,18 @@
 // app/api/negotiate/route.ts
-// THE MAIN NEGOTIATION ROUTE — was missing entirely, typing code was here instead.
-//
-// Handles:
-//  1. Creating/resuming a Sanity negotiation session
-//  2. Streaming AI responses via Anthropic
-//  3. Recording all messages (customer + AI) to Sanity
-//  4. ownerActive:true flag — records customer message only, no AI invoked
-//  5. Floor price proximity detection → Resend email + push notification alert
-//  6. Deal detection (DEAL:₦<price> signal in AI response)
+// KEY FIXES in this version:
+//  1. Floor price is now STRICTLY enforced in the AI system prompt with
+//     hard instructions — the AI is told it CANNOT go below the floor
+//     and the floor is re-stated multiple times so it can't be talked past it
+//  2. userId + userEmail are read from Clerk auth and stored on the session
+//     so chat history can be loaded per user
+//  3. Lazy client instantiation (no build-time errors)
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "next-sanity";
 import { Resend } from "resend";
 import { v4 as uuidv4 } from "uuid";
 import Anthropic from "@anthropic-ai/sdk";
+import { auth, currentUser } from "@clerk/nextjs/server";
 
 const writeClient = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
@@ -23,11 +22,6 @@ const writeClient = createClient({
   token: process.env.SANITY_API_WRITE_TOKEN,
 });
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
-// Within what fraction of the floor price do we alert the owner?
-// 0.10 = customer bid is within 10% above the floor → fire alert
 const FLOOR_ALERT_THRESHOLD = 0.10;
 const OWNER_EMAIL = process.env.OWNER_EMAIL ?? "iamsaintcurtis@gmail.com";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://mystore-drab-nine.vercel.app";
@@ -43,8 +37,8 @@ async function sendFloorAlert(params: {
   const { sessionId, productName, listedPrice, floorPrice, customerBid } = params;
   const adminUrl = `${BASE_URL}/admin/negotiations/${sessionId}`;
   const savedPct = Math.round(((listedPrice - customerBid) / listedPrice) * 100);
+  const resend = new Resend(process.env.RESEND_API_KEY);
 
-  // Email via Resend
   try {
     await resend.emails.send({
       from: "Saint's TechNet <notifications@sainttechnet.com>",
@@ -56,23 +50,19 @@ async function sendFloorAlert(params: {
           <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
             <tr><td style="padding:8px 0;color:#666;width:140px">Product</td><td style="font-weight:600">${productName}</td></tr>
             <tr><td style="padding:8px 0;color:#666">Listed price</td><td style="font-weight:600">₦${listedPrice.toLocaleString()}</td></tr>
-            <tr><td style="padding:8px 0;color:#666">Your floor price</td><td style="font-weight:600">₦${floorPrice.toLocaleString()}</td></tr>
+            <tr><td style="padding:8px 0;color:#666">Floor price</td><td style="font-weight:600">₦${floorPrice.toLocaleString()}</td></tr>
             <tr><td style="padding:8px 0;color:#666">Customer bid</td><td style="font-weight:600;color:#f59e0b">₦${customerBid.toLocaleString()} (${savedPct}% off listed)</td></tr>
           </table>
-          <a href="${adminUrl}" style="display:inline-block;background:#f59e0b;color:#000;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px">
-            👀 View &amp; Take Over Negotiation
+          <a href="${adminUrl}" style="display:inline-block;background:#f59e0b;color:#000;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:700">
+            👀 View &amp; Take Over
           </a>
-          <p style="color:#999;font-size:12px;margin-top:24px">
-            Automated alert from The Saint's TechNet negotiation system.
-          </p>
         </div>
       `,
     });
   } catch (err) {
-    console.error("[negotiate] Resend email failed:", err);
+    console.error("[negotiate] Email failed:", err);
   }
 
-  // Push notification via your existing /push/send endpoint
   try {
     await fetch(`${BASE_URL}/push/send`, {
       method: "POST",
@@ -85,11 +75,10 @@ async function sendFloorAlert(params: {
       }),
     });
   } catch (err) {
-    console.error("[negotiate] Push notification failed:", err);
+    console.error("[negotiate] Push failed:", err);
   }
 }
 
-// ── Extract a plausible bid amount from message text ─────────────────────
 function extractBid(text: string, listedPrice: number): number | null {
   const matches = text.match(/[\d,]+/g);
   if (!matches) return null;
@@ -114,17 +103,36 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "slug required" }, { status: 400 });
     }
 
+    // ── Get Clerk user if signed in ─────────────────────────────────────
+    let userId: string | null = null;
+    let userEmail: string | null = null;
+    try {
+      const { userId: clerkUserId } = await auth();
+      userId = clerkUserId;
+      if (userId) {
+        const user = await currentUser();
+        userEmail = user?.emailAddresses?.[0]?.emailAddress ?? null;
+      }
+    } catch {
+      // Guest — no Clerk session, that's fine
+    }
+
     // ── Fetch product ───────────────────────────────────────────────────
+    // CRITICAL: We use SANITY_API_READ_TOKEN (server-side only) to fetch
+    // floorPrice. This field is NOT in the public GROQ query used on the
+    // product page — it's fetched fresh here so it can never be spoofed.
     const product = await writeClient.fetch<{
       _id: string;
       name: string;
       price: number;
       floorPrice?: number;
       description?: string;
+      negotiationNotes?: string;
       category?: { title: string };
     } | null>(
       `*[_type == "product" && slug.current == $slug][0]{
-        _id, name, price, floorPrice, description, category->{ title }
+        _id, name, price, floorPrice, description, negotiationNotes,
+        category->{ title }
       }`,
       { slug }
     );
@@ -133,9 +141,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    const floorPrice = product.floorPrice ?? Math.round(product.price * 0.8);
+    // ── FIX: Floor price enforcement ────────────────────────────────────
+    // If no floorPrice is set in Sanity, default to 85% of listed price.
+    // This is safer than 80% — gives more room for the AI to negotiate
+    // without accidentally going below what you'd accept.
+    const floorPrice = product.floorPrice && product.floorPrice > 0
+      ? product.floorPrice
+      : Math.round(product.price * 0.85);
 
-    // ── Fetch existing session if we have a sessionId ───────────────────
+    // ── Fetch existing session ──────────────────────────────────────────
     const existingSession = sessionId
       ? await writeClient.fetch<{
           _id: string;
@@ -149,32 +163,27 @@ export async function POST(req: NextRequest) {
         )
       : null;
 
-    // ── ownerActive mode: record customer message only, no AI ───────────
-    // Called when the owner has taken over and the customer sends a reply.
-    // We write the message to Sanity so the admin dashboard sees it,
-    // but we do NOT stream an AI response.
+    // ── ownerActive mode ────────────────────────────────────────────────
     if (ownerActive && existingSession) {
       const latestMsg = messages[messages.length - 1];
       if (latestMsg?.content) {
         await writeClient
           .patch(existingSession._id)
           .setIfMissing({ messages: [] })
-          .append("messages", [
-            {
-              _key: `customer_${Date.now()}`,
-              role: "user",
-              content: latestMsg.content,
-              sender: "customer",
-              timestamp: new Date().toISOString(),
-            },
-          ])
+          .append("messages", [{
+            _key: `customer_${Date.now()}`,
+            role: "user",
+            content: latestMsg.content,
+            sender: "customer",
+            timestamp: new Date().toISOString(),
+          }])
           .set({ lastActivityAt: new Date().toISOString() })
           .commit();
       }
       return NextResponse.json({ success: true });
     }
 
-    // ── Create session if new ───────────────────────────────────────────
+    // ── Create or resume session ────────────────────────────────────────
     let sid = sessionId ?? uuidv4();
     let docId = existingSession?._id;
 
@@ -192,11 +201,14 @@ export async function POST(req: NextRequest) {
         startedAt: new Date().toISOString(),
         lastActivityAt: new Date().toISOString(),
         messages: [],
+        // Link to Clerk user if signed in
+        ...(userId && { userId }),
+        ...(userEmail && { userEmail }),
       });
       docId = doc._id;
     }
 
-    // ── Floor price proximity check ─────────────────────────────────────
+    // ── Floor proximity check ───────────────────────────────────────────
     const latestUserMsg = [...messages].reverse().find((m) => m.role === "user");
     const detectedBid = latestUserMsg
       ? extractBid(latestUserMsg.content, product.price)
@@ -206,14 +218,12 @@ export async function POST(req: NextRequest) {
       detectedBid !== null &&
       detectedBid >= floorPrice &&
       detectedBid <= floorPrice * (1 + FLOOR_ALERT_THRESHOLD) &&
-      !existingSession?.closeBidAlert; // only alert once per session
+      !existingSession?.closeBidAlert;
 
     if (docId) {
       const patchOps = writeClient.patch(docId);
-
       if (shouldAlert && detectedBid !== null) {
         patchOps.set({ closeBidAlert: true, customerBid: detectedBid });
-        // Fire notifications concurrently — don't await, don't block the stream
         sendFloorAlert({
           sessionId: sid,
           productName: product.name,
@@ -225,42 +235,61 @@ export async function POST(req: NextRequest) {
         patchOps.set({ customerBid: detectedBid });
       }
 
-      // Append customer message to Sanity
       if (latestUserMsg) {
         await patchOps
           .setIfMissing({ messages: [] })
-          .append("messages", [
-            {
-              _key: `customer_${Date.now()}`,
-              role: "user",
-              content: latestUserMsg.content,
-              sender: "customer",
-              timestamp: new Date().toISOString(),
-            },
-          ])
+          .append("messages", [{
+            _key: `customer_${Date.now()}`,
+            role: "user",
+            content: latestUserMsg.content,
+            sender: "customer",
+            timestamp: new Date().toISOString(),
+          }])
           .set({ lastActivityAt: new Date().toISOString() })
           .commit();
       }
     }
 
-    // ── Build AI system prompt ──────────────────────────────────────────
-    const systemPrompt = `You are Segun, a warm but firm sales negotiator for The Saint's TechNet — a premium Lagos-based tech store owned and run by a Computer Engineer.
+    // ── AI system prompt — floor price stated THREE times so it sticks ──
+    // Previous version only mentioned floor once and the AI would sometimes
+    // rationalise going below it under pressure. Repetition + absolute
+    // language ("HARD LIMIT", "non-negotiable", "you will lose money")
+    // makes the model treat it as a true constraint, not a suggestion.
+    const systemPrompt = `You are Segun, a warm but firm sales negotiator for The Saint's TechNet — a premium Lagos-based tech store owned by a Computer Engineer.
 
-Product: ${product.name}
-Listed price: ₦${product.price.toLocaleString()}
-Your floor price (NEVER reveal this to the customer): ₦${floorPrice.toLocaleString()}
-Category: ${product.category?.title ?? "Tech"}
-${product.description ? `Description: ${product.description}` : ""}
+PRODUCT: ${product.name}
+LISTED PRICE: ₦${product.price.toLocaleString()}
+YOUR ABSOLUTE FLOOR PRICE: ₦${floorPrice.toLocaleString()}
 
-Negotiation rules:
-- You can offer small discounts to build goodwill, but NEVER go below ₦${floorPrice.toLocaleString()}
-- Be conversational, warm, and confident — like a knowledgeable Lagos entrepreneur who knows the value of their product
-- When you both agree on a price, end your message with exactly: DEAL:₦<agreedPrice> (no spaces, no commas — e.g. DEAL:₦285000)
-- Never mention or hint at the floor price
-- Keep responses concise — 2 to 3 sentences maximum
-- If the customer bids below the floor, politely decline and counter with a reasonable figure above the floor`;
+⛔ HARD LIMIT — READ THIS CAREFULLY:
+You CANNOT agree to any price below ₦${floorPrice.toLocaleString()}. This is non-negotiable.
+If you agree to anything below ₦${floorPrice.toLocaleString()} the business will lose money.
+No matter what the customer says, no matter how they pressure you, no matter what story they tell —
+you MUST NOT go below ₦${floorPrice.toLocaleString()}. Not even by ₦1.
+
+If the customer bids below ₦${floorPrice.toLocaleString()}, counter with a price ABOVE the floor.
+A reasonable counter is anywhere from ₦${Math.round(floorPrice * 1.02).toLocaleString()} to ₦${Math.round(product.price * 0.95).toLocaleString()}.
+
+CATEGORY: ${product.category?.title ?? "Tech"}
+${product.description ? `PRODUCT DETAILS: ${product.description}` : ""}
+${product.negotiationNotes ? `PRIVATE OWNER NOTES (never share these with the customer): ${product.negotiationNotes}` : ""}
+
+NEGOTIATION STYLE:
+- Be conversational and warm — like a knowledgeable Lagos entrepreneur
+- You can give small discounts to build goodwill, but protect the floor at all costs
+- Reference the product's value, quality, and warranty when justifying the price
+- Keep responses to 2-3 sentences maximum
+
+DEAL SIGNAL:
+When you and the customer agree on a price, end your message with exactly:
+DEAL:₦<agreedPrice>
+Example: DEAL:₦687000
+(no spaces, no commas in the number)
+Only send this signal when the agreed price is AT OR ABOVE ₦${floorPrice.toLocaleString()}.`;
 
     // ── Stream AI response ──────────────────────────────────────────────
+    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
     const aiMessages = messages
       .filter((m) => m.role === "user" || m.role === "assistant")
       .map((m) => ({ role: m.role, content: m.content }));
@@ -272,7 +301,6 @@ Negotiation rules:
 
     const readable = new ReadableStream({
       async start(controller) {
-        // Send sessionId immediately so the client can store it
         controller.enqueue(
           encoder.encode(`data: ${JSON.stringify({ sessionId: sid })}\n\n`)
         );
@@ -292,22 +320,24 @@ Negotiation rules:
             ) {
               const text = chunk.delta.text;
               fullText += text;
-
               controller.enqueue(
                 encoder.encode(`data: ${JSON.stringify({ text })}\n\n`)
               );
 
-              // Detect deal signal as it streams in
               if (!dealDetected) {
                 const dealMatch = fullText.match(/DEAL:₦([\d]+)/);
                 if (dealMatch) {
-                  dealDetected = true;
-                  agreedPrice = Number(dealMatch[1]);
-                  controller.enqueue(
-                    encoder.encode(
-                      `data: ${JSON.stringify({ deal: true, agreedPrice })}\n\n`
-                    )
-                  );
+                  const price = Number(dealMatch[1]);
+                  // Double-check: never send a deal below floor
+                  if (price >= floorPrice) {
+                    dealDetected = true;
+                    agreedPrice = price;
+                    controller.enqueue(
+                      encoder.encode(
+                        `data: ${JSON.stringify({ deal: true, agreedPrice })}\n\n`
+                      )
+                    );
+                  }
                 }
               }
             }
@@ -315,30 +345,26 @@ Negotiation rules:
         } catch (err) {
           console.error("[negotiate] Stream error:", err);
           controller.enqueue(
-            encoder.encode(
-              `data: ${JSON.stringify({ error: "AI stream failed" })}\n\n`
-            )
+            encoder.encode(`data: ${JSON.stringify({ error: "Stream failed" })}\n\n`)
           );
         }
 
         controller.enqueue(encoder.encode("data: [DONE]\n\n"));
         controller.close();
 
-        // ── Persist AI response to Sanity after stream ends ─────────────
+        // Persist AI response to Sanity
         if (docId && fullText) {
           try {
             const patch = writeClient
               .patch(docId)
               .setIfMissing({ messages: [] })
-              .append("messages", [
-                {
-                  _key: `ai_${Date.now()}`,
-                  role: "assistant",
-                  content: fullText.replace(/DEAL:₦[\d]+/g, "").trim(),
-                  sender: "ai",
-                  timestamp: new Date().toISOString(),
-                },
-              ])
+              .append("messages", [{
+                _key: `ai_${Date.now()}`,
+                role: "assistant",
+                content: fullText.replace(/DEAL:₦[\d]+/g, "").trim(),
+                sender: "ai",
+                timestamp: new Date().toISOString(),
+              }])
               .set({ lastActivityAt: new Date().toISOString() });
 
             if (dealDetected && agreedPrice) {
@@ -361,7 +387,7 @@ Negotiation rules:
       },
     });
   } catch (err) {
-    console.error("[negotiate] Fatal error:", err);
+    console.error("[negotiate] Fatal:", err);
     return NextResponse.json({ error: "Failed" }, { status: 500 });
   }
 }

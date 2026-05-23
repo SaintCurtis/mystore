@@ -4,10 +4,46 @@ export const negotiationSessionType = defineType({
   name: "negotiationSession",
   title: "Negotiation Sessions",
   type: "document",
+  // ── Newest first in Studio ──────────────────────────────────────────────
+  orderings: [
+    {
+      title: "Newest First",
+      name: "startedAtDesc",
+      by: [{ field: "startedAt", direction: "desc" }],
+    },
+    {
+      title: "Last Activity",
+      name: "lastActivityDesc",
+      by: [{ field: "lastActivityAt", direction: "desc" }],
+    },
+  ],
   fields: [
     defineField({
       name: "sessionId",
       title: "Session ID",
+      type: "string",
+      readOnly: true,
+    }),
+    // ── NEW: Clerk user linkage ─────────────────────────────────────────
+    // Populated when a signed-in user starts a negotiation.
+    // Allows fetching all sessions for a user → "My Negotiations" history.
+    defineField({
+      name: "userId",
+      title: "Clerk User ID",
+      type: "string",
+      readOnly: true,
+      description: "Clerk user ID — set when a signed-in customer negotiates",
+    }),
+    defineField({
+      name: "userEmail",
+      title: "Customer Email",
+      type: "string",
+      readOnly: true,
+      description: "For admin reference — populated from Clerk when available",
+    }),
+    defineField({
+      name: "productId",
+      title: "Product ID",
       type: "string",
       readOnly: true,
     }),
@@ -41,10 +77,10 @@ export const negotiationSessionType = defineType({
       type: "string",
       options: {
         list: [
-          { title: "🤖 AI Active",      value: "ai_active"     },
-          { title: "👤 Owner Active",   value: "owner_active"  },
-          { title: "🤝 Deal Struck",    value: "deal_struck"   },
-          { title: "❌ Closed",         value: "closed"        },
+          { title: "🤖 AI Active",    value: "ai_active"    },
+          { title: "👤 Owner Active", value: "owner_active" },
+          { title: "🤝 Deal Struck",  value: "deal_struck"  },
+          { title: "❌ Closed",       value: "closed"       },
         ],
         layout: "radio",
       },
@@ -52,21 +88,20 @@ export const negotiationSessionType = defineType({
     }),
     defineField({
       name: "agreedPrice",
-      title: "Agreed Price (₦) — set when deal struck",
+      title: "Agreed Price (₦)",
       type: "number",
     }),
     defineField({
       name: "closeBidAlert",
       title: "Close Bid Alert",
       type: "boolean",
-      description: "True when customer bid within 15% of floor — needs your attention",
+      description: "True when customer bid is within 10% of floor — needs attention",
       initialValue: false,
     }),
     defineField({
       name: "customerBid",
       title: "Closest Customer Bid (₦)",
       type: "number",
-      description: "The bid that triggered the alert",
     }),
     defineField({
       name: "messages",
@@ -77,15 +112,15 @@ export const negotiationSessionType = defineType({
           type: "object",
           name: "message",
           fields: [
-            defineField({ name: "role",      type: "string", title: "Role" }),
-            defineField({ name: "content",   type: "text",   title: "Content" }),
-            defineField({ name: "sender",    type: "string", title: "Sender", description: "ai | owner | customer" }),
+            defineField({ name: "role",      type: "string",   title: "Role" }),
+            defineField({ name: "content",   type: "text",     title: "Content" }),
+            defineField({ name: "sender",    type: "string",   title: "Sender", description: "ai | owner | customer" }),
             defineField({ name: "timestamp", type: "datetime", title: "Timestamp" }),
           ],
           preview: {
-            select: { title: "role", subtitle: "content" },
+            select: { title: "sender", subtitle: "content" },
             prepare: ({ title, subtitle }) => ({
-              title: `[${title}]`,
+              title: `[${title ?? "?"}]`,
               subtitle: (subtitle ?? "").slice(0, 80),
             }),
           },
@@ -111,11 +146,19 @@ export const negotiationSessionType = defineType({
       subtitle: "status",
       alert:    "closeBidAlert",
       bid:      "customerBid",
+      agreed:   "agreedPrice",
+      started:  "startedAt",
     },
-    prepare({ title, subtitle, alert, bid }) {
+    prepare({ title, subtitle, alert, bid, agreed, started }) {
+      const date = started ? new Date(started).toLocaleDateString("en-NG") : "";
+      const priceInfo = agreed
+        ? `✅ ₦${Number(agreed).toLocaleString()}`
+        : bid
+        ? `Bid ₦${Number(bid).toLocaleString()}`
+        : "";
       return {
         title: `${alert ? "🔔 " : ""}${title ?? "Unknown product"}`,
-        subtitle: `${subtitle ?? "ai_active"}${bid ? ` · Bid ₦${Number(bid).toLocaleString()}` : ""}`,
+        subtitle: [subtitle ?? "ai_active", priceInfo, date].filter(Boolean).join(" · "),
       };
     },
   },
