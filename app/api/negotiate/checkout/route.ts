@@ -1,8 +1,17 @@
+// app/api/negotiate/checkout/route.ts
+//
+// FIX 1: Instead of sending customer straight to Paystack, we now redirect
+// them to /checkout?negotiated=true&... so they can pick address, delivery
+// method and payment method — same flow as a regular order.
+//
+// FIX 2: callback_url now uses NEXT_PUBLIC_BASE_URL (your actual site URL)
+// instead of VERCEL_URL which is the deployment API URL and requires
+// Vercel login — that's why customers were landing on vercel.com/login.
+
 import { NextRequest, NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { createClient } from "next-sanity";
 
-// ── Sanity server-only client ──────────────────────────────────────────────
 const serverClient = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET!,
@@ -17,11 +26,9 @@ if (!process.env.PAYSTACK_SECRET_KEY) {
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 
-// ── Types ──────────────────────────────────────────────────────────────────
 interface NegotiatedCheckoutRequest {
   productSlug: string;
   agreedPrice: number;
-  // Optional: selected variants (e.g. RAM/SSD choices)
   selectedVariants?: { type: string; label: string }[];
 }
 
@@ -35,9 +42,7 @@ interface PaystackInitResponse {
   };
 }
 
-// ── Route handler ──────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
-  // Auth check
   const { userId } = await auth();
   const user = await currentUser();
 
@@ -64,9 +69,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // ── Fetch product server-side — second floor check ────────────────────────
-  // We NEVER trust the agreedPrice from the frontend alone.
-  // We re-fetch the floorPrice here and verify again.
+  // Server-side product + floor price verification
   const product = await serverClient.fetch<{
     _id: string;
     name: string;
@@ -77,140 +80,137 @@ export async function POST(req: NextRequest) {
     images: { asset: { url: string } }[];
   } | null>(
     `*[_type == "product" && slug.current == $slug][0]{
-      _id,
-      name,
-      price,
-      floorPrice,
-      isNegotiable,
-      stock,
+      _id, name, price, floorPrice, isNegotiable, stock,
       "images": images[0..0]{ asset->{ url } }
     }`,
     { slug: productSlug }
   );
 
-  if (!product) {
-    return NextResponse.json({ error: "Product not found" }, { status: 404 });
-  }
+  if (!product) return NextResponse.json({ error: "Product not found" }, { status: 404 });
+  if (!product.isNegotiable) return NextResponse.json({ error: "Not negotiable" }, { status: 403 });
+  if (product.stock <= 0) return NextResponse.json({ error: "Out of stock" }, { status: 400 });
 
-  if (!product.isNegotiable) {
-    return NextResponse.json(
-      { error: "This product is not negotiable" },
-      { status: 403 }
-    );
-  }
+  const floorPrice = product.floorPrice && product.floorPrice > 0
+    ? product.floorPrice
+    : Math.round(product.price * 0.85);
 
-  if (product.stock <= 0) {
-    return NextResponse.json(
-      { error: "This product is out of stock" },
-      { status: 400 }
-    );
-  }
-
-  // ── Server-side floor price enforcement ───────────────────────────────────
-  if (agreedPrice < product.floorPrice) {
-    // Someone tried to tamper with the price — reject silently with a generic error
+  if (agreedPrice < floorPrice) {
     return NextResponse.json(
       { error: "Invalid price. Please restart the negotiation." },
       { status: 400 }
     );
   }
-
-  // agreedPrice should never exceed listed price either
   if (agreedPrice > product.price) {
-    return NextResponse.json(
-      { error: "Invalid agreed price" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Invalid agreed price" }, { status: 400 });
   }
 
-  // ── Build Paystack transaction ─────────────────────────────────────────────
-  const userEmail = user.emailAddresses[0]?.emailAddress ?? "";
-  const userName =
-    `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || userEmail;
+  // FIX 1: Route to /checkout page instead of directly to Paystack.
+  // The checkout page handles address + delivery + payment method selection.
+  // It reads the negotiation params and shows the agreed price.
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://mystore-drab-nine.vercel.app";
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
-    "http://localhost:3000";
+  const variantString = selectedVariants.length > 0
+    ? selectedVariants.map((v) => `${v.type}:${v.label}`).join("|")
+    : "";
 
-  const amountKobo = Math.round(agreedPrice * 100);
-
-  const variantString =
-    selectedVariants.length > 0
-      ? selectedVariants.map((v) => `${v.type}:${v.label}`).join("|")
-      : "";
-
-  const metadata: Record<string, string> = {
-    clerkUserId: userId,
-    userEmail,
-    sanityCustomerId: "",          // populated if you have getOrCreatePaystackCustomer
-    productIds: product._id,
-    quantities: "1",
-    prices: amountKobo.toString(),
-    shippingFee: "0",
-    shippingMethod: "",
-    shippingAddress: "",
-    // ── Negotiation-specific metadata ──────────────────────────────────────
-    isNegotiatedDeal: "true",
-    originalPrice: product.price.toString(),
+  const checkoutParams = new URLSearchParams({
+    negotiated: "true",
+    productId: product._id,
+    productSlug,
     agreedPrice: agreedPrice.toString(),
-    savedAmount: (product.price - agreedPrice).toString(),
-    productName: product.name,
-    ...(variantString && { selectedVariants: variantString }),
-    buyerName: userName,
-  };
+    originalPrice: product.price.toString(),
+    ...(variantString && { variants: variantString }),
+  });
+
+  return NextResponse.json({
+    success: true,
+    url: `${baseUrl}/checkout?${checkoutParams.toString()}`,
+    summary: {
+      productName: product.name,
+      originalPrice: product.price,
+      agreedPrice,
+      savedAmount: product.price - agreedPrice,
+      savedPercent: Math.round(((product.price - agreedPrice) / product.price) * 100),
+    },
+  });
+}
+
+// PUT — Called by the checkout page once address + shipping are confirmed.
+// THIS is where Paystack gets initialised with the correct callback_url.
+export async function PUT(req: NextRequest) {
+  const { userId } = await auth();
+  const user = await currentUser();
+  if (!userId || !user) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
 
   try {
-    const response = await fetch(
-      "https://api.paystack.co/transaction/initialize",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: userEmail,
-          amount: amountKobo,
-          currency: "NGN",
-          callback_url: `${baseUrl}/checkout/success`,
-          metadata,
-          // Custom label shown on Paystack payment page
-          label: `${product.name} — Negotiated Deal`,
-        }),
-      }
-    );
+    const {
+      productId, agreedPrice, productName, originalPrice,
+      selectedVariants = [], shippingAddress, shippingMethod, shippingFee = 0,
+    } = await req.json();
+
+    const userEmail = user.emailAddresses[0]?.emailAddress ?? "";
+    const userName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || userEmail;
+
+    // FIX 2: NEXT_PUBLIC_BASE_URL is your real site domain.
+    // VERCEL_URL is the internal deployment URL — it requires Vercel auth,
+    // which is why customers were hitting vercel.com/login after payment.
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://mystore-drab-nine.vercel.app";
+
+    const totalAmount = agreedPrice + shippingFee;
+    const amountKobo = Math.round(totalAmount * 100);
+
+    const variantString = (selectedVariants as { type: string; label: string }[]).length > 0
+      ? (selectedVariants as { type: string; label: string }[]).map((v) => `${v.type}:${v.label}`).join("|")
+      : "";
+
+    const metadata: Record<string, string> = {
+      clerkUserId: userId,
+      userEmail,
+      productIds: productId,
+      quantities: "1",
+      prices: Math.round(agreedPrice * 100).toString(),
+      shippingFee: Math.round(shippingFee * 100).toString(),
+      shippingMethod: shippingMethod ?? "",
+      shippingAddress: shippingAddress ? JSON.stringify(shippingAddress) : "",
+      isNegotiatedDeal: "true",
+      originalPrice: originalPrice.toString(),
+      agreedPrice: agreedPrice.toString(),
+      savedAmount: (originalPrice - agreedPrice).toString(),
+      productName,
+      ...(variantString && { selectedVariants: variantString }),
+      buyerName: userName,
+    };
+
+    const response = await fetch("https://api.paystack.co/transaction/initialize", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: userEmail,
+        amount: amountKobo,
+        currency: "NGN",
+        callback_url: `${baseUrl}/checkout/success`,
+        metadata,
+        label: `${productName} — Negotiated Deal`,
+      }),
+    });
 
     const data = (await response.json()) as PaystackInitResponse;
 
     if (!data.status || !data.data?.authorization_url) {
       console.error("Paystack init failed:", data.message);
-      return NextResponse.json(
-        { error: "Could not initialize payment. Please try again." },
-        { status: 502 }
-      );
+      return NextResponse.json({ error: "Could not initialise payment." }, { status: 502 });
     }
 
     return NextResponse.json({
       success: true,
       url: data.data.authorization_url,
       reference: data.data.reference,
-      // Return summary for UI display before redirect
-      summary: {
-        productName: product.name,
-        originalPrice: product.price,
-        agreedPrice,
-        savedAmount: product.price - agreedPrice,
-        savedPercent: Math.round(
-          ((product.price - agreedPrice) / product.price) * 100
-        ),
-      },
     });
   } catch (err) {
-    console.error("Negotiated checkout error:", err);
-    return NextResponse.json(
-      { error: "Something went wrong. Please try again." },
-      { status: 500 }
-    );
+    console.error("Negotiated payment init error:", err);
+    return NextResponse.json({ error: "Something went wrong." }, { status: 500 });
   }
 }

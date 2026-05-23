@@ -68,8 +68,8 @@ interface PaystackVerifyResponse {
 export async function createCheckoutSession(
   items: CartItem[],
   shippingAddress: ShippingAddress,
-  shippingFee: number = 0,        // ← PATCH 1: added shippingFee param
-  shippingMethod: string = ""     // ← PATCH 1: added shippingMethod param
+  shippingFee: number = 0,
+  shippingMethod: string = ""
 ): Promise<CheckoutResult> {
   try {
     const { userId } = await auth();
@@ -91,7 +91,6 @@ export async function createCheckoutSession(
 
     for (const item of items) {
       const product = products.find((p: { _id: string }) => p._id === item.productId);
-
       if (!product) {
         validationErrors.push(`Product "${item.name}" is no longer available`);
         continue;
@@ -104,7 +103,6 @@ export async function createCheckoutSession(
         validationErrors.push(`Only ${product.stock} of "${product.name}" available`);
         continue;
       }
-
       validatedItems.push({ product, quantity: item.quantity });
     }
 
@@ -112,14 +110,12 @@ export async function createCheckoutSession(
       return { success: false, error: validationErrors.join(". ") };
     }
 
-    // ── PATCH 2: include shipping fee in total ─────────────────────────────
     const totalNGN = validatedItems.reduce(
       (sum, { product, quantity }) => sum + (product.price ?? 0) * quantity,
       0
     );
     const totalNGNWithShipping = totalNGN + shippingFee;
     const totalKobo = Math.round(totalNGNWithShipping * 100);
-    // ──────────────────────────────────────────────────────────────────────
 
     const userEmail = user.emailAddresses[0]?.emailAddress ?? "";
     const userName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || userEmail;
@@ -131,7 +127,6 @@ export async function createCheckoutSession(
       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
       "http://localhost:3000";
 
-    // ── PATCH 3: add shippingFee + shippingMethod to metadata ─────────────
     const metadata = {
       clerkUserId: userId,
       userEmail,
@@ -140,10 +135,9 @@ export async function createCheckoutSession(
       quantities: validatedItems.map((i) => i.quantity).join(","),
       prices: validatedItems.map((i) => Math.round((i.product.price ?? 0) * 100)).join(","),
       shippingFee: shippingFee.toString(),
-      shippingMethod: shippingMethod,
+      shippingMethod,
       shippingAddress: JSON.stringify(shippingAddress),
     };
-    // ──────────────────────────────────────────────────────────────────────
 
     const response = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
@@ -240,6 +234,8 @@ export async function getCheckoutSession(reference: string) {
             }
           : null,
         lineItems: [],
+        // ── FIX: expose metadata so success page can show negotiated deal badge ──
+        metadata: tx.metadata ?? {},
       },
     };
   } catch (error) {
