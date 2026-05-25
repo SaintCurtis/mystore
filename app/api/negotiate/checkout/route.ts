@@ -94,7 +94,10 @@ export async function POST(req: NextRequest) {
     ? product.floorPrice
     : Math.round(product.price * 0.85);
 
-  if (agreedPrice < floorPrice) {
+  // Owner may have deliberately agreed below floor (emotional/strategic call).
+  // We only block if the price is impossibly low (less than 10% of listed)
+  // to catch tampering, not legitimate owner decisions.
+  if (agreedPrice < product.price * 0.1) {
     return NextResponse.json(
       { error: "Invalid price. Please restart the negotiation." },
       { status: 400 }
