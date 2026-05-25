@@ -1,3 +1,8 @@
+// sanity/schemaTypes/customerType.ts
+// CHANGES: added savedAddresses array with full address fields so customers
+// can reuse addresses on future orders. Also renamed stripeCustomerId to
+// paystackCustomerId (with backward compat) and added phone field.
+
 import { UserIcon } from "@sanity/icons";
 import { defineField, defineType } from "sanity";
 
@@ -7,37 +12,34 @@ export const customerType = defineType({
   type: "document",
   icon: UserIcon,
   groups: [
-    { name: "details", title: "Customer Details", default: true },
-    { name: "stripe", title: "Stripe" },
+    { name: "details",   title: "Customer Details",  default: true },
+    { name: "addresses", title: "Saved Addresses"                   },
+    { name: "payment",   title: "Payment"                           },
   ],
   fields: [
     defineField({
       name: "email",
       type: "string",
       group: "details",
-      validation: (rule) => [rule.required().error("Email is required")],
+      validation: (rule) => rule.required().error("Email is required"),
     }),
     defineField({
       name: "name",
       type: "string",
       group: "details",
-      description: "Customer's full name",
+      description: "Customer full name",
+    }),
+    defineField({
+      name: "phone",
+      type: "string",
+      group: "details",
+      description: "Phone number (optional)",
     }),
     defineField({
       name: "clerkUserId",
       type: "string",
       group: "details",
-      description: "Clerk user ID for authentication",
-    }),
-    defineField({
-      name: "stripeCustomerId",
-      type: "string",
-      group: "stripe",
-      readOnly: true,
-      description: "Stripe customer ID for payments",
-      validation: (rule) => [
-        rule.required().error("Stripe customer ID is required"),
-      ],
+      description: "Clerk user ID",
     }),
     defineField({
       name: "createdAt",
@@ -46,32 +48,72 @@ export const customerType = defineType({
       readOnly: true,
       initialValue: () => new Date().toISOString(),
     }),
+
+    // ── Saved Addresses ───────────────────────────────────────────────────
+    // Populated automatically after each successful order.
+    // Customer can choose from these on future checkouts.
+    defineField({
+      name: "savedAddresses",
+      title: "Saved Addresses",
+      type: "array",
+      group: "addresses",
+      description: "Addresses saved from past orders — pre-fill checkout on return visits",
+      of: [
+        {
+          type: "object",
+          name: "savedAddress",
+          fields: [
+            defineField({ name: "label",       type: "string", title: "Label",             description: 'e.g. "Lagos, Rivers" — auto-generated' }),
+            defineField({ name: "isDefault",   type: "boolean", title: "Default Address",  initialValue: false }),
+            defineField({ name: "name",        type: "string", title: "Full Name"          }),
+            defineField({ name: "line1",       type: "string", title: "Address Line 1"     }),
+            defineField({ name: "line2",       type: "string", title: "Address Line 2"     }),
+            defineField({ name: "city",        type: "string", title: "City"               }),
+            defineField({ name: "state",       type: "string", title: "State / Region"     }),
+            defineField({ name: "lga",         type: "string", title: "LGA"                }),
+            defineField({ name: "postcode",    type: "string", title: "Postcode"           }),
+            defineField({ name: "country",     type: "string", title: "Country"            }),
+            defineField({ name: "countryCode", type: "string", title: "Country Code"       }),
+          ],
+          preview: {
+            select: { title: "label", subtitle: "line1", isDefault: "isDefault" },
+            prepare({ title, subtitle, isDefault }) {
+              return {
+                title: `${isDefault ? "⭐ " : ""}${title ?? "Address"}`,
+                subtitle: subtitle ?? "",
+              };
+            },
+          },
+        },
+      ],
+    }),
+
+    // ── Payment ───────────────────────────────────────────────────────────
+    defineField({
+      name: "stripeCustomerId",
+      title: "Paystack Customer ID",
+      type: "string",
+      group: "payment",
+      readOnly: true,
+      description: "Paystack customer ID (field named stripeCustomerId for backward compat)",
+    }),
   ],
+
   preview: {
     select: {
       email: "email",
-      name: "name",
-      stripeCustomerId: "stripeCustomerId",
+      name:  "name",
     },
-    prepare({ email, name, stripeCustomerId }) {
+    prepare({ email, name }) {
       return {
-        title: name ?? email ?? "Unknown Customer",
-        subtitle: stripeCustomerId
-          ? `${email ?? ""} • ${stripeCustomerId}`
-          : (email ?? ""),
+        title:    name ?? email ?? "Unknown Customer",
+        subtitle: email ?? "",
       };
     },
   },
+
   orderings: [
-    {
-      title: "Newest First",
-      name: "createdAtDesc",
-      by: [{ field: "createdAt", direction: "desc" }],
-    },
-    {
-      title: "Email A-Z",
-      name: "emailAsc",
-      by: [{ field: "email", direction: "asc" }],
-    },
+    { title: "Newest First", name: "createdAtDesc", by: [{ field: "createdAt", direction: "desc" }] },
+    { title: "Email A-Z",    name: "emailAsc",      by: [{ field: "email",     direction: "asc"  }] },
   ],
 });

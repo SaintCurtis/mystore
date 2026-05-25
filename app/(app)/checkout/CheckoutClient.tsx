@@ -67,6 +67,13 @@ interface ShippingAddress {
   countryCode: string;
 }
 
+interface SavedAddress {
+  _key: string; label: string; isDefault: boolean;
+  name: string; line1: string; line2: string;
+  city: string; state: string; lga: string;
+  postcode: string; country: string; countryCode: string;
+}
+
 interface NegotiatedDeal {
   productId: string;
   productSlug: string;
@@ -144,6 +151,8 @@ export function CheckoutClient() {
   const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
   const [countries, setCountries] = useState<{ code: string; name: string }[]>([]);
   const [countriesLoading, setCountriesLoading] = useState(true);
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+  const [selectedSavedAddr, setSelectedSavedAddr] = useState<string | null>(null);
 
   const [address, setAddress] = useState<ShippingAddress>({
     name: "", line1: "", line2: "", city: "", state: "", lga: "",
@@ -176,6 +185,22 @@ export function CheckoutClient() {
       })
       .finally(() => setCountriesLoading(false));
   }, []);
+
+  // ── Fetch saved addresses for returning customers ────────────────────
+  useEffect(() => {
+    if (!isSignedIn) return;
+    fetch("/api/customer/addresses")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.addresses?.length > 0) {
+          setSavedAddresses(data.addresses);
+          const def = data.addresses.find((a: SavedAddress) => a.isDefault) ?? data.addresses[0];
+          if (def) applyAddress(def);
+        }
+      })
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSignedIn]);
 
   // ── Google Places Autocomplete ────────────────────────────────────────
   useEffect(() => {
@@ -292,6 +317,17 @@ export function CheckoutClient() {
     } finally {
       setIsPayingNegotiated(false);
     }
+  }
+
+  // ── Apply a saved address ─────────────────────────────────────────────
+  function applyAddress(addr: SavedAddress) {
+    setAddress({
+      name: addr.name, line1: addr.line1, line2: addr.line2 ?? "",
+      city: addr.city, state: addr.state ?? "", lga: addr.lga ?? "",
+      postcode: addr.postcode, country: addr.country, countryCode: addr.countryCode,
+    });
+    setSelectedSavedAddr(addr._key);
+    setSelectedShipping(null);
   }
 
   // ── Empty cart ────────────────────────────────────────────────────────
@@ -457,6 +493,46 @@ export function CheckoutClient() {
                 <h2 className="font-semibold text-zinc-900 dark:text-[#f1f1f1]">Shipping Address</h2>
               </div>
               <div className="space-y-4 px-5 py-4">
+
+                {/* Saved addresses — returning customers */}
+                {isSignedIn && savedAddresses.length > 0 && (
+                  <div className="pb-4 border-b border-zinc-100 dark:border-zinc-800">
+                    <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-2.5 uppercase tracking-wide">
+                      Your saved addresses
+                    </p>
+                    <div className="space-y-2">
+                      {savedAddresses.map((addr) => (
+                        <button key={addr._key} type="button" onClick={() => applyAddress(addr)}
+                          className={`w-full text-left rounded-xl border px-4 py-3 text-sm transition-all duration-150 ${
+                            selectedSavedAddr === addr._key
+                              ? "border-amber-500 bg-amber-50 dark:bg-amber-950/20 ring-1 ring-amber-500/30"
+                              : "border-zinc-200 dark:border-zinc-700 hover:border-amber-300 dark:hover:border-amber-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                          }`}>
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                              {addr.isDefault && <span className="text-amber-500 mr-1">⭐</span>}
+                              {addr.label}
+                            </span>
+                            {selectedSavedAddr === addr._key && (
+                              <CheckBadgeIcon className="h-4 w-4 text-amber-500 shrink-0" />
+                            )}
+                          </div>
+                          <p className="text-zinc-500 dark:text-zinc-400 mt-0.5 text-xs truncate">
+                            {addr.line1}{addr.city ? `, ${addr.city}` : ""}{addr.postcode ? ` ${addr.postcode}` : ""}
+                          </p>
+                        </button>
+                      ))}
+                      <button type="button"
+                        onClick={() => {
+                          setSelectedSavedAddr(null);
+                          setAddress({ name: "", line1: "", line2: "", city: "", state: "", lga: "", postcode: "", country: "Nigeria", countryCode: "NG" });
+                        }}
+                        className="w-full text-left rounded-xl border border-dashed border-zinc-200 dark:border-zinc-700 px-4 py-3 text-sm text-zinc-400 hover:border-amber-400 hover:text-amber-600 dark:hover:text-amber-400 transition-all">
+                        + Use a different address
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <label className={labelClass}>Full Name <span className="text-red-500">*</span></label>
