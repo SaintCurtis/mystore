@@ -49,12 +49,10 @@ export async function POST(
       return NextResponse.json({ error: "Session already closed" }, { status: 400 });
     }
 
-    // Server-side floor price guard — even owner can't go below floor
+    // Note: Owner can deliberately go below floor (emotional/strategic decision).
+    // We just log it for awareness but don't block it.
     if (session.floorPrice && agreedPrice < session.floorPrice) {
-      return NextResponse.json(
-        { error: `Price cannot be below floor price of ₦${session.floorPrice.toLocaleString()}` },
-        { status: 400 }
-      );
+      console.warn(`[deal] Owner went below floor: agreed ₦${agreedPrice} vs floor ₦${session.floorPrice}`);
     }
 
     // Append a deal confirmation message to the conversation

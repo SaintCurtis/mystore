@@ -85,7 +85,7 @@ function AgreeDealModal({
   const savingsPct = isValid ? Math.round((savings / session.listedPrice) * 100) : 0;
 
   async function handleConfirm() {
-    if (!isValid || isBelowFloor) return;
+    if (!isValid) return; // Owner can go below floor — their call
     setLoading(true);
     try {
       await onConfirm(parsed);
@@ -155,8 +155,8 @@ function AgreeDealModal({
 
             {/* Validation feedback */}
             {isBelowFloor && (
-              <p className="mt-2 text-xs font-medium text-red-600 dark:text-red-400">
-                ⚠️ Below your floor price of ₦{session.floorPrice.toLocaleString()}
+              <p className="mt-2 text-xs font-medium text-amber-600 dark:text-amber-400">
+                ⚠️ Below your floor price of ₦{session.floorPrice.toLocaleString()} — you can still confirm
               </p>
             )}
             {isValid && !isBelowFloor && savings > 0 && (
@@ -176,7 +176,7 @@ function AgreeDealModal({
           </Button>
           <Button
             onClick={handleConfirm}
-            disabled={!isValid || isBelowFloor || loading}
+            disabled={!isValid || loading}
             className="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold gap-2 disabled:opacity-50"
           >
             {loading
