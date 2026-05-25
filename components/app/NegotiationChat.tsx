@@ -186,6 +186,18 @@ export function NegotiationChat({
       if (data.status === "owner_active") ownerActiveRef.current = true;
       else if (data.status === "ai_active") ownerActiveRef.current = false;
 
+      // ── Owner struck the deal manually from admin dashboard ─────────────
+      // When owner clicks "Agree on Price", the session status flips to
+      // deal_struck and agreedPrice is set. The customer's polling picks
+      // this up here and shows the Pay button immediately.
+      if (data.status === "deal_struck" && data.agreedPrice && !dealStruckRef.current) {
+        dealStruckRef.current = true;
+        clearSession(product.slug);
+        setDeal({ struck: true, agreedPrice: data.agreedPrice, loading: false });
+        setOwnerTyping(false);
+        return; // stop polling — deal is done
+      }
+
       if (Array.isArray(data.messages) && data.messages.length > 0) {
         const sorted = [...data.messages].sort(
           (a: { timestamp: string }, b: { timestamp: string }) =>

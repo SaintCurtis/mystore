@@ -1,3 +1,9 @@
+// app/api/negotiate/owner-messages/route.ts
+// Customer polls this every 3s.
+// CHANGE: now returns agreedPrice when status === "deal_struck"
+// so the customer's chat immediately shows the Pay button when
+// the owner strikes the deal from the admin dashboard.
+
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "next-sanity";
 
@@ -9,8 +15,6 @@ const serverClient = createClient({
   token: process.env.SANITY_API_READ_TOKEN,
 });
 
-// Customer polls this every 3s to check if owner has sent a message
-// Query param: ?after=<ISO timestamp of last message seen>
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const sessionId = searchParams.get("sessionId");
@@ -23,10 +27,12 @@ export async function GET(req: NextRequest) {
   try {
     const session = await serverClient.fetch<{
       status: string;
+      agreedPrice?: number;
       messages: { role: string; content: string; sender: string; timestamp: string }[];
     } | null>(
       `*[_type == "negotiationSession" && sessionId == $sessionId][0]{
         status,
+        agreedPrice,
         messages[]{ role, content, sender, timestamp }
       }`,
       { sessionId }
@@ -45,6 +51,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       status: session.status,
       messages: newOwnerMessages,
+      // Return agreedPrice when deal is struck so customer sees Pay button
+      ...(session.status === "deal_struck" && session.agreedPrice
+        ? { agreedPrice: session.agreedPrice }
+        : {}),
     });
   } catch (err) {
     console.error("[poll-owner-messages]", err);
