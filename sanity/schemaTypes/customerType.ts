@@ -106,7 +106,8 @@ export const customerType = defineType({
 
   preview: {
     select: { email: "email", name: "name" },
-    prepare({ email, name }: { email: string; name: string }) {
+    prepare(selection: Record<string, any>) {
+      const { email, name } = selection;
       return {
         title:    name ?? email ?? "Unknown Customer",
         subtitle: email ?? "",
