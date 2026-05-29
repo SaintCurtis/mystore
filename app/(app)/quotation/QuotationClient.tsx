@@ -96,12 +96,12 @@ function ProductSearchInput({
     fetch(`/api/search?q=${encodeURIComponent(query)}&limit=6`)
       .then((r) => r.json())
       .then((data) => {
-        const products: ProductSuggestion[] = (data?.products ?? []).map((p: any) => ({
-          id: p._id ?? p.id ?? p.slug,
+        const products: ProductSuggestion[] = (data?.results ?? []).map((p: any) => ({
+          id: p._id,
           name: p.name,
           price: p.price ?? 0,
-          imageUrl: p.imageUrl,
-          category: p.category,
+          imageUrl: p.image,
+          category: p.categoryTitle,
         }));
         setSuggestions(products);
         setOpen(products.length > 0);
