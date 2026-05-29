@@ -14,11 +14,13 @@ import {
   UserIcon,
   WrenchScrewdriverIcon,
   ArchiveBoxIcon,
+  Squares2X2Icon,
+  DocumentTextIcon,
 } from "@heroicons/react/24/outline";
 import {
   HeartIcon as HeartSolid,
 } from "@heroicons/react/24/solid";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { useCartActions, useTotalItems } from "@/lib/store/cart-store-provider";
 import { useChatActions, useIsChatOpen } from "@/lib/store/chat-store-provider";
@@ -36,6 +38,13 @@ export function Header() {
   const wishlistCount = useWishlistCount();
   const { openWishlist } = useWishlistActions();
   const [searchOpen, setSearchOpen] = useState(false);
+
+  // Admin check — same pattern as MobileNav
+  const { user } = useUser();
+  const isOwner =
+    !!user?.id &&
+    !!process.env.NEXT_PUBLIC_ADMIN_CLERK_USER_ID &&
+    user.id === process.env.NEXT_PUBLIC_ADMIN_CLERK_USER_ID;
 
   return (
     <header className="sticky top-0 z-50 border-b border-zinc-200 dark:border-[#1f1f1f] bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-md transition-colors duration-300">
@@ -131,8 +140,34 @@ export function Header() {
           <SignedIn>
             <UserButton afterSwitchSessionUrl="/" appearance={{ elements: { avatarBox: "h-8 w-8" } }}>
               <UserButton.MenuItems>
-                <UserButton.Link label="My Orders" labelIcon={<ArchiveBoxIcon className="h-4 w-4" />} href="/orders" />
-                <UserButton.Link label="Build My Setup" labelIcon={<WrenchScrewdriverIcon className="h-4 w-4" />} href="/build-my-setup" />
+                {/* Admin link — owner only */}
+                {isOwner && (
+                  <UserButton.Link
+                    label="Admin Dashboard"
+                    labelIcon={<Squares2X2Icon className="h-4 w-4" />}
+                    href="/admin"
+                  />
+                )}
+                <UserButton.Link
+                  label="My Orders"
+                  labelIcon={<ArchiveBoxIcon className="h-4 w-4" />}
+                  href="/orders"
+                />
+                <UserButton.Link
+                  label="My Profile"
+                  labelIcon={<UserIcon className="h-4 w-4" />}
+                  href="/profile"
+                />
+                <UserButton.Link
+                  label="Get a Quotation"
+                  labelIcon={<DocumentTextIcon className="h-4 w-4" />}
+                  href="/quotation"
+                />
+                <UserButton.Link
+                  label="Build My Setup"
+                  labelIcon={<WrenchScrewdriverIcon className="h-4 w-4" />}
+                  href="/build-my-setup"
+                />
               </UserButton.MenuItems>
             </UserButton>
           </SignedIn>

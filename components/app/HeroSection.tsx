@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, ShieldCheck, RotateCcw, Globe, Wand2, Sparkles, Zap } from "lucide-react";
+import { ArrowRight, ShieldCheck, RotateCcw, Globe, Wand2, Sparkles, Zap, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const TRUST_BADGES = [
@@ -156,6 +156,14 @@ export function HeroSection() {
                   className="h-12 border border-zinc-300 dark:border-[#2a2a2a] px-6 text-sm font-medium text-zinc-700 dark:text-[#a3a3a3] hover:bg-zinc-100 dark:hover:bg-[#111111] hover:text-zinc-900 dark:hover:text-[#f1f1f1] transition-all">
                   <Link href="/?category=gaming-laptops">Gaming Laptops</Link>
                 </Button>
+                {/* Quotation CTA — desktop only inline with Row 1 buttons */}
+                <Button asChild variant="ghost" size="lg"
+                  className="hidden sm:flex h-12 border border-violet-200 dark:border-violet-500/20 px-5 text-sm font-medium text-violet-700 dark:text-violet-400 bg-violet-50/50 dark:bg-violet-500/5 hover:bg-violet-100 dark:hover:bg-violet-500/10 hover:border-violet-300 dark:hover:border-violet-500/40 transition-all gap-2">
+                  <Link href="/quotation">
+                    <FileText className="h-4 w-4" />
+                    Get a Quote
+                  </Link>
+                </Button>
               </div>
 
               {/* Row 2 — action cards */}
@@ -181,6 +189,26 @@ export function HeroSection() {
                   <ArrowRight className="h-4 w-4 shrink-0 text-amber-500 dark:text-amber-400 transition-transform group-hover:translate-x-1" />
                 </Link>
 
+                {/* ── Get a Quotation — mobile card (between Build My Setup and ACASIS) ── */}
+                <Link href="/quotation"
+                  className="sm:hidden group flex items-center gap-4 rounded-2xl border border-violet-200 dark:border-violet-500/20 bg-linear-to-r from-violet-50 to-purple-50 dark:from-violet-500/8 dark:to-purple-500/5 px-4 py-3.5 transition-all duration-200 hover:border-violet-400 dark:hover:border-violet-500/40 hover:shadow-md hover:shadow-violet-500/10 flex-1">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/15 dark:bg-violet-500/10 group-hover:bg-violet-500/25 transition-colors">
+                    <FileText className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-zinc-900 dark:text-[#f1f1f1] flex items-center gap-1.5">
+                      Get a Quotation
+                      <span className="inline-flex items-center gap-0.5 rounded-full bg-violet-500/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-violet-700 dark:text-violet-400">
+                        <Sparkles className="h-2.5 w-2.5" /> AI
+                      </span>
+                    </p>
+                    <p className="text-xs text-zinc-500 dark:text-[#a3a3a3] mt-0.5 line-clamp-1">
+                      Formal quote for bulk & corporate
+                    </p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 shrink-0 text-violet-500 dark:text-violet-400 transition-transform group-hover:translate-x-1" />
+                </Link>
+
                 {/* ACASIS */}
                 <Link href="/?category=acasis"
                   className="group flex items-center gap-4 rounded-2xl border border-blue-200 dark:border-blue-500/20 bg-linear-to-r from-blue-50 to-indigo-50 dark:from-blue-500/8 dark:to-indigo-500/5 px-4 py-3.5 transition-all duration-200 hover:border-blue-400 dark:hover:border-blue-500/40 hover:shadow-md hover:shadow-blue-500/10 flex-1">
@@ -202,7 +230,7 @@ export function HeroSection() {
                 </Link>
               </div>
 
-              {/* WhatsApp CTA — mobile only, below main CTAs */}
+              {/* WhatsApp CTA — mobile only */}
               <a
                 href={`https://wa.me/2349060898951?text=${encodeURIComponent("Hi! I need help choosing a product on The Saint's TechNet.")}`}
                 target="_blank"
@@ -232,13 +260,6 @@ export function HeroSection() {
             ))}
           </div>
         </div>
-
-        {/* 
-          ✅ REMOVED: Mobile trust badge horizontal scroll row.
-          The MobileTrustBar component below the hero already handles
-          social proof on mobile (Engineer-Inspected, Fast Response, etc.)
-          Removing this eliminates the perceived duplication.
-        */}
       </div>
 
       {/* Blend */}

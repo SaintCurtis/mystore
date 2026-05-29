@@ -6,7 +6,7 @@ import Link from "next/link";
 import {
   X, Menu, Wand2, Package, Monitor, Cpu, Headphones,
   Zap, Satellite, Video, ShoppingBag, Gamepad2, Home,
-  Heart, Gift, LayoutDashboard,
+  Heart, Gift, LayoutDashboard, FileText, UserCircle,
 } from "lucide-react";
 import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import { ThemeToggle } from "@/components/app/ThemeToggle";
@@ -14,17 +14,18 @@ import { useTotalItems, useCartActions } from "@/lib/store/cart-store-provider";
 import { useWishlistCount, useWishlistActions } from "@/lib/store/wishlist-store-provider";
 
 const NAV_ITEMS = [
-  { label: "Build My Setup ✨",        href: "/build-my-setup",                   icon: Wand2,       highlight: true  },
-  { label: "All Products",              href: "/",                                 icon: ShoppingBag, highlight: false },
-  { label: "Computers",                 href: "/?category=computers",              icon: Cpu,         highlight: false },
-  { label: "Accessories",               href: "/?category=accessories",            icon: Headphones,  highlight: false },
-  { label: "Monitors",                  href: "/?category=monitors",               icon: Monitor,     highlight: false },
-  { label: "Gaming Laptops",            href: "/?category=gaming-laptops",         icon: Gamepad2,    highlight: false },
-  { label: "Content Creation",          href: "/?category=content-creation-tools", icon: Video,       highlight: false },
-  { label: "Tech Setup Gears",          href: "/?category=tech-setup-gears",       icon: Home,        highlight: false },
-  { label: "EcoFlow",                   href: "/?category=ecoflow",                icon: Zap,         highlight: false },
-  { label: "Starlink",                  href: "/?category=starlink",               icon: Satellite,   highlight: false },
-  { label: "ACASIS",                    href: "/?category=acasis",                 icon: Zap,         highlight: false },
+  { label: "Build My Setup ✨",        href: "/build-my-setup",                    icon: Wand2,       highlight: true,  highlightColor: "amber" },
+  { label: "Get a Quotation",           href: "/quotation",                         icon: FileText,    highlight: true,  highlightColor: "violet" },
+  { label: "All Products",              href: "/",                                  icon: ShoppingBag, highlight: false, highlightColor: null },
+  { label: "Computers",                 href: "/?category=computers",               icon: Cpu,         highlight: false, highlightColor: null },
+  { label: "Accessories",               href: "/?category=accessories",             icon: Headphones,  highlight: false, highlightColor: null },
+  { label: "Monitors",                  href: "/?category=monitors",                icon: Monitor,     highlight: false, highlightColor: null },
+  { label: "Gaming Laptops",            href: "/?category=gaming-laptops",          icon: Gamepad2,    highlight: false, highlightColor: null },
+  { label: "Content Creation",          href: "/?category=content-creation-tools",  icon: Video,       highlight: false, highlightColor: null },
+  { label: "Tech Setup Gears",          href: "/?category=tech-setup-gears",        icon: Home,        highlight: false, highlightColor: null },
+  { label: "EcoFlow",                   href: "/?category=ecoflow",                 icon: Zap,         highlight: false, highlightColor: null },
+  { label: "Starlink",                  href: "/?category=starlink",                icon: Satellite,   highlight: false, highlightColor: null },
+  { label: "ACASIS",                    href: "/?category=acasis",                  icon: Zap,         highlight: false, highlightColor: null },
 ];
 
 export function MobileNav() {
@@ -42,16 +43,13 @@ export function MobileNav() {
     !!process.env.NEXT_PUBLIC_ADMIN_CLERK_USER_ID &&
     user.id === process.env.NEXT_PUBLIC_ADMIN_CLERK_USER_ID;
 
-  // Mount portal after hydration
   useEffect(() => { setMounted(true); }, []);
 
-  // Lock body scroll
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
-  // Close on scroll / swipe
   useEffect(() => {
     if (!open) return;
     scrollYRef.current = window.scrollY;
@@ -67,7 +65,6 @@ export function MobileNav() {
     };
   }, [open]);
 
-  // Close on Escape
   useEffect(() => {
     if (!open) return;
     const handleKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
@@ -90,7 +87,7 @@ export function MobileNav() {
         aria-hidden="true"
       />
 
-      {/* Drawer — renders at document root, never clipped by header */}
+      {/* Drawer */}
       <div
         className={`
           fixed left-0 top-0 z-9999
@@ -149,24 +146,34 @@ export function MobileNav() {
           )}
 
           {/* Main nav */}
-          {NAV_ITEMS.map(({ label, href, icon: Icon, highlight }) => (
-            <Link
-              key={href + label}
-              href={href}
-              onClick={close}
-              className={`
-                flex items-center gap-3 px-5 py-3.5 text-sm font-medium
-                border-l-2 transition-colors
-                ${highlight
-                  ? "border-amber-500 bg-amber-50/70 dark:bg-amber-500/8 text-amber-700 dark:text-amber-400"
-                  : "border-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1a1a1a] hover:text-zinc-900 dark:hover:text-white"
-                }
-              `}
-            >
-              <Icon className={`h-4 w-4 shrink-0 ${highlight ? "text-amber-500" : "text-zinc-400 dark:text-zinc-500"}`} />
-              {label}
-            </Link>
-          ))}
+          {NAV_ITEMS.map(({ label, href, icon: Icon, highlight, highlightColor }) => {
+            const colorMap: Record<string, string> = {
+              amber: "border-amber-500 bg-amber-50/70 dark:bg-amber-500/8 text-amber-700 dark:text-amber-400",
+              violet: "border-violet-500 bg-violet-50/70 dark:bg-violet-500/8 text-violet-700 dark:text-violet-400",
+            };
+            const iconColorMap: Record<string, string> = {
+              amber: "text-amber-500",
+              violet: "text-violet-500",
+            };
+            const highlightClasses = highlight && highlightColor
+              ? colorMap[highlightColor]
+              : "border-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1a1a1a] hover:text-zinc-900 dark:hover:text-white";
+            const iconClasses = highlight && highlightColor
+              ? iconColorMap[highlightColor]
+              : "text-zinc-400 dark:text-zinc-500";
+
+            return (
+              <Link
+                key={href + label}
+                href={href}
+                onClick={close}
+                className={`flex items-center gap-3 px-5 py-3.5 text-sm font-medium border-l-2 transition-colors ${highlightClasses}`}
+              >
+                <Icon className={`h-4 w-4 shrink-0 ${iconClasses}`} />
+                {label}
+              </Link>
+            );
+          })}
 
           <div className="mx-5 my-1.5 border-t border-zinc-100 dark:border-[#1c1c1c]" />
 
@@ -178,6 +185,14 @@ export function MobileNav() {
             >
               <Package className="h-4 w-4 text-zinc-400 dark:text-zinc-500" />
               My Orders
+            </Link>
+            <Link
+              href="/profile"
+              onClick={close}
+              className="flex items-center gap-3 px-5 py-3.5 text-sm font-medium border-l-2 border-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1a1a1a] transition-colors"
+            >
+              <UserCircle className="h-4 w-4 text-zinc-400 dark:text-zinc-500" />
+              My Profile
             </Link>
             <Link
               href="/referral"
@@ -257,7 +272,6 @@ export function MobileNav() {
 
   return (
     <>
-      {/* Trigger button — stays inside header */}
       <button
         type="button"
         onClick={() => setOpen(true)}
@@ -268,7 +282,6 @@ export function MobileNav() {
         <Menu className="h-5 w-5" />
       </button>
 
-      {/* Drawer — portaled to document.body, completely outside header */}
       {mounted && createPortal(drawer, document.body)}
     </>
   );

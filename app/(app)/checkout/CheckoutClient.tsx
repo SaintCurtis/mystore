@@ -1,18 +1,8 @@
 "use client";
 
 // app/(app)/checkout/CheckoutClient.tsx
-//
-// KEY CHANGES:
-//  1. Reads ?negotiated=true&productId=...&agreedPrice=...&originalPrice=...
-//     from URL and renders the negotiated deal checkout properly instead of
-//     showing "Your cart is empty"
-//  2. Google Places Autocomplete on street address field — real suggestions,
-//     auto-fills city/state/postcode/country as user types
-//  3. LGA dropdown for Nigerian addresses
-//  4. Countries loaded from REST Countries API — no more hardcoded list
-//  5. All lucide-react replaced with heroicons
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
@@ -57,6 +47,7 @@ const NIGERIA_LGAS: Record<string, string[]> = {
 
 interface ShippingAddress {
   name: string;
+  phone: string;
   line1: string;
   line2: string;
   city: string;
@@ -155,13 +146,13 @@ export function CheckoutClient() {
   const [selectedSavedAddr, setSelectedSavedAddr] = useState<string | null>(null);
 
   const [address, setAddress] = useState<ShippingAddress>({
-    name: "", line1: "", line2: "", city: "", state: "", lga: "",
+    name: "", phone: "", line1: "", line2: "", city: "", state: "", lga: "",
     postcode: "", country: "Nigeria", countryCode: "NG",
   });
 
   const addressInputRef = useRef<HTMLInputElement>(null);
 
-  // ── Fetch countries from REST Countries API ───────────────────────────
+  // ── Fetch countries ───────────────────────────────────────────────────
   useEffect(() => {
     fetch("https://restcountries.com/v3.1/all?fields=name,cca2")
       .then((r) => r.json())
@@ -186,7 +177,7 @@ export function CheckoutClient() {
       .finally(() => setCountriesLoading(false));
   }, []);
 
-  // ── Fetch saved addresses for returning customers ────────────────────
+  // ── Fetch saved addresses ─────────────────────────────────────────────
   useEffect(() => {
     if (!isSignedIn) return;
     fetch("/api/customer/addresses")
@@ -206,8 +197,6 @@ export function CheckoutClient() {
   useEffect(() => {
     const input = addressInputRef.current;
     if (!input || typeof window === "undefined") return;
-
-    // Wait for Google Maps to load
     const init = () => {
       if (!(window as any).google?.maps?.places) return;
       const autocomplete = new (window as any).google.maps.places.Autocomplete(input, {
@@ -236,16 +225,11 @@ export function CheckoutClient() {
         setSelectedShipping(null);
       });
     };
-
     if ((window as any).google?.maps?.places) {
       init();
     } else {
-      // Poll until loaded
       const interval = setInterval(() => {
-        if ((window as any).google?.maps?.places) {
-          clearInterval(interval);
-          init();
-        }
+        if ((window as any).google?.maps?.places) { clearInterval(interval); init(); }
       }, 500);
       return () => clearInterval(interval);
     }
@@ -258,6 +242,7 @@ export function CheckoutClient() {
 
   const isAddressComplete =
     address.name.trim() !== "" &&
+    address.phone.trim() !== "" &&
     address.line1.trim() !== "" &&
     address.city.trim() !== "" &&
     address.postcode.trim() !== "" &&
@@ -280,6 +265,7 @@ export function CheckoutClient() {
     if (!isAddressComplete || hasStockIssues || isLoading) return;
     setIsCryptoLoading(true);
     try {
+      sessionStorage.setItem("lastCheckoutAddress", JSON.stringify(address));
       const result = await createCryptoCheckoutSession(cartItems, address);
       if (result.success && result.url) { clearCart(); window.location.href = result.url; }
       else toast.error(result.error ?? "Could not start crypto payment");
@@ -311,6 +297,7 @@ export function CheckoutClient() {
       });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.error ?? "Payment failed");
+      sessionStorage.setItem("lastCheckoutAddress", JSON.stringify(address));
       window.location.href = data.url;
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
@@ -322,7 +309,7 @@ export function CheckoutClient() {
   // ── Apply a saved address ─────────────────────────────────────────────
   function applyAddress(addr: SavedAddress) {
     setAddress({
-      name: addr.name, line1: addr.line1, line2: addr.line2 ?? "",
+      name: addr.name, phone: "", line1: addr.line1, line2: addr.line2 ?? "",
       city: addr.city, state: addr.state ?? "", lga: addr.lga ?? "",
       postcode: addr.postcode, country: addr.country, countryCode: addr.countryCode,
     });
@@ -348,7 +335,6 @@ export function CheckoutClient() {
 
   return (
     <>
-      {/* Google Places API */}
       {process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY && (
         <script
           async
@@ -371,7 +357,6 @@ export function CheckoutClient() {
           </Link>
           <h1 className="mt-3 text-2xl font-bold text-zinc-900 dark:text-[#f1f1f1]">Checkout</h1>
 
-          {/* Negotiated deal banner */}
           {negotiated && deal && (
             <div className="mt-3 flex items-center gap-3 rounded-xl border border-amber-400/40 bg-amber-500/8 px-4 py-3">
               <CheckBadgeIcon className="h-5 w-5 text-amber-500 shrink-0" />
@@ -386,7 +371,6 @@ export function CheckoutClient() {
             </div>
           )}
 
-          {/* Sign in banner */}
           {isLoaded && !isSignedIn && (
             <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-amber-500/30 bg-amber-500/8 px-4 py-3">
               <p className="text-sm text-amber-700 dark:text-amber-300">
@@ -413,7 +397,6 @@ export function CheckoutClient() {
                 </h2>
               </div>
 
-              {/* Negotiated product */}
               {negotiated && deal && (
                 <div className="flex gap-3 px-5 py-4">
                   <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-zinc-100 dark:bg-[#0d0d0d]">
@@ -440,7 +423,6 @@ export function CheckoutClient() {
                 </div>
               )}
 
-              {/* Cart items */}
               {!negotiated && (
                 <>
                   {hasStockIssues && !isLoading && (
@@ -494,7 +476,7 @@ export function CheckoutClient() {
               </div>
               <div className="space-y-4 px-5 py-4">
 
-                {/* Saved addresses — returning customers */}
+                {/* Saved addresses */}
                 {isSignedIn && savedAddresses.length > 0 && (
                   <div className="pb-4 border-b border-zinc-100 dark:border-zinc-800">
                     <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-2.5 uppercase tracking-wide">
@@ -525,7 +507,7 @@ export function CheckoutClient() {
                       <button type="button"
                         onClick={() => {
                           setSelectedSavedAddr(null);
-                          setAddress({ name: "", line1: "", line2: "", city: "", state: "", lga: "", postcode: "", country: "Nigeria", countryCode: "NG" });
+                          setAddress({ name: "", phone: "", line1: "", line2: "", city: "", state: "", lga: "", postcode: "", country: "Nigeria", countryCode: "NG" });
                         }}
                         className="w-full text-left rounded-xl border border-dashed border-zinc-200 dark:border-zinc-700 px-4 py-3 text-sm text-zinc-400 hover:border-amber-400 hover:text-amber-600 dark:hover:text-amber-400 transition-all">
                         + Use a different address
@@ -534,6 +516,7 @@ export function CheckoutClient() {
                   </div>
                 )}
 
+                {/* Full Name */}
                 <div>
                   <label className={labelClass}>Full Name <span className="text-red-500">*</span></label>
                   <input type="text" value={address.name}
@@ -541,7 +524,21 @@ export function CheckoutClient() {
                     placeholder="John Doe" className={inputClass} />
                 </div>
 
-                {/* Street address — Google Places autocomplete */}
+                {/* ── Phone Number ── */}
+                <div>
+                  <label className={labelClass}>
+                    Phone Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    value={address.phone}
+                    onChange={(e) => setAddress((a) => ({ ...a, phone: e.target.value }))}
+                    placeholder="+234 800 000 0000"
+                    className={inputClass}
+                  />
+                </div>
+
+                {/* Street address */}
                 <div>
                   <label className={labelClass}>
                     Street Address <span className="text-red-500">*</span>
@@ -672,14 +669,12 @@ export function CheckoutClient() {
                 </div>
               </div>
 
-              {/* Payment method selector — regular cart only */}
               {!negotiated && (
                 <div className="border-t border-zinc-100 dark:border-[#1a1a1a] pt-4">
                   <PaymentMethodSelector selected={paymentMethod} onChange={setPaymentMethod} />
                 </div>
               )}
 
-              {/* Pay button */}
               <div className="pt-1">
                 {negotiated ? (
                   !isSignedIn ? (

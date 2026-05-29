@@ -6,6 +6,7 @@ import { CheckCircle, Package, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils";
 import { useCartActions } from "@/lib/store/cart-store-provider";
+import { useAuth } from "@clerk/nextjs";
 
 interface SuccessClientProps {
   session: {
@@ -32,11 +33,30 @@ interface SuccessClientProps {
 
 export function SuccessClient({ session }: SuccessClientProps) {
   const { clearCart } = useCartActions();
+  const { isSignedIn } = useAuth();
 
   // Clear cart on mount
   useEffect(() => {
     clearCart();
   }, [clearCart]);
+
+  // ── Save address + phone from checkout to customer profile ────────────
+  useEffect(() => {
+    if (!isSignedIn) return;
+    try {
+      const raw = sessionStorage.getItem("lastCheckoutAddress");
+      if (!raw) return;
+      sessionStorage.removeItem("lastCheckoutAddress");
+      // Fire-and-forget — never block or affect the success page
+      fetch("/api/customer/addresses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: raw,
+      }).catch(() => {});
+    } catch {
+      // sessionStorage unavailable (private mode, SSR quirk) — safe to ignore
+    }
+  }, [isSignedIn]);
 
   const address = session.shippingAddress;
 
@@ -67,7 +87,6 @@ export function SuccessClient({ session }: SuccessClientProps) {
         </div>
 
         <div className="px-6 py-4">
-          {/* Line items — only shown if available */}
           {session.lineItems && session.lineItems.length > 0 && (
             <div className="space-y-3">
               {session.lineItems.map((item) => (
@@ -86,7 +105,6 @@ export function SuccessClient({ session }: SuccessClientProps) {
             </div>
           )}
 
-          {/* Total */}
           <div className="mt-4 border-t border-zinc-200 pt-4 dark:border-zinc-800">
             <div className="flex justify-between text-base font-semibold">
               <span className="text-zinc-900 dark:text-zinc-100">Total</span>
@@ -97,7 +115,6 @@ export function SuccessClient({ session }: SuccessClientProps) {
           </div>
         </div>
 
-        {/* Shipping Address — shown if collected */}
         {address && (
           <div className="border-t border-zinc-200 px-6 py-4 dark:border-zinc-800">
             <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
@@ -117,7 +134,6 @@ export function SuccessClient({ session }: SuccessClientProps) {
           </div>
         )}
 
-        {/* Payment Status */}
         <div className="border-t border-zinc-200 px-6 py-4 dark:border-zinc-800">
           <div className="flex items-center gap-2">
             <Package className="h-5 w-5 text-zinc-400" />
