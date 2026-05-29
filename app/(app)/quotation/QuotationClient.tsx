@@ -2,11 +2,11 @@
 
 // app/(app)/quotation/QuotationClient.tsx
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   FileText, Plus, Trash2, Sparkles, ArrowLeft, Printer,
-  CheckCircle,
+  CheckCircle, Search, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -19,6 +19,15 @@ interface QuoteItem {
   name: string;
   quantity: number;
   unitPrice: number;
+  fromCatalogue: boolean; // locked price if selected from search
+}
+
+interface ProductSuggestion {
+  id: string;
+  name: string;
+  price: number;
+  imageUrl?: string;
+  category?: string;
 }
 
 interface GeneratedQuote {
@@ -47,13 +56,169 @@ const inputClass =
 
 const labelClass = "mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300";
 
-// ── Component ─────────────────────────────────────────────────────────────
+// ── Product Search Input ───────────────────────────────────────────────────
+
+function ProductSearchInput({
+  value,
+  onChange,
+  onSelectProduct,
+  placeholder,
+}: {
+  value: string;
+  onChange: (val: string) => void;
+  onSelectProduct: (product: ProductSuggestion) => void;
+  placeholder?: string;
+}) {
+  const [suggestions, setSuggestions] = useState<ProductSuggestion[]>([]);
+  const [open, setOpen] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Close on outside click
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const search = useCallback((query: string) => {
+    if (!query.trim() || query.length < 2) {
+      setSuggestions([]);
+      setOpen(false);
+      return;
+    }
+    setSearching(true);
+    fetch(`/api/search?q=${encodeURIComponent(query)}&limit=6`)
+      .then((r) => r.json())
+      .then((data) => {
+        const products: ProductSuggestion[] = (data?.products ?? []).map((p: any) => ({
+          id: p._id ?? p.id ?? p.slug,
+          name: p.name,
+          price: p.price ?? 0,
+          imageUrl: p.imageUrl,
+          category: p.category,
+        }));
+        setSuggestions(products);
+        setOpen(products.length > 0);
+      })
+      .catch(() => {})
+      .finally(() => setSearching(false));
+  }, []);
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const val = e.target.value;
+    onChange(val);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => search(val), 300);
+  }
+
+  function handleSelect(product: ProductSuggestion) {
+    onSelectProduct(product);
+    setSuggestions([]);
+    setOpen(false);
+  }
+
+  function handleClear() {
+    onChange("");
+    setSuggestions([]);
+    setOpen(false);
+  }
+
+  return (
+    <div ref={containerRef} className="relative">
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
+        <input
+          type="text"
+          value={value}
+          onChange={handleChange}
+          onFocus={() => suggestions.length > 0 && setOpen(true)}
+          placeholder={placeholder ?? "Search products or type custom item…"}
+          className={inputClass + " pl-9 pr-8"}
+          autoComplete="off"
+        />
+        {value && (
+          <button
+            type="button"
+            onClick={handleClear}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
+        {searching && (
+          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-zinc-400 animate-pulse">
+            …
+          </span>
+        )}
+      </div>
+
+      {/* Dropdown */}
+      {open && suggestions.length > 0 && (
+        <div className="absolute top-full left-0 right-0 z-50 mt-1 rounded-xl border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] shadow-xl dark:shadow-black/40 overflow-hidden">
+          <div className="px-3 py-2 border-b border-zinc-100 dark:border-[#1a1a1a]">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">
+              From your catalogue — select to auto-fill price
+            </p>
+          </div>
+          <ul className="max-h-64 overflow-y-auto overscroll-contain">
+            {suggestions.map((product) => (
+              <li key={product.id}>
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()} // prevent blur before click
+                  onClick={() => handleSelect(product)}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-zinc-50 dark:hover:bg-white/4 transition-colors text-left"
+                >
+                  {product.imageUrl ? (
+                    <img
+                      src={product.imageUrl}
+                      alt={product.name}
+                      className="h-9 w-9 rounded-lg object-cover shrink-0 bg-zinc-100 dark:bg-zinc-800"
+                    />
+                  ) : (
+                    <div className="h-9 w-9 rounded-lg bg-zinc-100 dark:bg-zinc-800 shrink-0 flex items-center justify-center">
+                      <FileText className="h-4 w-4 text-zinc-400" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-zinc-900 dark:text-[#f1f1f1] truncate">
+                      {product.name}
+                    </p>
+                    {product.category && (
+                      <p className="text-xs text-zinc-400 truncate capitalize">{product.category}</p>
+                    )}
+                  </div>
+                  <span className="text-sm font-bold text-amber-600 dark:text-amber-400 shrink-0">
+                    {formatPrice(product.price)}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          <div className="px-3 py-2 border-t border-zinc-100 dark:border-[#1a1a1a]">
+            <p className="text-[10px] text-zinc-400">
+              Not listed? Keep typing to use a custom description.
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Main Component ─────────────────────────────────────────────────────────
 
 export function QuotationClient() {
   const [customerName, setCustomerName] = useState("");
   const [notes, setNotes] = useState("");
   const [items, setItems] = useState<QuoteItem[]>([
-    { id: "1", name: "", quantity: 1, unitPrice: 0 },
+    { id: "1", name: "", quantity: 1, unitPrice: 0, fromCatalogue: false },
   ]);
   const [loading, setLoading] = useState(false);
   const [quote, setQuote] = useState<GeneratedQuote | null>(null);
@@ -62,7 +227,7 @@ export function QuotationClient() {
   function addItem() {
     setItems((prev) => [
       ...prev,
-      { id: Date.now().toString(), name: "", quantity: 1, unitPrice: 0 },
+      { id: Date.now().toString(), name: "", quantity: 1, unitPrice: 0, fromCatalogue: false },
     ]);
   }
 
@@ -70,9 +235,19 @@ export function QuotationClient() {
     setItems((prev) => prev.filter((i) => i.id !== id));
   }
 
-  function updateItem(id: string, field: keyof Omit<QuoteItem, "id">, value: string | number) {
+  function updateItem(id: string, field: keyof Omit<QuoteItem, "id">, value: string | number | boolean) {
     setItems((prev) =>
       prev.map((i) => (i.id === id ? { ...i, [field]: value } : i))
+    );
+  }
+
+  function selectProductForItem(id: string, product: ProductSuggestion) {
+    setItems((prev) =>
+      prev.map((i) =>
+        i.id === id
+          ? { ...i, name: product.name, unitPrice: product.price, fromCatalogue: true }
+          : i
+      )
     );
   }
 
@@ -112,15 +287,16 @@ export function QuotationClient() {
     }
   }
 
+  // Live totals
   const estimatedTotal = items.reduce(
     (sum, i) => sum + (i.unitPrice || 0) * (i.quantity || 1),
     0
   );
 
+  const filledItems = items.filter((i) => i.name.trim() && i.unitPrice > 0);
+
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-[#0a0a0a] transition-colors">
-
-      {/* Print styles — hides everything except the quote when printing */}
       <style>{`
         @media print {
           body > * { display: none !important; }
@@ -159,6 +335,14 @@ export function QuotationClient() {
               </p>
             </div>
           </div>
+
+          {/* Example hint */}
+          <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-violet-100 dark:border-violet-500/15 bg-violet-50 dark:bg-violet-500/8 px-4 py-3">
+            <Sparkles className="h-4 w-4 text-violet-500 shrink-0 mt-0.5" />
+            <p className="text-xs text-violet-700 dark:text-violet-300 leading-relaxed">
+              <span className="font-semibold">How it works:</span> Search for products from our catalogue (prices auto-fill) or type custom items. Add your name, hit Generate — you'll get a branded PDF-ready quotation in seconds.
+            </p>
+          </div>
         </div>
 
         {/* ── Form ── */}
@@ -171,9 +355,7 @@ export function QuotationClient() {
             </h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className={labelClass}>
-                  Your name or organisation
-                </label>
+                <label className={labelClass}>Your name or organisation</label>
                 <input
                   type="text"
                   value={customerName}
@@ -201,10 +383,15 @@ export function QuotationClient() {
           {/* Items */}
           <div className="rounded-xl border border-zinc-200 dark:border-[#1a1a1a] bg-white dark:bg-[#111111] p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-zinc-900 dark:text-[#f1f1f1]">Items</h2>
+              <div>
+                <h2 className="font-semibold text-zinc-900 dark:text-[#f1f1f1]">Items</h2>
+                <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
+                  Search our catalogue — prices fill automatically
+                </p>
+              </div>
               <button
                 onClick={addItem}
-                className="flex items-center gap-1.5 rounded-lg border border-zinc-200 dark:border-[#2a2a2a] px-3 py-1.5 text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:border-amber-500 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                className="flex items-center gap-1.5 rounded-lg border border-zinc-200 dark:border-[#2a2a2a] px-3 py-1.5 text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:border-violet-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
               >
                 <Plus className="h-3.5 w-3.5" /> Add item
               </button>
@@ -218,19 +405,20 @@ export function QuotationClient() {
               <span className="col-span-1" />
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               {items.map((item, idx) => (
                 <div key={item.id} className="grid grid-cols-12 gap-2 items-start">
-                  {/* Name */}
+
+                  {/* Product search */}
                   <div className="col-span-12 sm:col-span-6">
-                    <input
-                      type="text"
+                    <ProductSearchInput
                       value={item.name}
-                      onChange={(e) => updateItem(item.id, "name", e.target.value)}
-                      placeholder={`Item ${idx + 1} — e.g. MacBook Air M2 (Foreign Used)`}
-                      className={inputClass}
+                      onChange={(val) => updateItem(item.id, "name", val)}
+                      onSelectProduct={(product) => selectProductForItem(item.id, product)}
+                      placeholder={`Item ${idx + 1} — search or describe`}
                     />
                   </div>
+
                   {/* Qty */}
                   <div className="col-span-3 sm:col-span-2">
                     <input
@@ -243,20 +431,39 @@ export function QuotationClient() {
                       className={inputClass + " text-center"}
                     />
                   </div>
-                  {/* Price */}
+
+                  {/* Price — with ₦ prefix */}
                   <div className="col-span-8 sm:col-span-3">
-                    <input
-                      type="number"
-                      min={0}
-                      step={1000}
-                      value={item.unitPrice || ""}
-                      onChange={(e) =>
-                        updateItem(item.id, "unitPrice", parseFloat(e.target.value) || 0)
-                      }
-                      placeholder="0"
-                      className={inputClass + " text-right"}
-                    />
+                    <div className="relative">
+                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-zinc-400">
+                        ₦
+                      </span>
+                      <input
+                        type="number"
+                        min={0}
+                        step={1000}
+                        value={item.unitPrice || ""}
+                        onChange={(e) => {
+                          updateItem(item.id, "unitPrice", parseFloat(e.target.value) || 0);
+                          updateItem(item.id, "fromCatalogue", false);
+                        }}
+                        placeholder="0"
+                        className={inputClass + " pl-7 text-right " + (item.fromCatalogue ? "bg-amber-50 dark:bg-amber-950/20 border-amber-300 dark:border-amber-700/50" : "")}
+                      />
+                    </div>
+                    {/* Live line total */}
+                    {item.unitPrice > 0 && item.quantity > 1 && (
+                      <p className="text-right text-[10px] text-zinc-400 mt-0.5">
+                        = {formatPrice(item.unitPrice * item.quantity)}
+                      </p>
+                    )}
+                    {item.fromCatalogue && (
+                      <p className="text-right text-[10px] text-amber-600 dark:text-amber-400 mt-0.5">
+                        ✦ catalogue price
+                      </p>
+                    )}
                   </div>
+
                   {/* Delete */}
                   <div className="col-span-1 flex justify-center items-center pt-2.5">
                     {items.length > 1 && (
@@ -272,13 +479,33 @@ export function QuotationClient() {
               ))}
             </div>
 
-            {/* Estimated total preview */}
+            {/* Live total */}
             {estimatedTotal > 0 && (
-              <div className="mt-4 pt-4 border-t border-zinc-100 dark:border-[#1a1a1a] flex items-center justify-between">
-                <span className="text-sm text-zinc-500 dark:text-[#a3a3a3]">Estimated total</span>
-                <span className="text-base font-bold text-zinc-900 dark:text-amber-400">
-                  {formatPrice(estimatedTotal)}
-                </span>
+              <div className="mt-4 pt-4 border-t border-zinc-100 dark:border-[#1a1a1a]">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-zinc-500 dark:text-[#a3a3a3]">
+                    Estimated total
+                    {filledItems.length > 0 && (
+                      <span className="ml-1.5 text-xs text-zinc-400">
+                        ({filledItems.length} {filledItems.length === 1 ? "item" : "items"})
+                      </span>
+                    )}
+                  </span>
+                  <span className="text-base font-bold text-zinc-900 dark:text-amber-400">
+                    {formatPrice(estimatedTotal)}
+                  </span>
+                </div>
+                {/* Per-item breakdown */}
+                {filledItems.length > 1 && (
+                  <div className="mt-2 space-y-1">
+                    {filledItems.map((item) => (
+                      <div key={item.id} className="flex justify-between text-xs text-zinc-400 dark:text-zinc-600">
+                        <span className="truncate max-w-[200px]">{item.name} × {item.quantity}</span>
+                        <span>{formatPrice(item.unitPrice * item.quantity)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -286,18 +513,23 @@ export function QuotationClient() {
           {/* Generate button */}
           <Button
             onClick={generateQuote}
-            disabled={loading}
-            className="w-full h-12 bg-violet-600 hover:bg-violet-500 text-white font-bold text-sm shadow-lg shadow-violet-500/20 gap-2 transition-all"
+            disabled={loading || filledItems.length === 0}
+            className="w-full h-12 bg-violet-600 hover:bg-violet-500 text-white font-bold text-sm shadow-lg shadow-violet-500/20 gap-2 transition-all disabled:opacity-40"
           >
             {loading ? (
               <>
-                <span className="inline-block animate-spin">⟳</span>
+                <span className="inline-block animate-spin text-base">⟳</span>
                 Generating your quotation…
               </>
             ) : (
               <>
                 <Sparkles className="h-4 w-4" />
                 Generate Formal Quotation
+                {filledItems.length > 0 && (
+                  <span className="ml-1 rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">
+                    {filledItems.length} {filledItems.length === 1 ? "item" : "items"}
+                  </span>
+                )}
               </>
             )}
           </Button>
@@ -306,8 +538,6 @@ export function QuotationClient() {
         {/* ── Quote Preview ── */}
         {quote && (
           <div id="quote-preview" className="mt-10">
-
-            {/* Preview header */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-emerald-500" />
@@ -326,7 +556,6 @@ export function QuotationClient() {
               </Button>
             </div>
 
-            {/* The printable document */}
             <div
               id="quote-printable"
               ref={printRef}
@@ -355,8 +584,7 @@ export function QuotationClient() {
               </div>
 
               <div className="px-6 py-6 space-y-6">
-
-                {/* Meta row */}
+                {/* Meta */}
                 <div className="grid grid-cols-2 gap-6 text-sm">
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1">
@@ -382,43 +610,24 @@ export function QuotationClient() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="bg-zinc-50 dark:bg-[#0d0d0d] border-b border-zinc-100 dark:border-[#1a1a1a]">
-                        <th className="text-left px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-zinc-500">
-                          Item
-                        </th>
-                        <th className="text-center px-3 py-3 text-[11px] font-bold uppercase tracking-wide text-zinc-500">
-                          Qty
-                        </th>
-                        <th className="text-right px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-zinc-500">
-                          Unit Price
-                        </th>
-                        <th className="text-right px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-zinc-500">
-                          Total
-                        </th>
+                        <th className="text-left px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-zinc-500">Item</th>
+                        <th className="text-center px-3 py-3 text-[11px] font-bold uppercase tracking-wide text-zinc-500">Qty</th>
+                        <th className="text-right px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-zinc-500">Unit Price</th>
+                        <th className="text-right px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-zinc-500">Total</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-100 dark:divide-[#1a1a1a]">
                       {quote.items.map((item, i) => (
-                        <tr
-                          key={i}
-                          className="hover:bg-zinc-50/50 dark:hover:bg-white/2 transition-colors"
-                        >
+                        <tr key={i} className="hover:bg-zinc-50/50 dark:hover:bg-white/2 transition-colors">
                           <td className="px-4 py-3.5">
-                            <p className="font-medium text-zinc-900 dark:text-[#f1f1f1]">
-                              {item.name}
-                            </p>
+                            <p className="font-medium text-zinc-900 dark:text-[#f1f1f1]">{item.name}</p>
                             {item.notes && (
                               <p className="text-xs text-zinc-400 mt-0.5">{item.notes}</p>
                             )}
                           </td>
-                          <td className="px-3 py-3.5 text-center text-zinc-600 dark:text-zinc-400">
-                            {item.quantity}
-                          </td>
-                          <td className="px-4 py-3.5 text-right text-zinc-700 dark:text-zinc-300">
-                            {formatPrice(item.unitPrice)}
-                          </td>
-                          <td className="px-4 py-3.5 text-right font-semibold text-zinc-900 dark:text-[#f1f1f1]">
-                            {formatPrice(item.lineTotal)}
-                          </td>
+                          <td className="px-3 py-3.5 text-center text-zinc-600 dark:text-zinc-400">{item.quantity}</td>
+                          <td className="px-4 py-3.5 text-right text-zinc-700 dark:text-zinc-300">{formatPrice(item.unitPrice)}</td>
+                          <td className="px-4 py-3.5 text-right font-semibold text-zinc-900 dark:text-[#f1f1f1]">{formatPrice(item.lineTotal)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -430,18 +639,14 @@ export function QuotationClient() {
                   <div className="w-full max-w-xs space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-zinc-500 dark:text-[#a3a3a3]">Subtotal</span>
-                      <span className="text-zinc-900 dark:text-[#f1f1f1]">
-                        {formatPrice(quote.subtotal)}
-                      </span>
+                      <span className="text-zinc-900 dark:text-[#f1f1f1]">{formatPrice(quote.subtotal)}</span>
                     </div>
                     <div className="flex justify-between text-xs">
                       <span className="text-zinc-400">{quote.vatNote}</span>
                     </div>
                     <div className="flex justify-between pt-2 border-t border-zinc-200 dark:border-[#1a1a1a] font-bold text-base">
                       <span className="text-zinc-900 dark:text-[#f1f1f1]">Grand Total</span>
-                      <span className="text-amber-600 dark:text-amber-400">
-                        {formatPrice(quote.grandTotal)}
-                      </span>
+                      <span className="text-amber-600 dark:text-amber-400">{formatPrice(quote.grandTotal)}</span>
                     </div>
                   </div>
                 </div>
@@ -463,10 +668,7 @@ export function QuotationClient() {
                   </p>
                   <ul className="grid sm:grid-cols-2 gap-x-4 gap-y-1.5">
                     {quote.terms.map((term, i) => (
-                      <li
-                        key={i}
-                        className="flex items-start gap-2 text-xs text-zinc-500 dark:text-zinc-400"
-                      >
+                      <li key={i} className="flex items-start gap-2 text-xs text-zinc-500 dark:text-zinc-400">
                         <span className="text-amber-500 mt-px shrink-0">✦</span>
                         {term}
                       </li>
