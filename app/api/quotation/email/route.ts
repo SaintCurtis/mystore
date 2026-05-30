@@ -25,10 +25,13 @@ interface QuoteItem {
 interface Quote {
   quoteNumber: string;
   customerName: string;
+  customerAddress?: string;
+  customerPhone?: string;
   quoteDate: string;
   validUntil: string;
   items: QuoteItem[];
   subtotal: number;
+  vatAmount?: number;
   vatNote: string;
   grandTotal: number;
   terms: string[];
@@ -97,6 +100,8 @@ export async function POST(req: NextRequest) {
         <td>
           <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#71717a;margin:0 0 4px 0;">Prepared for</p>
           <p style="font-weight:700;font-size:17px;margin:0;">${quote.customerName}</p>
+          ${quote.customerPhone ? `<p style="font-size:12px;color:#52525b;margin:3px 0 0 0;">${quote.customerPhone}</p>` : ""}
+          ${quote.customerAddress ? `<p style="font-size:12px;color:#52525b;margin:2px 0 0 0;">${quote.customerAddress}</p>` : ""}
         </td>
         <td style="text-align:right;">
           <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#71717a;margin:0 0 4px 0;">Validity</p>
@@ -122,7 +127,7 @@ export async function POST(req: NextRequest) {
           <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:#52525b;">
             <span>Subtotal</span><span>${fmt(quote.subtotal)}</span>
           </div>
-          <div style="font-size:11px;color:#a1a1aa;padding:2px 0;">${quote.vatNote}</div>
+          ${quote.vatAmount ? `<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;color:#52525b;"><span>${quote.vatNote} (7.5%)</span><span>${fmt(quote.vatAmount)}</span></div>` : ""}
           <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:700;padding:10px 0 0 0;border-top:2px solid #e4e4e7;margin-top:6px;">
             <span>Grand Total</span>
             <span style="color:#d97706;">${fmt(quote.grandTotal)}</span>

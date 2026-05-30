@@ -34,6 +34,8 @@ interface ProductSuggestion {
 interface GeneratedQuote {
   quoteNumber: string;
   customerName: string;
+  customerAddress?: string;
+  customerPhone?: string;
   quoteDate: string;
   validUntil: string;
   items: {
@@ -44,6 +46,7 @@ interface GeneratedQuote {
     notes: string;
   }[];
   subtotal: number;
+  vatAmount?: number;
   vatNote: string;
   grandTotal: number;
   terms: string[];
@@ -279,6 +282,8 @@ export function QuotationClient() {
   const { user, isSignedIn } = useUser();
   const [customerName, setCustomerName] = useState("");
   const [notes, setNotes] = useState("");
+  const [customerAddress, setCustomerAddress] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
   const [items, setItems] = useState<QuoteItem[]>([
     { id: "1", name: "", quantity: 1, unitPrice: 0, fromCatalogue: false },
   ]);
@@ -333,6 +338,8 @@ export function QuotationClient() {
         body: JSON.stringify({
           items: validItems.map(({ name, quantity, unitPrice }) => ({ name, quantity, unitPrice })),
           customerName: customerName.trim() || undefined,
+          customerAddress: customerAddress.trim() || undefined,
+          customerPhone: customerPhone.trim() || undefined,
           notes: notes.trim() || undefined,
         }),
       });
@@ -422,6 +429,8 @@ export function QuotationClient() {
       <div>
         <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#71717a;margin-bottom:4px;">Prepared for</p>
         <p style="font-weight:700;font-size:17px;">${quote.customerName}</p>
+        ${quote.customerPhone ? `<p style="font-size:12px;color:#52525b;margin-top:3px;">${quote.customerPhone}</p>` : ""}
+        ${quote.customerAddress ? `<p style="font-size:12px;color:#52525b;margin-top:2px;">${quote.customerAddress}</p>` : ""}
       </div>
       <div style="text-align:right;">
         <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#71717a;margin-bottom:4px;">Validity</p>
@@ -447,7 +456,7 @@ export function QuotationClient() {
         <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:#52525b;">
           <span>Subtotal</span><span>${fmt(quote.subtotal)}</span>
         </div>
-        <div style="font-size:11px;color:#a1a1aa;padding:2px 0;">${quote.vatNote}</div>
+        ${quote.vatAmount ? `<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;color:#52525b;"><span>${quote.vatNote} (7.5%)</span><span>${fmt(quote.vatAmount)}</span></div>` : ""}
         <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:700;padding:10px 0 0;border-top:2px solid #e4e4e7;margin-top:6px;">
           <span>Grand Total</span><span style="color:#d97706;">${fmt(quote.grandTotal)}</span>
         </div>
@@ -530,28 +539,52 @@ export function QuotationClient() {
           <div className="space-y-5 no-print">
             <div className="rounded-xl border border-zinc-200 dark:border-[#1a1a1a] bg-white dark:bg-[#111111] p-5">
               <h2 className="font-semibold text-zinc-900 dark:text-[#f1f1f1] mb-4">Customer Details</h2>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className={labelClass}>Your name or organisation</label>
-                  <input
-                    type="text"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    placeholder="e.g. Greenfield Secondary School"
-                    className={inputClass}
-                  />
+              <div className="space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className={labelClass}>Name or organisation <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      placeholder="e.g. Greenfield Secondary School"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Phone number</label>
+                    <input
+                      type="tel"
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      placeholder="+234 800 000 0000"
+                      className={inputClass}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className={labelClass}>
-                    Notes <span className="text-zinc-400 text-xs font-normal">(optional)</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="e.g. need delivery by Friday, Lagos only"
-                    className={inputClass}
-                  />
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className={labelClass}>Delivery address</label>
+                    <input
+                      type="text"
+                      value={customerAddress}
+                      onChange={(e) => setCustomerAddress(e.target.value)}
+                      placeholder="e.g. 12 Adeola Odeku St, Victoria Island, Lagos"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>
+                      Notes <span className="text-zinc-400 text-xs font-normal">(optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="e.g. need delivery by Friday"
+                      className={inputClass}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -601,12 +634,12 @@ export function QuotationClient() {
                       <div className="relative">
                         <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-zinc-400">₦</span>
                         <input
-                          type="number"
-                          min={0}
-                          step={1000}
+                          type="text"
+                          inputMode="numeric"
                           value={item.unitPrice || ""}
                           onChange={(e) => {
-                            updateItem(item.id, "unitPrice", parseFloat(e.target.value) || 0);
+                            const raw = e.target.value.replace(/[^0-9.]/g, "");
+                            updateItem(item.id, "unitPrice", parseFloat(raw) || 0);
                             updateItem(item.id, "fromCatalogue", false);
                           }}
                           placeholder="0"
@@ -784,6 +817,12 @@ function QuotePrintLayout({ quote }: { quote: GeneratedQuote }) {
           <div>
             <p style={{ fontSize: "10px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#71717a", margin: "0 0 4px 0" }}>Prepared for</p>
             <p style={{ fontWeight: 700, fontSize: "16px", margin: 0 }}>{quote.customerName}</p>
+            {quote.customerPhone && (
+              <p style={{ fontSize: "12px", color: "#52525b", margin: "3px 0 0 0" }}>{quote.customerPhone}</p>
+            )}
+            {quote.customerAddress && (
+              <p style={{ fontSize: "12px", color: "#52525b", margin: "2px 0 0 0" }}>{quote.customerAddress}</p>
+            )}
           </div>
           <div style={{ textAlign: "right" }}>
             <p style={{ fontSize: "10px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#71717a", margin: "0 0 4px 0" }}>Validity</p>
@@ -823,7 +862,12 @@ function QuotePrintLayout({ quote }: { quote: GeneratedQuote }) {
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", padding: "4px 0", color: "#52525b" }}>
               <span>Subtotal</span><span>{formatPrice(quote.subtotal)}</span>
             </div>
-            <div style={{ fontSize: "11px", color: "#a1a1aa", padding: "2px 0" }}>{quote.vatNote}</div>
+            {quote.vatAmount != null && quote.vatAmount > 0 && (
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", padding: "4px 0", color: "#52525b" }}>
+                <span>{quote.vatNote} (7.5%)</span>
+                <span>{formatPrice(quote.vatAmount)}</span>
+              </div>
+            )}
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "16px", fontWeight: 700, padding: "8px 0 0 0", borderTop: "2px solid #e4e4e7", marginTop: "6px" }}>
               <span>Grand Total</span>
               <span style={{ color: "#d97706" }}>{formatPrice(quote.grandTotal)}</span>
