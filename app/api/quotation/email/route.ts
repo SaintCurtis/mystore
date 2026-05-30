@@ -167,7 +167,7 @@ export async function POST(req: NextRequest) {
 </html>`;
 
     await resend.emails.send({
-      from: "The Saint's TechNet <quotes@saintstechnet.com>",
+      from: "The Saint's TechNet <onboarding@resend.dev>",
       to: email,
       subject: `Quotation ${quote.quoteNumber} — ${fmt(quote.grandTotal)} — The Saint's TechNet`,
       html,

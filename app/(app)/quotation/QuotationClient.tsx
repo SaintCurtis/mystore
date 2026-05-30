@@ -371,7 +371,115 @@ export function QuotationClient() {
   }
 
   function handlePrint() {
-    window.print();
+    if (!quote) return;
+    const fmt = (n: number) =>
+      new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
+
+    const itemRows = quote.items.map((item) => `
+      <tr>
+        <td style="padding:12px;border-bottom:1px solid #f0f0f0;">
+          <strong>${item.name}</strong>
+          ${item.notes ? `<br/><span style="font-size:11px;color:#71717a;">${item.notes}</span>` : ""}
+        </td>
+        <td style="padding:12px 8px;text-align:center;border-bottom:1px solid #f0f0f0;">${item.quantity}</td>
+        <td style="padding:12px;text-align:right;border-bottom:1px solid #f0f0f0;">${fmt(item.unitPrice)}</td>
+        <td style="padding:12px;text-align:right;border-bottom:1px solid #f0f0f0;font-weight:600;">${fmt(item.lineTotal)}</td>
+      </tr>`).join("");
+
+    const termsList = quote.terms.map((t) => `<li style="margin-bottom:4px;">${t}</li>`).join("");
+
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Quotation ${quote.quoteNumber} — The Saint's TechNet</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: white; color: #18181b; }
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<div style="max-width:700px;margin:0 auto;background:white;">
+  <div style="background:#09090b;padding:24px 28px;display:flex;justify-content:space-between;align-items:flex-start;">
+    <div>
+      <p style="color:#f59e0b;font-weight:800;font-size:20px;letter-spacing:-0.02em;">The Saint's TechNet</p>
+      <p style="color:#71717a;font-size:11px;margin-top:6px;line-height:1.6;">
+        Built by an Engineer · CAC Registered · Lagos, Nigeria<br>
+        BN: 9245886 · iamsaintcurtis@gmail.com · +234 906 089 8951
+      </p>
+    </div>
+    <div style="text-align:right;">
+      <p style="color:#a1a1aa;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;">Quotation</p>
+      <p style="color:#f59e0b;font-family:monospace;font-size:18px;font-weight:700;margin-top:4px;">${quote.quoteNumber}</p>
+    </div>
+  </div>
+
+  <div style="padding:28px;display:flex;flex-direction:column;gap:22px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div>
+        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#71717a;margin-bottom:4px;">Prepared for</p>
+        <p style="font-weight:700;font-size:17px;">${quote.customerName}</p>
+      </div>
+      <div style="text-align:right;">
+        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#71717a;margin-bottom:4px;">Validity</p>
+        <p style="font-weight:600;">Until ${quote.validUntil}</p>
+        <p style="font-size:11px;color:#71717a;margin-top:2px;">Issued ${quote.quoteDate}</p>
+      </div>
+    </div>
+
+    <table style="width:100%;border-collapse:collapse;font-size:13px;border:1px solid #e4e4e7;border-radius:8px;overflow:hidden;">
+      <thead>
+        <tr style="background:#f4f4f5;">
+          <th style="text-align:left;padding:10px 12px;font-size:10px;font-weight:700;text-transform:uppercase;color:#71717a;">Item</th>
+          <th style="text-align:center;padding:10px 8px;font-size:10px;font-weight:700;text-transform:uppercase;color:#71717a;width:60px;">Qty</th>
+          <th style="text-align:right;padding:10px 12px;font-size:10px;font-weight:700;text-transform:uppercase;color:#71717a;width:140px;">Unit Price</th>
+          <th style="text-align:right;padding:10px 12px;font-size:10px;font-weight:700;text-transform:uppercase;color:#71717a;width:140px;">Total</th>
+        </tr>
+      </thead>
+      <tbody>${itemRows}</tbody>
+    </table>
+
+    <div style="display:flex;justify-content:flex-end;">
+      <div style="width:280px;">
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:#52525b;">
+          <span>Subtotal</span><span>${fmt(quote.subtotal)}</span>
+        </div>
+        <div style="font-size:11px;color:#a1a1aa;padding:2px 0;">${quote.vatNote}</div>
+        <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:700;padding:10px 0 0;border-top:2px solid #e4e4e7;margin-top:6px;">
+          <span>Grand Total</span><span style="color:#d97706;">${fmt(quote.grandTotal)}</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:16px;">
+      <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#b45309;margin-bottom:8px;">Note from the Engineer</p>
+      <p style="font-size:13px;color:#92400e;line-height:1.6;">${quote.engineerNote}</p>
+    </div>
+
+    <div>
+      <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#71717a;margin-bottom:10px;">Terms &amp; Conditions</p>
+      <ul style="padding-left:16px;font-size:12px;color:#52525b;columns:2;gap:16px;">${termsList}</ul>
+    </div>
+
+    <div style="border-top:1px solid #f4f4f5;padding-top:16px;text-align:center;">
+      <p style="font-size:12px;color:#71717a;">
+        To accept: WhatsApp <strong>+234 906 089 8951</strong> with quote number <strong style="font-family:monospace;">${quote.quoteNumber}</strong>
+      </p>
+    </div>
+  </div>
+</div>
+<script>window.onload = function() { window.print(); }<\/script>
+</body>
+</html>`;
+
+    const win = window.open("", "_blank", "width=800,height=900");
+    if (win) {
+      win.document.write(html);
+      win.document.close();
+    }
   }
 
   const estimatedTotal = items.reduce((sum, i) => sum + (i.unitPrice || 0) * (i.quantity || 1), 0);
@@ -380,43 +488,6 @@ export function QuotationClient() {
 
   return (
     <>
-      {/* ── Print stylesheet — scoped to #quote-printable only ── */}
-      <style>{`
-        @media print {
-          header, footer, nav,
-          .no-print { display: none !important; }
-
-          body { margin: 0; background: white; }
-
-          #quote-print-wrapper {
-            display: block !important;
-            position: fixed;
-            inset: 0;
-            z-index: 9999;
-            background: white;
-            padding: 24px 32px;
-            overflow: visible;
-          }
-
-          #quote-print-wrapper * {
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-
-          /* Hide everything except the print wrapper */
-          body > *:not(#quote-print-portal) { display: none !important; }
-        }
-      `}</style>
-
-      {/* ── Hidden print portal — always in DOM, visible only when printing ── */}
-      {quote && (
-        <div id="quote-print-portal" style={{ display: "none" }}>
-          <div id="quote-print-wrapper">
-            <QuotePrintLayout quote={quote} />
-          </div>
-        </div>
-      )}
-
       <EmailModal
         open={emailModalOpen}
         defaultEmail={defaultEmail}
