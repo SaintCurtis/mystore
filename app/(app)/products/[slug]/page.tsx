@@ -1,5 +1,4 @@
 // app/(app)/products/[slug]/page.tsx
-// Only change: ChevronLeftIcon from heroicons instead of lucide ChevronLeft
 
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -97,7 +96,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
         <div className="grid gap-10 lg:grid-cols-2 lg:gap-16 xl:gap-24">
           <div className="lg:sticky lg:top-24 lg:self-start">
-            <ProductGallery images={product.images} productName={product.name} />
+            <ProductGallery
+              images={product.images}
+              videos={p.videos}
+              productName={product.name}
+            />
           </div>
           <div className="flex flex-col gap-6">
             <ProductInfo product={product} />

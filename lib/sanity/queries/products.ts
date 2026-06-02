@@ -119,6 +119,7 @@ export const PRODUCT_BY_SLUG_QUERY = defineQuery(`*[
   "brand": brand->{ _id, title, "slug": slug.current },
   "model": model->{ _id, title, "slug": slug.current },
   "images": images[]{ _key, asset->{ _id, url }, hotspot },
+  "videos": videos[]{ _key, asset->{ _id, url, mimeType } },
   category->{
     _id,
     title,
