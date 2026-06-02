@@ -118,17 +118,21 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
           ) : mainVideoUrl ? (
-            /* Video-only product — show first frame + play overlay */
+            /* Video-only product — autoplay muted loop (WiFi), static thumb fallback */
             <div className="relative h-full w-full bg-zinc-900">
               <video
                 src={mainVideoUrl}
                 className="h-full w-full object-cover"
+                autoPlay
                 muted
+                loop
                 playsInline
-                preload="metadata"
+                preload="auto"
+                // Browser silently ignores autoplay on metered/slow connections
               />
-              <div className="absolute inset-0 flex items-center justify-center bg-black/30 transition-colors duration-200 group-hover:bg-black/20">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-lg">
+              {/* Play icon fades out once video is playing */}
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30 transition-opacity duration-500 group-hover:bg-black/10 pointer-events-none">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/80 shadow-lg">
                   <svg
                     className="h-5 w-5 translate-x-0.5 text-zinc-900"
                     fill="currentColor"
