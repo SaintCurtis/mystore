@@ -41,6 +41,10 @@ const FILTERED_PRODUCT_PROJECTION = `{
     _key,
     asset->{ _id, url }
   },
+  "videos": videos[0...1]{
+    _key,
+    asset->{ _id, url }
+  },
   category->{
     _id,
     title,

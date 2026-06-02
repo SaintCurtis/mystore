@@ -13,7 +13,7 @@ import { useCartActions, useCartItem } from "@/lib/store/cart-store-provider";
 import { toast } from "sonner";
 import type { FILTER_PRODUCTS_BY_NAME_QUERY_RESULT} from "@/sanity.types";
 
-type Product = FILTER_PRODUCTS_BY_NAME_QUERY_RESULT[number]; 
+type Product = FILTER_PRODUCTS_BY_NAME_QUERY_RESULT[number];
 
 interface ProductCardProps {
   product: Product;
@@ -42,9 +42,12 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
   const { addItem, updateQuantity } = useCartActions();
 
   const images = product.images ?? [];
+  const videos = (product as any).videos ?? [];
   const mainImageUrl = images[0]?.asset?.url;
   const displayedImageUrl =
     hoveredImageIndex !== null ? images[hoveredImageIndex]?.asset?.url : mainImageUrl;
+  // Only use video thumbnail if there are no images at all
+  const mainVideoUrl = !mainImageUrl ? (videos[0]?.asset?.url ?? null) : null;
 
   const stock = product.stock ?? 0;
   const isOutOfStock = stock <= 0;
@@ -103,7 +106,7 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
         "dark:hover:shadow-[0_0_0_1px_rgba(6,182,212,0.2),0_8px_40px_rgba(0,0,0,0.8),0_0_30px_rgba(6,182,212,0.08)]",
       )}
     >
-      {/* ── Image ── */}
+      {/* ── Image / Video thumbnail ── */}
       <Link href={`/products/${product.slug}`} className="block">
         <div className="relative aspect-square overflow-hidden bg-zinc-100 dark:bg-[#0d0d0d]">
           {displayedImageUrl ? (
@@ -114,6 +117,28 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
               className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
+          ) : mainVideoUrl ? (
+            /* Video-only product — show first frame + play overlay */
+            <div className="relative h-full w-full bg-zinc-900">
+              <video
+                src={mainVideoUrl}
+                className="h-full w-full object-cover"
+                muted
+                playsInline
+                preload="metadata"
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30 transition-colors duration-200 group-hover:bg-black/20">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-lg">
+                  <svg
+                    className="h-5 w-5 translate-x-0.5 text-zinc-900"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="flex h-full items-center justify-center">
               <svg className="h-10 w-10 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -184,21 +209,12 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
 
       {/* ── Info ── */}
       <div className="flex flex-1 flex-col p-2.5 sm:p-4">
-
-        {/*
-          Name — min-h-[2.5em] keeps the grid row aligned even when
-          a product name is only one line vs two lines on the card next to it.
-        */}
         <Link href={`/products/${product.slug}`} className="block mb-2">
           <h3 className="font-display line-clamp-2 text-[12px] sm:text-sm font-semibold leading-snug text-zinc-900 dark:text-[#f1f1f1] group-hover:text-zinc-700 dark:group-hover:text-white transition-colors min-h-[2.5em]">
             {product.name}
           </h3>
         </Link>
 
-        {/*
-          Price row — left-aligned reads premium, not marketplace.
-          StockBadge lives on the right so it costs zero extra vertical space.
-        */}
         <div className="flex items-baseline justify-between gap-1 mb-3">
           <p className="font-display text-base sm:text-xl font-extrabold tracking-tight leading-none text-zinc-900 dark:text-amber-400">
             {formatInCurrency(product.price)}
@@ -210,8 +226,6 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
         <div className="mt-auto space-y-1.5">
 
           {isOutOfStock ? (
-
-            /* Out of stock — full width, no confusion */
             <button
               disabled
               className="w-full h-11 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-400 cursor-not-allowed border border-zinc-200 dark:border-zinc-700"
@@ -220,14 +234,7 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
             </button>
 
           ) : isInCart ? (
-
             <>
-              {/*
-                ── IN CART STATE ──────────────────────────────────────────────
-                Customer already committed. Buy Now stays as the dominant CTA
-                — clicking it takes them to the product page where checkout is
-                one step away. Stepper sits below, smaller, purely functional.
-                ─────────────────────────────────────────────────────────────── */}
               <Link
                 href={`/products/${product.slug}`}
                 className={cn(
@@ -240,7 +247,6 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
                 Buy Now
               </Link>
 
-              {/* Compact quantity stepper — secondary, below Buy Now */}
               <div className="flex h-8 w-full items-stretch overflow-hidden rounded-lg border border-amber-500/40 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/8">
                 <button
                   type="button"
@@ -268,21 +274,7 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
             </>
 
           ) : (
-
             <>
-              {/*
-                ── DEFAULT STATE — the impulse trigger ───────────────────────
-                One dominant button. Full width. Amber. Tall. Unmissable.
-                "Buy Now" = zero friction between desire and purchase.
-
-                The cart icon is embedded as a recessed pill on the right edge
-                of the Buy Now button. It's reachable but visually secondary —
-                the eye lands on "Buy Now" first, every single time.
-
-                On a 185px-wide card (Fold 4), the button fills the entire
-                card width. The embedded cart pill is 32px — still a
-                comfortable tap target without ever competing for attention.
-                ─────────────────────────────────────────────────────────────── */}
               <div className="relative">
                 <Link
                   href={`/products/${product.slug}`}
@@ -290,14 +282,13 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
                     "flex w-full h-11 items-center justify-center gap-1.5 rounded-lg",
                     "bg-amber-500 text-zinc-950 font-display text-xs sm:text-sm font-bold tracking-wide",
                     "shadow-md shadow-amber-500/25 hover:bg-amber-400 transition-all duration-200 active:scale-[0.98]",
-                    "pr-11", // breathing room for the embedded cart pill
+                    "pr-11",
                   )}
                 >
                   <Zap className="h-3.5 w-3.5 shrink-0" />
                   Buy Now
                 </Link>
 
-                {/* Cart pill — lives inside Buy Now, right edge, visually recessed */}
                 <button
                   type="button"
                   onClick={handleAddToCart}
@@ -318,7 +309,6 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
                 </button>
               </div>
             </>
-
           )}
 
           {/* Compare — desktop only */}
