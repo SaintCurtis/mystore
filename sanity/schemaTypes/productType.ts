@@ -119,14 +119,27 @@ export const productType = defineType({
       description: 'e.g. "29.6cm x 19.9cm x 1.5cm"',
     }),
 
-    // ── Media ──────────────────────────────────────────────────
-    defineField({
-      name: "images",
-      type: "array",
-      group: "media",
-      of: [{ type: "image", options: { hotspot: true } }],
-      validation: (rule) => rule.min(1).error("At least one image is required"),
-    }),
+   // ── Media ──────────────────────────────────────────────────
+defineField({
+  name: "images",
+  type: "array",
+  group: "media",
+  of: [{ type: "image", options: { hotspot: true } }],
+  validation: (rule) => rule.min(1).error("At least one image is required"),
+}),
+defineField({
+  name: "videos",
+  title: "Videos",
+  type: "array",
+  group: "media",
+  description: "Upload product demo or unboxing videos",
+  of: [
+    {
+      type: "file",
+      options: { accept: "video/*" },
+    },
+  ],
+}),
 
     // ── Inventory ──────────────────────────────────────────────
     defineField({
