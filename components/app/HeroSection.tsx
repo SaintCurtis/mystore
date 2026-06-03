@@ -189,7 +189,7 @@ export function HeroSection() {
                   <ArrowRight className="h-4 w-4 shrink-0 text-amber-500 dark:text-amber-400 transition-transform group-hover:translate-x-1" />
                 </Link>
 
-                {/* ── Get a Quotation — mobile card (between Build My Setup and ACASIS) ── */}
+                {/* ── Get a Quotation — mobile card ── */}
                 <Link href="/quotation"
                   className="sm:hidden group flex items-center gap-4 rounded-2xl border border-violet-200 dark:border-violet-500/20 bg-linear-to-r from-violet-50 to-purple-50 dark:from-violet-500/8 dark:to-purple-500/5 px-4 py-3.5 transition-all duration-200 hover:border-violet-400 dark:hover:border-violet-500/40 hover:shadow-md hover:shadow-violet-500/10 flex-1">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/15 dark:bg-violet-500/10 group-hover:bg-violet-500/25 transition-colors">
@@ -245,7 +245,7 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* Right — trust badges desktop only */}
+          {/* Right — trust badges + Get a Quote — desktop only */}
           <div className={`hidden lg:flex flex-col gap-3 pb-16 w-64 shrink-0 transition-all duration-700 delay-500 ${mounted ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"}`}>
             {TRUST_BADGES.map(({ icon: Icon, label, sub }) => (
               <div key={label} className="flex items-center gap-3 rounded-xl border border-zinc-200 dark:border-[#1f1f1f] bg-white dark:bg-[#111111] px-4 py-3.5 transition-colors">
@@ -258,7 +258,23 @@ export function HeroSection() {
                 </div>
               </div>
             ))}
+
+            {/* Get a Quote — highlighted 4th card */}
+            <Link href="/quotation"
+              className="group flex items-center gap-3 rounded-xl border-2 border-violet-300 dark:border-violet-500/40 bg-linear-to-br from-violet-50 to-purple-50 dark:from-violet-500/10 dark:to-purple-500/8 px-4 py-3.5 transition-all duration-200 hover:border-violet-400 dark:hover:border-violet-500/60 hover:shadow-md hover:shadow-violet-500/15">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-500/15 group-hover:bg-violet-500/25 transition-colors">
+                <FileText className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-violet-700 dark:text-violet-300 flex items-center gap-1.5">
+                  Get a Quote
+                  <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                </p>
+                <p className="text-xs text-zinc-500 dark:text-[#a3a3a3]">Bulk & corporate orders</p>
+              </div>
+            </Link>
           </div>
+
         </div>
       </div>
 
