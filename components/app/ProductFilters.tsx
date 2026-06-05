@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { X, ChevronDown, ChevronUp } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -32,7 +32,6 @@ function pluralize(word: string): string {
   return word + "s";
 }
 
-// Root categories that use cascading subcategory selects
 const DRILLDOWN_ROOTS = [
   "monitors",
   "content-creation-tools",
@@ -47,7 +46,6 @@ function isDrilldownRoot(slug: string): slug is DrilldownRoot {
   return (DRILLDOWN_ROOTS as readonly string[]).includes(slug);
 }
 
-// Labels for each drilldown level per root category
 const DRILLDOWN_LABELS: Record<DrilldownRoot, string[]> = {
   monitors: ["Type", "Condition", "Panel Type"],
   "content-creation-tools": ["Category", "Sub-category"],
@@ -61,12 +59,15 @@ interface ProductFiltersProps {
   categories: ALL_CATEGORIES_QUERY_RESULT;
   brands?: { title: string; slug: string }[];
   models?: { title: string; slug: string }[];
+  /** Called when the user taps "Done" inside the mobile bottom sheet */
+  onDone?: () => void;
 }
 
 export function ProductFilters({
   categories,
   brands = [],
   models = [],
+  onDone,
 }: ProductFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -93,14 +94,14 @@ export function ProductFilters({
     urlMaxPrice,
   ]);
 
+  // On mobile the Color + Material filters are low-traffic and add visual noise.
+  // We collapse them behind a toggle so users see the most useful filters first.
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
+
   useEffect(() => {
     setPriceRange([urlMinPrice, urlMaxPrice]);
   }, [urlMinPrice, urlMaxPrice]);
 
-  // ── Helpers — cast to any[] so parentSlug is always accessible ─
-  // The generated ALL_CATEGORIES_QUERY_RESULT type doesn't always
-  // surface parentSlug on the item type, but the runtime data
-  // always has it from the GROQ query. Using any[] here is safe.
   const cats = categories as any[];
 
   function findDrilldownRoot(catSlug: string): DrilldownRoot | null {
@@ -135,7 +136,6 @@ export function ProductFilters({
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   }
 
-  // Top-level categories have no parentSlug
   const topLevelCategories = cats.filter((c) => !c.parentSlug);
 
   const drilldownRoot = findDrilldownRoot(currentCategory);
@@ -190,7 +190,6 @@ export function ProductFilters({
     router.push(`?${params.toString()}`, { scroll: false });
   }
 
-  // ── Brand / Model logic ────────────────────────────────────────
   const showCondition =
     !drilldownRoot &&
     (CATEGORIES_WITH_CONDITIONS as readonly string[]).includes(currentCategory);
@@ -215,7 +214,6 @@ export function ProductFilters({
 
   const showModel = showBrand && !!currentBrand && models.length > 0;
 
-  // ── Active states ──────────────────────────────────────────────
   const isSearchActive = !!currentSearch;
   const isCategoryActive = !!currentCategory;
   const isConditionActive = !!currentCondition;
@@ -398,7 +396,7 @@ export function ProductFilters({
         </Select>
       </div>
 
-      {/* ── Drilldown selects ──────────────────────────────────── */}
+      {/* Drilldown selects */}
       {drilldownRoot &&
         drilldownLevels.map((level, i) => {
           const options = getChildren(level.parentSlug);
@@ -561,76 +559,6 @@ export function ProductFilters({
         </div>
       )}
 
-      {/* Color */}
-      <div>
-        <FilterLabel isActive={isColorActive} filterKey="color">
-          Color
-        </FilterLabel>
-        <Select
-          value={currentColor || "all"}
-          onValueChange={(value) =>
-            updateParams({ color: value === "all" ? null : value })
-          }
-        >
-          <SelectTrigger
-            className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${
-              isColorActive ? "border-amber-500 ring-1 ring-amber-500" : ""
-            }`}
-          >
-            <SelectValue placeholder="All Colors" />
-          </SelectTrigger>
-          <SelectContent className="bg-zinc-800 border-zinc-700">
-            <SelectItem value="all" className="text-zinc-100">
-              All Colors
-            </SelectItem>
-            {COLORS.map((color) => (
-              <SelectItem
-                key={color.value}
-                value={color.value}
-                className="text-zinc-100"
-              >
-                {color.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Material */}
-      <div>
-        <FilterLabel isActive={isMaterialActive} filterKey="material">
-          Material
-        </FilterLabel>
-        <Select
-          value={currentMaterial || "all"}
-          onValueChange={(value) =>
-            updateParams({ material: value === "all" ? null : value })
-          }
-        >
-          <SelectTrigger
-            className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${
-              isMaterialActive ? "border-amber-500 ring-1 ring-amber-500" : ""
-            }`}
-          >
-            <SelectValue placeholder="All Materials" />
-          </SelectTrigger>
-          <SelectContent className="bg-zinc-800 border-zinc-700">
-            <SelectItem value="all" className="text-zinc-100">
-              All Materials
-            </SelectItem>
-            {MATERIALS.map((mat) => (
-              <SelectItem
-                key={mat.value}
-                value={mat.value}
-                className="text-zinc-100"
-              >
-                {mat.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
       {/* Price Range */}
       <div>
         <FilterLabel isActive={isPriceActive} filterKey="price">
@@ -703,6 +631,110 @@ export function ProductFilters({
             ))}
           </SelectContent>
         </Select>
+      </div>
+
+      {/* ── More Filters (Color + Material) ──────────────────────────────
+          These are low-traffic filters on mobile — most users never use them.
+          Collapsing them behind a toggle reduces the filter sheet scroll height
+          by ~160px on mobile, making the primary filters (category, price,
+          sort) immediately visible without scrolling.
+          On desktop the sidebar always shows everything; the toggle only
+          appears inside the mobile bottom sheet (when onDone is provided). ── */}
+      <div>
+        <button
+          type="button"
+          onClick={() => setShowMoreFilters((v) => !v)}
+          className="flex w-full items-center justify-between rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2.5 text-sm font-medium text-zinc-300 hover:bg-zinc-800 transition-colors"
+        >
+          <span className="flex items-center gap-2">
+            More Filters
+            {(isColorActive || isMaterialActive) && (
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[9px] font-bold text-zinc-950">
+                {[isColorActive, isMaterialActive].filter(Boolean).length}
+              </span>
+            )}
+          </span>
+          {showMoreFilters
+            ? <ChevronUp className="h-4 w-4" />
+            : <ChevronDown className="h-4 w-4" />
+          }
+        </button>
+
+        {showMoreFilters && (
+          <div className="mt-4 space-y-6">
+            {/* Color */}
+            <div>
+              <FilterLabel isActive={isColorActive} filterKey="color">
+                Color
+              </FilterLabel>
+              <Select
+                value={currentColor || "all"}
+                onValueChange={(value) =>
+                  updateParams({ color: value === "all" ? null : value })
+                }
+              >
+                <SelectTrigger
+                  className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${
+                    isColorActive ? "border-amber-500 ring-1 ring-amber-500" : ""
+                  }`}
+                >
+                  <SelectValue placeholder="All Colors" />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-800 border-zinc-700">
+                  <SelectItem value="all" className="text-zinc-100">
+                    All Colors
+                  </SelectItem>
+                  {COLORS.map((color) => (
+                    <SelectItem
+                      key={color.value}
+                      value={color.value}
+                      className="text-zinc-100"
+                    >
+                      {color.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Material */}
+            <div>
+              <FilterLabel isActive={isMaterialActive} filterKey="material">
+                Material
+              </FilterLabel>
+              <Select
+                value={currentMaterial || "all"}
+                onValueChange={(value) =>
+                  updateParams({ material: value === "all" ? null : value })
+                }
+              >
+                <SelectTrigger
+                  className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${
+                    isMaterialActive
+                      ? "border-amber-500 ring-1 ring-amber-500"
+                      : ""
+                  }`}
+                >
+                  <SelectValue placeholder="All Materials" />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-800 border-zinc-700">
+                  <SelectItem value="all" className="text-zinc-100">
+                    All Materials
+                  </SelectItem>
+                  {MATERIALS.map((mat) => (
+                    <SelectItem
+                      key={mat.value}
+                      value={mat.value}
+                      className="text-zinc-100"
+                    >
+                      {mat.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

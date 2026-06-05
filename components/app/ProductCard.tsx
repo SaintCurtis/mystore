@@ -118,7 +118,6 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
           ) : mainVideoUrl ? (
-            /* Video-only product — autoplay muted loop (WiFi), static thumb fallback */
             <div className="relative h-full w-full bg-zinc-900">
               <video
                 src={mainVideoUrl}
@@ -128,9 +127,7 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
                 loop
                 playsInline
                 preload="auto"
-                // Browser silently ignores autoplay on metered/slow connections
               />
-              {/* Play icon fades out once video is playing */}
               <div className="absolute inset-0 flex items-center justify-center bg-black/30 transition-opacity duration-500 group-hover:bg-black/10 pointer-events-none">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/80 shadow-lg">
                   <svg
@@ -184,9 +181,18 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
         </div>
       </Link>
 
-      {/* ── Thumbnail strip — desktop only ── */}
+      {/* ── Thumbnail strip — desktop only ──
+          Hidden on mobile (hidden sm:flex) so no touch-hover issues.
+          onMouseEnter/Leave are mouse-only events; touch devices never
+          trigger them, but the hoveredImageIndex could get stuck if a
+          touch event somehow fires mouseenter without a matching mouseleave.
+          We guard with onTouchStart={() => setHoveredImageIndex(null)} on
+          the strip wrapper so any touch interaction resets to the main image. */}
       {hasMultipleImages ? (
-        <div className="hidden sm:flex gap-1.5 border-t border-zinc-100 dark:border-[#1a1a1a] bg-zinc-50 dark:bg-[#0d0d0d] p-2 sm:p-3">
+        <div
+          className="hidden sm:flex gap-1.5 border-t border-zinc-100 dark:border-[#1a1a1a] bg-zinc-50 dark:bg-[#0d0d0d] p-2 sm:p-3"
+          onTouchStart={() => setHoveredImageIndex(null)}
+        >
           {images.map((image, index) => (
             <button
               key={image._key ?? index}
