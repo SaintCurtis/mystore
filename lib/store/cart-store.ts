@@ -1,5 +1,6 @@
 import { createStore } from "zustand/vanilla";
 import { persist } from "zustand/middleware";
+import type { SelectedVariant } from "@/types/variants";
 
 // Types
 export interface CartItem {
@@ -8,6 +9,7 @@ export interface CartItem {
   price: number;
   quantity: number;
   image?: string;
+  selectedVariants?: SelectedVariant[];
 }
 
 export interface CartState {

@@ -238,7 +238,14 @@ export const PRODUCTS_BY_IDS_QUERY = defineQuery(`*[
   "slug": slug.current,
   price,
   "image": images[0]{ asset->{ _id, url } },
-  stock
+  stock,
+  "variantGroups": variantGroups[]{
+    type,
+    "options": options[]{
+      label,
+      inStock
+    }
+  }
 }`);
 
 // ============================================

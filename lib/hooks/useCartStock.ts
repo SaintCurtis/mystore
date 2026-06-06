@@ -23,16 +23,18 @@ interface UseCartStockReturn {
 }
 
 /**
- * Fetches current stock levels for cart items
- * Returns stock info map and loading state
+ * Fetches current stock levels for cart items.
+ * Handles variant composite IDs (e.g. "productId__ram:16GB|ssd:512GB")
+ * by stripping the variant suffix before querying Sanity.
+ * Also checks variant-level inStock boolean from Sanity schema.
  */
 export function useCartStock(items: CartItem[]): UseCartStockReturn {
   const [stockMap, setStockMap] = useState<StockMap>(new Map());
   const [isLoading, setIsLoading] = useState(false);
 
-  // Memoize product IDs to use as stable dependency
+  // Strip variant suffix and deduplicate product IDs for Sanity query
   const productIds = useMemo(
-    () => items.map((item) => item.productId),
+    () => [...new Set(items.map((item) => item.productId.split("__")[0]))],
     [items]
   );
 
@@ -52,15 +54,40 @@ export function useCartStock(items: CartItem[]): UseCartStockReturn {
       const newStockMap = new Map<string, StockInfo>();
 
       for (const item of items) {
+        // Strip variant suffix to get raw Sanity product _id
+        const rawProductId = item.productId.split("__")[0];
         const product = products.find(
-          (p: { _id: string }) => p._id === item.productId
+          (p: { _id: string }) => p._id === rawProductId
         );
+
         const currentStock = product?.stock ?? 0;
+
+        // Check variant-level inStock if this cart item has selected variants
+        let variantOutOfStock = false;
+        if (
+          item.selectedVariants &&
+          item.selectedVariants.length > 0 &&
+          product?.variantGroups
+        ) {
+          for (const selected of item.selectedVariants) {
+            const group = product.variantGroups.find(
+              (g: { type: string }) => g.type === selected.type
+            );
+            const option = group?.options?.find(
+              (o: { label: string }) => o.label === selected.label
+            );
+            // If option explicitly set to inStock: false, mark as out of stock
+            if (option && option.inStock === false) {
+              variantOutOfStock = true;
+              break;
+            }
+          }
+        }
 
         newStockMap.set(item.productId, {
           productId: item.productId,
           currentStock,
-          isOutOfStock: currentStock === 0,
+          isOutOfStock: currentStock === 0 || variantOutOfStock,
           exceedsStock: item.quantity > currentStock,
           availableQuantity: Math.min(item.quantity, currentStock),
         });
