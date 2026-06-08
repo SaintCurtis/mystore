@@ -79,42 +79,78 @@ export function ProductSection({
     <div className="flex flex-col gap-4">
 
       <style>{`
-        @keyframes filterPulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.55); }
-          50%       { box-shadow: 0 0 0 8px rgba(245,158,11,0); }
+        /* ── Breathing glow — the whole button border pulses in/out ── */
+        @keyframes breatheGlow {
+          0%, 100% {
+            box-shadow:
+              0 0 0 0 rgba(251,191,36,0),
+              0 0 0 0 rgba(249,115,22,0),
+              0 4px 24px rgba(245,158,11,0.35);
+          }
+          40% {
+            box-shadow:
+              0 0 0 4px rgba(251,191,36,0.35),
+              0 0 0 8px rgba(249,115,22,0.15),
+              0 4px 32px rgba(245,158,11,0.55);
+          }
+          60% {
+            box-shadow:
+              0 0 0 6px rgba(251,191,36,0.2),
+              0 0 0 14px rgba(249,115,22,0.06),
+              0 4px 40px rgba(245,158,11,0.4);
+          }
         }
-        .filter-cta-pulse { animation: filterPulse 2s ease-in-out infinite; }
 
-        @keyframes filterShimmer {
-          0%   { background-position: -200% center; }
-          100% { background-position: 200% center; }
-        }
-        .filter-cta-shimmer {
-          background-size: 200% auto;
-          animation: filterShimmer 3s linear infinite;
+        /* ── Shimmer sweep — a bright stripe crosses the button every 3.5s ── */
+        @keyframes shimmerSweep {
+          0%   { transform: translateX(-120%) skewX(-15deg); opacity: 0;   }
+          8%   { opacity: 1; }
+          40%  { transform: translateX(220%)  skewX(-15deg); opacity: 0.6; }
+          41%  { opacity: 0; }
+          100% { transform: translateX(220%)  skewX(-15deg); opacity: 0;   }
         }
 
-        /* Gem dot — cycles through a full rainbow + white flash */
+        /* ── Gem dot rainbow ── */
         @keyframes gemColor {
-          0%   { background: #ff4d4d; box-shadow: 0 0 6px 2px #ff4d4d; }
-          12%  { background: #ff9500; box-shadow: 0 0 6px 2px #ff9500; }
-          24%  { background: #ffe600; box-shadow: 0 0 6px 2px #ffe600; }
-          36%  { background: #00e676; box-shadow: 0 0 6px 2px #00e676; }
-          48%  { background: #00cfff; box-shadow: 0 0 6px 2px #00cfff; }
-          60%  { background: #7c4dff; box-shadow: 0 0 6px 2px #7c4dff; }
-          72%  { background: #ff40c8; box-shadow: 0 0 6px 2px #ff40c8; }
-          84%  { background: #ffffff; box-shadow: 0 0 10px 4px #ffffff; }
-          100% { background: #ff4d4d; box-shadow: 0 0 6px 2px #ff4d4d; }
+          0%   { background:#ff4d4d; box-shadow:0 0 6px 2px #ff4d4d; }
+          14%  { background:#ff9500; box-shadow:0 0 6px 2px #ff9500; }
+          28%  { background:#ffe600; box-shadow:0 0 6px 2px #ffe600; }
+          42%  { background:#00e676; box-shadow:0 0 6px 2px #00e676; }
+          56%  { background:#00cfff; box-shadow:0 0 6px 2px #00cfff; }
+          70%  { background:#7c4dff; box-shadow:0 0 6px 2px #7c4dff; }
+          84%  { background:#ffffff; box-shadow:0 0 10px 4px #ffffff; }
+          100% { background:#ff4d4d; box-shadow:0 0 6px 2px #ff4d4d; }
         }
         @keyframes gemPing {
-          0%   { transform: scale(1);   opacity: 1; }
-          60%  { transform: scale(2.4); opacity: 0; }
-          100% { transform: scale(2.4); opacity: 0; }
+          0%   { transform:scale(1);   opacity:1; }
+          60%  { transform:scale(2.4); opacity:0; }
+          100% { transform:scale(2.4); opacity:0; }
+        }
+
+        .filter-cta-alive {
+          animation: breatheGlow 2.4s ease-in-out infinite;
+          position: relative;
+          overflow: hidden;
+        }
+        .filter-cta-alive::after {
+          content: '';
+          position: absolute;
+          top: 0; left: 0;
+          width: 40%;
+          height: 100%;
+          background: linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(255,255,255,0.55) 50%,
+            transparent 100%
+          );
+          animation: shimmerSweep 3.5s ease-in-out infinite;
+          pointer-events: none;
+          border-radius: inherit;
         }
         .gem-dot {
           position: relative;
-          width: 10px;
-          height: 10px;
+          width: 10px; height: 10px;
           border-radius: 50%;
           flex-shrink: 0;
           animation: gemColor 2s linear infinite;
@@ -159,9 +195,9 @@ export function ProductSection({
           <button
             type="button"
             onClick={openMobileFilters}
-            className="filter-cta-pulse filter-cta-shimmer relative w-full h-14 rounded-2xl font-bold text-base text-zinc-950 active:scale-[0.98] transition-transform duration-150 overflow-hidden"
+            className="filter-cta-alive relative w-full h-14 rounded-2xl font-bold text-base text-zinc-950 active:scale-[0.98] transition-transform duration-150 overflow-hidden"
             style={{
-              background: "linear-gradient(90deg, #f59e0b 0%, #fbbf24 40%, #f97316 60%, #f59e0b 100%)",
+              background: "linear-gradient(90deg, #f59e0b 0%, #fbbf24 45%, #f97316 100%)",
             }}
           >
             <span className="relative z-10 flex items-center justify-center gap-3">
