@@ -11,7 +11,7 @@ const PRODUCT_FILTER_CONDITIONS = `
     $categorySlug == ""
     || category->slug.current == $categorySlug
     || category->parentCategory->slug.current == $categorySlug
-    || category->parentCategory->parentCategory->slug.current == $categorySlug
+    || category->parentCategory->parentCategory->slug.current ==$categorySlug
     || category->parentCategory->parentCategory->parentCategory->slug.current == $categorySlug
   )
   && (
@@ -107,7 +107,7 @@ export const FEATURED_PRODUCTS_QUERY = defineQuery(`*[
 }`);
 
 // ============================================
-// Single Product
+// Single Product — includes all new spec fields
 // ============================================
 
 export const PRODUCT_BY_SLUG_QUERY = defineQuery(`*[
@@ -138,6 +138,19 @@ export const PRODUCT_BY_SLUG_QUERY = defineQuery(`*[
   featured,
   assemblyRequired,
   isNegotiable,
+
+  // ── Tech Specs ─────────────────────────────────────────────
+  specDisplay,
+  specProcessor,
+  specRAM,
+  specStorage,
+  specGPU,
+  specBattery,
+  specOS,
+  specConnectivity,
+  specRefreshRate,
+  specWeight,
+  "specExtras": specExtras[]{ label, value },
 
   // ── Variants ──────────────────────────────────────────────
   "variantGroups": variantGroups[]{
@@ -182,7 +195,7 @@ export const PRODUCTS_BY_CATEGORY_QUERY = defineQuery(`*[
   && (
     category->slug.current == $categorySlug
     || category->parentCategory->slug.current == $categorySlug
-    || category->parentCategory->parentCategory->slug.current == $categorySlug
+    || category->parentCategory->parentCategory->slug.current ==$categorySlug
     || category->parentCategory->parentCategory->parentCategory->slug.current == $categorySlug
   )
 ] | order(name asc) {
@@ -292,7 +305,7 @@ export const AI_SEARCH_PRODUCTS_QUERY = defineQuery(`*[
     $categorySlug == ""
     || category->slug.current == $categorySlug
     || category->parentCategory->slug.current == $categorySlug
-    || category->parentCategory->parentCategory->slug.current == $categorySlug
+    || category->parentCategory->parentCategory->slug.current ==$categorySlug
     || category->parentCategory->parentCategory->parentCategory->slug.current == $categorySlug
   )
   && (

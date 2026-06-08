@@ -71,10 +71,10 @@ export function useCartStock(items: CartItem[]): UseCartStockReturn {
         ) {
           for (const selected of item.selectedVariants) {
             const group = product.variantGroups.find(
-              (g: { type: string }) => g.type === selected.type
+              (g: { type: string | null }) => g.type === selected.type
             );
             const option = group?.options?.find(
-              (o: { label: string }) => o.label === selected.label
+              (o: { label: string | null }) => o.label === selected.label
             );
             // If option explicitly set to inStock: false, mark as out of stock
             if (option && option.inStock === false) {
