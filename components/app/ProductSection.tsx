@@ -93,6 +93,39 @@ export function ProductSection({
           background-size: 200% auto;
           animation: filterShimmer 3s linear infinite;
         }
+
+        /* Gem dot — cycles through a full rainbow + white flash */
+        @keyframes gemColor {
+          0%   { background: #ff4d4d; box-shadow: 0 0 6px 2px #ff4d4d; }
+          12%  { background: #ff9500; box-shadow: 0 0 6px 2px #ff9500; }
+          24%  { background: #ffe600; box-shadow: 0 0 6px 2px #ffe600; }
+          36%  { background: #00e676; box-shadow: 0 0 6px 2px #00e676; }
+          48%  { background: #00cfff; box-shadow: 0 0 6px 2px #00cfff; }
+          60%  { background: #7c4dff; box-shadow: 0 0 6px 2px #7c4dff; }
+          72%  { background: #ff40c8; box-shadow: 0 0 6px 2px #ff40c8; }
+          84%  { background: #ffffff; box-shadow: 0 0 10px 4px #ffffff; }
+          100% { background: #ff4d4d; box-shadow: 0 0 6px 2px #ff4d4d; }
+        }
+        @keyframes gemPing {
+          0%   { transform: scale(1);   opacity: 1; }
+          60%  { transform: scale(2.4); opacity: 0; }
+          100% { transform: scale(2.4); opacity: 0; }
+        }
+        .gem-dot {
+          position: relative;
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          flex-shrink: 0;
+          animation: gemColor 2s linear infinite;
+        }
+        .gem-dot::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: 50%;
+          animation: gemColor 2s linear infinite, gemPing 2s ease-out infinite;
+        }
       `}</style>
 
       {/* ── Product count ── */}
@@ -134,10 +167,7 @@ export function ProductSection({
             <span className="relative z-10 flex items-center justify-center gap-3">
               <SlidersHorizontal className="h-5 w-5 shrink-0" strokeWidth={2.5} />
               <span className="tracking-wide">Find Your Perfect Product</span>
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-zinc-950 opacity-40" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-zinc-950 opacity-60" />
-              </span>
+              <span className="gem-dot" />
             </span>
           </button>
         ) : (
