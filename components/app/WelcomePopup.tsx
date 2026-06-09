@@ -6,7 +6,7 @@ import { X, ShoppingBag, Heart } from "lucide-react";
 import { useWishlistActions } from "@/lib/store/wishlist-store-provider";
 
 const POPUP_KEY = "welcome-popup-last-shown";
-const SHOW_AGAIN_AFTER_HOURS = 24; // Show once per 24 hours
+const SHOW_AGAIN_AFTER_HOURS = 24;
 
 const GREETINGS = [
   { emoji: "👋", text: "Welcome back" },
@@ -32,20 +32,23 @@ export function WelcomePopup() {
   const [animateIn, setAnimateIn] = useState(false);
   const { openWishlist } = useWishlistActions();
 
-  const greeting = getRandomItem(GREETINGS);
-  const nudge = getRandomItem(WISHLIST_NUDGES);
+  // ✅ Move random picks into state — only set client-side inside useEffect
+  const [greeting, setGreeting] = useState(GREETINGS[0]);
+  const [nudge, setNudge] = useState(WISHLIST_NUDGES[0]);
 
   useEffect(() => {
     if (!isLoaded) return;
 
-    // Check if shown recently
     const lastShown = localStorage.getItem(POPUP_KEY);
     if (lastShown) {
       const hoursSince = (Date.now() - parseInt(lastShown)) / (1000 * 60 * 60);
       if (hoursSince < SHOW_AGAIN_AFTER_HOURS) return;
     }
 
-    // Show after a small delay — feels more natural
+    // ✅ Set random values here — never runs on server
+    setGreeting(getRandomItem(GREETINGS));
+    setNudge(getRandomItem(WISHLIST_NUDGES));
+
     const t1 = setTimeout(() => {
       setVisible(true);
       const t2 = setTimeout(() => setAnimateIn(true), 50);
@@ -82,11 +85,9 @@ export function WelcomePopup() {
     `}>
       <div className="relative rounded-2xl border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] shadow-2xl dark:shadow-black/60 overflow-hidden">
 
-        {/* Amber accent top bar */}
         <div className="h-1 w-full bg-linear-to-r from-amber-400 via-orange-500 to-amber-400" />
 
         <div className="p-5">
-          {/* Dismiss */}
           <button
             type="button"
             onClick={dismiss}
@@ -95,7 +96,6 @@ export function WelcomePopup() {
             <X className="h-3.5 w-3.5" />
           </button>
 
-          {/* Greeting */}
           <div className="flex items-start gap-3 pr-6">
             <span className="text-2xl">{greeting.emoji}</span>
             <div>
@@ -112,7 +112,6 @@ export function WelcomePopup() {
             </div>
           </div>
 
-          {/* Actions */}
           <div className="mt-4 flex gap-2">
             <button
               type="button"
@@ -132,7 +131,6 @@ export function WelcomePopup() {
             </button>
           </div>
 
-          {/* Subtext */}
           <p className="mt-3 text-center text-[11px] text-zinc-400 dark:text-zinc-600">
             Engineer-verified tech · Warranty on everything · Ships worldwide 🌍
           </p>

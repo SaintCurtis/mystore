@@ -9,7 +9,20 @@
    We map it to every font variable so font-display, font-body, and font-sans
    all resolve to Inter — consistent typography everywhere.
    ───────────────────────────────────────────────────────────────────────── */
-@theme inline {
+@keyframes trustMarquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.trust-track {
+  display: flex;
+  width: max-content;
+  animation: trustMarquee 32s linear infinite;
+  will-change: transform;
+}
+.trust-track:hover {
+  animation-play-state: paused;
+}
+   @theme inline {
   --font-sans:    var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-body:    var(--font-inter), ui-sans-serif, system-ui, sans-serif;
