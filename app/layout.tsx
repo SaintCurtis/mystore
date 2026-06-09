@@ -19,6 +19,35 @@ const dmSans = DM_Sans({
 
 const BASE_URL = "https://mystore-drab-nine.vercel.app";
 
+function ChunkErrorHandler() {
+  return (
+    <script
+      dangerouslySetInnerHTML={{
+        __html: `
+          (function() {
+            window.addEventListener('error', function(e) {
+              var msg = e.message || '';
+              if (
+                msg.indexOf('Loading chunk') !== -1 ||
+                msg.indexOf('Failed to fetch dynamically imported module') !== -1 ||
+                msg.indexOf('ChunkLoadError') !== -1
+              ) {
+                if (!sessionStorage.getItem('chunk_reload')) {
+                  sessionStorage.setItem('chunk_reload', '1');
+                  window.location.reload();
+                }
+              }
+            });
+            window.addEventListener('load', function() {
+              sessionStorage.removeItem('chunk_reload');
+            });
+          })();
+        `,
+      }}
+    />
+  );
+}
+
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
@@ -80,6 +109,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <ChunkErrorHandler />
         <meta name="theme-color" content="#f59e0b" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
