@@ -21,37 +21,20 @@ import { BuildMySetupFAB } from "@/components/app/BuildMySetupFAB";
 import { ReferralTracker } from "@/components/app/ReferralTracker";
 import { Suspense } from "react";
 
-// ── SanityLive removed ────────────────────────────────────────────────────
-// SanityLive is only needed for Sanity's Presentation Tool / visual editing
-// preview workflow. We don't use that — we use webhook-based revalidation
-// instead. SanityLive was causing a redirect to sanity.io/login for all
-// visitors on the deployed site regardless of token configuration.
-// Content freshness is handled by app/api/revalidate/route.ts + webhooks.
-
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider
-      afterSignInUrl="/"
-      afterSignUpUrl="/"
       signInFallbackRedirectUrl="/"
       signUpFallbackRedirectUrl="/"
-      // ── FIX 4: Override the app name shown in Clerk's sign-in modal ──────
-      // Without this, Clerk shows "Sign in to Clerk" which looks unbranded.
-      // The appearance.layout.unsafe_disableDevelopmentModeWarnings suppresses
-      // the dev overlay, and the variables set your brand colour throughout.
       appearance={{
         variables: {
-          colorPrimary: "#f59e0b",        // amber-500 — your brand
+          colorPrimary: "#f59e0b",
           colorBackground: "#ffffff",
-          colorText: "#09090b",           // zinc-950
-          colorTextSecondary: "#71717a",  // zinc-500
           borderRadius: "0.75rem",
           fontFamily: "var(--font-body)",
         },
         elements: {
-          // Hides "Secured by Clerk" footer branding
           footer: "hidden",
-          // Clean card matching your site style
           card: "shadow-xl border border-zinc-200 dark:border-zinc-800 rounded-2xl",
           headerTitle: "font-extrabold tracking-tight text-zinc-900",
           headerSubtitle: "text-zinc-500",
