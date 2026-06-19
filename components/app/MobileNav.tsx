@@ -109,7 +109,7 @@ export function MobileNav() {
               The Saint's TechNet
             </p>
             <p className="text-[10px] font-semibold text-amber-500 uppercase tracking-widest mt-0.5">
-              Built by an Engineer
+              Engineer-Verified. Community-Trusted.
             </p>
           </div>
           <button

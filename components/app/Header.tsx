@@ -63,7 +63,7 @@ export function Header() {
               The Saint's TechNet
             </span>
             <span className="text-[10px] font-medium text-amber-500 tracking-wider uppercase">
-              Built by an Engineer.
+              Engineer-Verified. Community-Trusted.
             </span>
           </div>
           <span className="sm:hidden text-sm font-extrabold text-zinc-900 dark:text-[#f1f1f1] truncate max-w-[110px]">

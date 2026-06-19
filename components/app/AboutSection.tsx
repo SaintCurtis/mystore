@@ -1,10 +1,10 @@
 import { Wrench, ShieldCheck, Globe, Award } from "lucide-react";
 
 const MILESTONES = [
-  { icon: Wrench, year: "2016", title: "Deep Technical Roots", desc: "Years of hands-on hardware experience — diagnosing faults, replacing components, and understanding computers the way most resellers never will. That foundation is what sets The Saint's TechNet apart." },
-  { icon: Award, year: "2019", title: "The Saint's TechNet Founded", desc: "What started as a passion project quickly became a trusted name in premium tech retail. Built on integrity, verified products, and honest recommendations — not just sales targets." },
-  { icon: ShieldCheck, year: "2021", title: "CAC Business Registration", desc: "Formalised as The Saint's Technology Networks — a fully registered Nigerian business. Every transaction is backed by a real, accountable entity. No side hustle. This is the real thing." },
-  { icon: Globe, year: "2024", title: "Shipping Worldwide", desc: "From Nigeria to anywhere on Earth. Brand new and premium foreign-used tech delivered to customers across the globe — with warranty, with care, and with expertise." },
+  { icon: Wrench, year: "2016", title: "Deep Technical Roots", desc: "Years of hands-on hardware work — diagnosing faults, replacing components, understanding machines the way most resellers never will. That foundation is what drives every product decision we make." },
+  { icon: Award, year: "2019", title: "The Saint's TechNet Founded", desc: "Launched with one goal: bring honest, engineer-verified tech retail to Nigeria. No hype. No guesswork. Just the right product at the right price." },
+  { icon: ShieldCheck, year: "2021", title: "CAC Business Registration", desc: "Registered as The Saint's Technology Networks — a fully accountable Nigerian business. Every transaction is backed by a real, legal entity." },
+  { icon: Globe, year: "2024", title: "Shipping Worldwide", desc: "From Lagos to anywhere on Earth — brand-new and premium foreign-used tech, warranted and delivered worldwide." },
 ];
 
 export function AboutSection() {
@@ -19,30 +19,22 @@ export function AboutSection() {
               About The Saint's TechNet
             </p>
             <h2 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-[#f1f1f1] sm:text-4xl">
-              Not Just a Seller.{" "}
-              <span className="text-amber-600 dark:text-amber-400">An Engineer</span>{" "}
-              Who Happens to Sell.
+              Engineering Expertise.{" "}
+              <span className="text-amber-600 dark:text-amber-400">Not Just</span>{" "}
+              Sales.
             </h2>
 
             <div className="mt-6 space-y-5 text-sm leading-7 text-zinc-600 dark:text-[#a3a3a3] sm:text-base">
               <p>
-                The Saint's Technology Networks — known as{" "}
                 <span className="font-semibold text-zinc-900 dark:text-[#f1f1f1]">The Saint's TechNet</span>{" "}
-                — was built on something most tech vendors don't have: real, deep technical knowledge.
-                Not certifications on a wall. Actual hands-on engineering expertise developed over years
-                of working with hardware at its most fundamental level.
+                was built on something most tech vendors skip: genuine engineering knowledge applied to every product we touch.
               </p>
               <p>
-                When you buy from us, you're not buying from a middleman who googled specs.
-                You're buying from someone who can look at a machine, understand it completely,
-                and tell you honestly whether it fits your needs — or whether something else does.
+                Every recommendation is honest. Every product is verified by our team before it reaches you.
+                We only stock what we'd stand behind — which is why every sale comes with a warranty and a 7-day return policy.
               </p>
               <p>
-                That commitment to honesty is why our customers come back, refer their colleagues,
-                and trust us with purchases that matter. Every product is personally verified.
-                Every recommendation is genuine. Every sale is backed by a warranty and a 7-day
-                return policy — because when you truly understand what you're selling, you have
-                nothing to hide.
+                That standard is why our customers come back, and why they send their colleagues.
               </p>
             </div>
 

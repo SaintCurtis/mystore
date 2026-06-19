@@ -129,10 +129,8 @@ export function HeroSection() {
 
             {/* Sub-copy desktop */}
             <p className={`mt-3 max-w-lg text-sm leading-7 text-zinc-500 dark:text-[#a3a3a3] sm:text-base hidden sm:block transition-all duration-700 delay-300 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
-              My journey with technology started with repairing computers many years ago.
-              Today, I personally inspect every device we offer — whether brand new or carefully
-              selected foreign-used. All products are stored in our dedicated warehouse and
-              come with warranty. We ship worldwide.
+              Every device we offer — brand new or carefully selected foreign-used — is inspected
+              by our engineering team before it reaches you. Warranty on everything. Shipped worldwide.
             </p>
 
             {/* Sub-copy mobile — short */}

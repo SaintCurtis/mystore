@@ -51,7 +51,7 @@ function ChunkErrorHandler() {
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    default: "The Saint's TechNet — Built by an Engineer. Trusted by Thousands.",
+    default: "The Saint's TechNet — Engineer-Verified. Community-Trusted.",
     template: "%s | The Saint's TechNet",
   },
   description:
@@ -81,15 +81,15 @@ export const metadata: Metadata = {
     locale: "en_NG",
     url: BASE_URL,
     siteName: "The Saint's TechNet",
-    title: "The Saint's TechNet — Built by an Engineer. Trusted by Thousands.",
+    title: "The Saint's TechNet — Engineer-Verified. Community-Trusted.",
     description:
-      "Premium brand-new and foreign-used tech — verified by a Computer Engineer. Warranty on everything. CAC-registered. Ships worldwide.",
+      "Premium brand-new and foreign-used tech — engineer-verified, warranted, and shipped worldwide. CAC-registered since 2019.",
     images: [{ url: `${BASE_URL}/og-image.jpg`, width: 1200, height: 630, alt: "The Saint's TechNet" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "The Saint's TechNet — Built by an Engineer. Trusted by Thousands.",
-    description: "Premium brand-new and foreign-used tech — verified by a Computer Engineer. Warranty on everything.",
+    title: "The Saint's TechNet — Engineer-Verified. Community-Trusted.",
+    description: "Premium brand-new and foreign-used tech — engineer-verified, warranted, and shipped worldwide.",
     images: [`${BASE_URL}/og-image.jpg`],
     creator: "@Saint_Curtis_",
     site: "@Saint_Curtis_",

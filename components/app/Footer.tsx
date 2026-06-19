@@ -69,8 +69,7 @@ export function Footer() {
             </Link>
 
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-[#a3a3a3] max-w-xs">
-              Premium brand-new and foreign-used tech — verified by a Seasoned Computer Engineer.
-              Warranty on everything. Shipped worldwide since 2019.
+              Premium brand-new and foreign-used tech — engineer-verified, warranted, and shipped worldwide since 2019.
             </p>
 
             <div className="flex items-center gap-3">
@@ -179,7 +178,7 @@ export function Footer() {
               © {new Date().getFullYear()} The Saint's Technology Networks. CAC Registered. All rights reserved.
             </p>
             <p className="text-xs text-zinc-400 dark:text-[#444]">
-              Built by an Engineer. Trusted by Thousands.
+              Engineer-Verified. Community-Trusted.
             </p>
           </div>
         </div>
