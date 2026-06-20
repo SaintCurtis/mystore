@@ -11,9 +11,15 @@ import { CompareButton } from "@/components/app/CompareButton";
 import { useCurrency } from "@/lib/store/currency-store-provider";
 import { useCartActions, useCartItem } from "@/lib/store/cart-store-provider";
 import { toast } from "sonner";
+<<<<<<< HEAD
 import type { FILTER_PRODUCTS_BY_NAME_QUERY_RESULT} from "@/sanity.types";
 
 type Product = FILTER_PRODUCTS_BY_NAME_QUERY_RESULT[number];
+=======
+import type { FILTER_PRODUCTS_BY_NAME_QUERY_RESULT } from "@/sanity.types";
+
+type Product = FILTER_PRODUCTS_BY_NAME_QUERY_RESULT[number]; 
+>>>>>>> c73f224 (refactor: de-personalize copywriting to team voice across site)
 
 interface ProductCardProps {
   product: Product;

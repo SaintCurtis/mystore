@@ -102,6 +102,13 @@ export function ProductFilters({
     setPriceRange([urlMinPrice, urlMaxPrice]);
   }, [urlMinPrice, urlMaxPrice]);
 
+<<<<<<< HEAD
+=======
+  // ── Helpers — cast to any[] so parentSlug is always accessible ─
+  // The generated ALL_CATEGORIES_QUERY_RESULT type doesn't always
+  // surface parentSlug on the item type, but the runtime data
+  // always has it from the GROQ query. Using any[] here is safe.
+>>>>>>> c73f224 (refactor: de-personalize copywriting to team voice across site)
   const cats = categories as any[];
 
   function findDrilldownRoot(catSlug: string): DrilldownRoot | null {
