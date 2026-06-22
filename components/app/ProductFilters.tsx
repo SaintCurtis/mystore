@@ -59,7 +59,6 @@ interface ProductFiltersProps {
   categories: ALL_CATEGORIES_QUERY_RESULT;
   brands?: { title: string; slug: string }[];
   models?: { title: string; slug: string }[];
-  /** Called when the user taps "Done" inside the mobile bottom sheet */
   onDone?: () => void;
 }
 
@@ -94,21 +93,16 @@ export function ProductFilters({
     urlMaxPrice,
   ]);
 
-  // On mobile the Color + Material filters are low-traffic and add visual noise.
-  // We collapse them behind a toggle so users see the most useful filters first.
   const [showMoreFilters, setShowMoreFilters] = useState(false);
 
   useEffect(() => {
     setPriceRange([urlMinPrice, urlMaxPrice]);
   }, [urlMinPrice, urlMaxPrice]);
 
-<<<<<<< HEAD
-=======
   // ── Helpers — cast to any[] so parentSlug is always accessible ─
   // The generated ALL_CATEGORIES_QUERY_RESULT type doesn't always
   // surface parentSlug on the item type, but the runtime data
   // always has it from the GROQ query. Using any[] here is safe.
->>>>>>> c73f224 (refactor: de-personalize copywriting to team voice across site)
   const cats = categories as any[];
 
   function findDrilldownRoot(catSlug: string): DrilldownRoot | null {
@@ -319,7 +313,6 @@ export function ProductFilters({
 
   return (
     <div className="space-y-6 rounded-xl border border-zinc-800 bg-zinc-900 p-6">
-      {/* Clear Filters */}
       {hasActiveFilters && (
         <div className="rounded-lg border border-amber-700/50 bg-amber-500/10 p-3">
           <div className="mb-2 flex items-center justify-between">
@@ -467,9 +460,7 @@ export function ProductFilters({
           >
             <SelectTrigger
               className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${
-                isConditionActive
-                  ? "border-amber-500 ring-1 ring-amber-500"
-                  : ""
+                isConditionActive ? "border-amber-500 ring-1 ring-amber-500" : ""
               }`}
             >
               <SelectValue placeholder="Any Condition" />
@@ -640,13 +631,7 @@ export function ProductFilters({
         </Select>
       </div>
 
-      {/* ── More Filters (Color + Material) ──────────────────────────────
-          These are low-traffic filters on mobile — most users never use them.
-          Collapsing them behind a toggle reduces the filter sheet scroll height
-          by ~160px on mobile, making the primary filters (category, price,
-          sort) immediately visible without scrolling.
-          On desktop the sidebar always shows everything; the toggle only
-          appears inside the mobile bottom sheet (when onDone is provided). ── */}
+      {/* More Filters */}
       <div>
         <button
           type="button"
@@ -717,9 +702,7 @@ export function ProductFilters({
               >
                 <SelectTrigger
                   className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${
-                    isMaterialActive
-                      ? "border-amber-500 ring-1 ring-amber-500"
-                      : ""
+                    isMaterialActive ? "border-amber-500 ring-1 ring-amber-500" : ""
                   }`}
                 >
                   <SelectValue placeholder="All Materials" />

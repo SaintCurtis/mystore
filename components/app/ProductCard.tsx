@@ -11,15 +11,9 @@ import { CompareButton } from "@/components/app/CompareButton";
 import { useCurrency } from "@/lib/store/currency-store-provider";
 import { useCartActions, useCartItem } from "@/lib/store/cart-store-provider";
 import { toast } from "sonner";
-<<<<<<< HEAD
-import type { FILTER_PRODUCTS_BY_NAME_QUERY_RESULT} from "@/sanity.types";
-
-type Product = FILTER_PRODUCTS_BY_NAME_QUERY_RESULT[number];
-=======
 import type { FILTER_PRODUCTS_BY_NAME_QUERY_RESULT } from "@/sanity.types";
 
-type Product = FILTER_PRODUCTS_BY_NAME_QUERY_RESULT[number]; 
->>>>>>> c73f224 (refactor: de-personalize copywriting to team voice across site)
+type Product = FILTER_PRODUCTS_BY_NAME_QUERY_RESULT[number];
 
 interface ProductCardProps {
   product: Product;
@@ -52,7 +46,6 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
   const mainImageUrl = images[0]?.asset?.url;
   const displayedImageUrl =
     hoveredImageIndex !== null ? images[hoveredImageIndex]?.asset?.url : mainImageUrl;
-  // Only use video thumbnail if there are no images at all
   const mainVideoUrl = !mainImageUrl ? (videos[0]?.asset?.url ?? null) : null;
 
   const stock = product.stock ?? 0;
@@ -187,13 +180,6 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
         </div>
       </Link>
 
-      {/* ── Thumbnail strip — desktop only ──
-          Hidden on mobile (hidden sm:flex) so no touch-hover issues.
-          onMouseEnter/Leave are mouse-only events; touch devices never
-          trigger them, but the hoveredImageIndex could get stuck if a
-          touch event somehow fires mouseenter without a matching mouseleave.
-          We guard with onTouchStart={() => setHoveredImageIndex(null)} on
-          the strip wrapper so any touch interaction resets to the main image. */}
       {hasMultipleImages ? (
         <div
           className="hidden sm:flex gap-1.5 border-t border-zinc-100 dark:border-[#1a1a1a] bg-zinc-50 dark:bg-[#0d0d0d] p-2 sm:p-3"
@@ -327,7 +313,6 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
             </>
           )}
 
-          {/* Compare — desktop only */}
           <div className="hidden sm:flex justify-center pt-0.5">
             <CompareButton
               product={{
