@@ -17,6 +17,7 @@ interface ProductSectionProps {
   searchQuery: string;
   brands?: { title: string; slug: string }[];
   models?: { title: string; slug: string }[];
+  limitOnHomepage?: boolean;
 }
 
 export function ProductSection({
@@ -25,6 +26,7 @@ export function ProductSection({
   searchQuery,
   brands = [],
   models = [],
+  limitOnHomepage = false,
 }: ProductSectionProps) {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -32,17 +34,6 @@ export function ProductSection({
 
   const searchParams = useSearchParams();
   const activeCategory = searchParams.get("category") ?? undefined;
-  const hasActiveFilters =
-    !!activeCategory ||
-    !!searchQuery ||
-    !!searchParams.get("condition") ||
-    !!searchParams.get("brand") ||
-    !!searchParams.get("color") ||
-    !!searchParams.get("material") ||
-    !!searchParams.get("minPrice") ||
-    !!searchParams.get("maxPrice");
-
-  const limitOnHomepage = !hasActiveFilters;
 
   const activeFilterCount = [
     activeCategory,
@@ -78,92 +69,6 @@ export function ProductSection({
   return (
     <div className="flex flex-col gap-4">
 
-      <style>{`
-        /* ── Breathing glow — the whole button border pulses in/out ── */
-        @keyframes breatheGlow {
-          0%, 100% {
-            box-shadow:
-              0 0 0 0 rgba(251,191,36,0),
-              0 0 0 0 rgba(249,115,22,0),
-              0 4px 24px rgba(245,158,11,0.35);
-          }
-          40% {
-            box-shadow:
-              0 0 0 4px rgba(251,191,36,0.35),
-              0 0 0 8px rgba(249,115,22,0.15),
-              0 4px 32px rgba(245,158,11,0.55);
-          }
-          60% {
-            box-shadow:
-              0 0 0 6px rgba(251,191,36,0.2),
-              0 0 0 14px rgba(249,115,22,0.06),
-              0 4px 40px rgba(245,158,11,0.4);
-          }
-        }
-
-        /* ── Shimmer sweep — a bright stripe crosses the button every 3.5s ── */
-        @keyframes shimmerSweep {
-          0%   { transform: translateX(-120%) skewX(-15deg); opacity: 0;   }
-          8%   { opacity: 1; }
-          40%  { transform: translateX(220%)  skewX(-15deg); opacity: 0.6; }
-          41%  { opacity: 0; }
-          100% { transform: translateX(220%)  skewX(-15deg); opacity: 0;   }
-        }
-
-        /* ── Gem dot rainbow ── */
-        @keyframes gemColor {
-          0%   { background:#ff4d4d; box-shadow:0 0 6px 2px #ff4d4d; }
-          14%  { background:#ff9500; box-shadow:0 0 6px 2px #ff9500; }
-          28%  { background:#ffe600; box-shadow:0 0 6px 2px #ffe600; }
-          42%  { background:#00e676; box-shadow:0 0 6px 2px #00e676; }
-          56%  { background:#00cfff; box-shadow:0 0 6px 2px #00cfff; }
-          70%  { background:#7c4dff; box-shadow:0 0 6px 2px #7c4dff; }
-          84%  { background:#ffffff; box-shadow:0 0 10px 4px #ffffff; }
-          100% { background:#ff4d4d; box-shadow:0 0 6px 2px #ff4d4d; }
-        }
-        @keyframes gemPing {
-          0%   { transform:scale(1);   opacity:1; }
-          60%  { transform:scale(2.4); opacity:0; }
-          100% { transform:scale(2.4); opacity:0; }
-        }
-
-        .filter-cta-alive {
-          animation: breatheGlow 2.4s ease-in-out infinite;
-          position: relative;
-          overflow: hidden;
-        }
-        .filter-cta-alive::after {
-          content: '';
-          position: absolute;
-          top: 0; left: 0;
-          width: 40%;
-          height: 100%;
-          background: linear-gradient(
-            90deg,
-            transparent 0%,
-            rgba(255,255,255,0.55) 50%,
-            transparent 100%
-          );
-          animation: shimmerSweep 3.5s ease-in-out infinite;
-          pointer-events: none;
-          border-radius: inherit;
-        }
-        .gem-dot {
-          position: relative;
-          width: 10px; height: 10px;
-          border-radius: 50%;
-          flex-shrink: 0;
-          animation: gemColor 2s linear infinite;
-        }
-        .gem-dot::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          border-radius: 50%;
-          animation: gemColor 2s linear infinite, gemPing 2s ease-out infinite;
-        }
-      `}</style>
-
       {/* ── Product count ── */}
       <p className="text-sm text-zinc-500 dark:text-[#a3a3a3]">
         <span className="font-semibold text-zinc-800 dark:text-[#f1f1f1]">
@@ -181,15 +86,7 @@ export function ProductSection({
         )}
       </p>
 
-      {/* ── Mobile filter CTA — full width, centered ──────────────────────
-          Two states:
-          IDLE   → amber gradient shimmer + pulse ring + "Find Your Perfect Product"
-          ACTIVE → solid amber + filter count badge + X quick-clear button
-
-          Height 56px (h-14), rounded-2xl, bold 16px text — commands attention
-          without being aggressive. The shimmer and pulse stop the moment a
-          filter is applied so the animation only runs when it's actually useful.
-      ──────────────────────────────────────────────────────────────────── */}
+      {/* ── Mobile filter CTA ── */}
       <div className="lg:hidden">
         {activeFilterCount === 0 ? (
           <button
@@ -226,7 +123,6 @@ export function ProductSection({
               </span>
             </button>
 
-            {/* Quick-clear — appears only when filters are active */}
             <button
               type="button"
               onClick={() => { window.location.href = "/"; }}

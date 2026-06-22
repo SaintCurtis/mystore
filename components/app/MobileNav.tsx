@@ -8,24 +8,25 @@ import {
   Zap, Satellite, Video, ShoppingBag, Gamepad2, Home,
   Heart, Gift, LayoutDashboard, FileText, UserCircle,
 } from "lucide-react";
-import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from "@clerk/nextjs";
+// Clerk v7: use Show instead of SignedIn/SignedOut
+import { Show, SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import { ThemeToggle } from "@/components/app/ThemeToggle";
 import { useTotalItems, useCartActions } from "@/lib/store/cart-store-provider";
 import { useWishlistCount, useWishlistActions } from "@/lib/store/wishlist-store-provider";
 
 const NAV_ITEMS = [
-  { label: "Build My Setup ✨",        href: "/build-my-setup",                    icon: Wand2,       highlight: true,  highlightColor: "amber" },
-  { label: "Get a Quotation",           href: "/quotation",                         icon: FileText,    highlight: true,  highlightColor: "violet" },
-  { label: "All Products",              href: "/",                                  icon: ShoppingBag, highlight: false, highlightColor: null },
-  { label: "Computers",                 href: "/?category=computers",               icon: Cpu,         highlight: false, highlightColor: null },
-  { label: "Accessories",               href: "/?category=accessories",             icon: Headphones,  highlight: false, highlightColor: null },
-  { label: "Monitors",                  href: "/?category=monitors",                icon: Monitor,     highlight: false, highlightColor: null },
-  { label: "Gaming Laptops",            href: "/?category=gaming-laptops",          icon: Gamepad2,    highlight: false, highlightColor: null },
-  { label: "Content Creation",          href: "/?category=content-creation-tools",  icon: Video,       highlight: false, highlightColor: null },
-  { label: "Tech Setup Gears",          href: "/?category=tech-setup-gears",        icon: Home,        highlight: false, highlightColor: null },
-  { label: "EcoFlow",                   href: "/?category=ecoflow",                 icon: Zap,         highlight: false, highlightColor: null },
-  { label: "Starlink",                  href: "/?category=starlink",                icon: Satellite,   highlight: false, highlightColor: null },
-  { label: "ACASIS",                    href: "/?category=acasis",                  icon: Zap,         highlight: false, highlightColor: null },
+  { label: "Build My Setup ✨",  href: "/build-my-setup",                   icon: Wand2,       highlight: true,  highlightColor: "amber"  },
+  { label: "Get a Quotation",    href: "/quotation",                         icon: FileText,    highlight: true,  highlightColor: "violet" },
+  { label: "All Products",       href: "/",                                  icon: ShoppingBag, highlight: false, highlightColor: null     },
+  { label: "Computers",          href: "/?category=computers",               icon: Cpu,         highlight: false, highlightColor: null     },
+  { label: "Accessories",        href: "/?category=accessories",             icon: Headphones,  highlight: false, highlightColor: null     },
+  { label: "Monitors",           href: "/?category=monitors",                icon: Monitor,     highlight: false, highlightColor: null     },
+  { label: "Gaming Laptops",     href: "/?category=gaming-laptops",          icon: Gamepad2,    highlight: false, highlightColor: null     },
+  { label: "Content Creation",   href: "/?category=content-creation-tools",  icon: Video,       highlight: false, highlightColor: null     },
+  { label: "Tech Setup Gears",   href: "/?category=tech-setup-gears",        icon: Home,        highlight: false, highlightColor: null     },
+  { label: "EcoFlow",            href: "/?category=ecoflow",                 icon: Zap,         highlight: false, highlightColor: null     },
+  { label: "Starlink",           href: "/?category=starlink",                icon: Satellite,   highlight: false, highlightColor: null     },
+  { label: "ACASIS",             href: "/?category=acasis",                  icon: Zap,         highlight: false, highlightColor: null     },
 ];
 
 export function MobileNav() {
@@ -76,100 +77,65 @@ export function MobileNav() {
 
   const drawer = (
     <>
-      {/* Backdrop */}
       <div
-        className={`
-          fixed inset-0 z-9998 bg-black/60 backdrop-blur-sm
-          transition-opacity duration-300 ease-in-out
-          ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}
-        `}
-        onClick={close}
-        aria-hidden="true"
+        className={`fixed inset-0 z-9998 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ease-in-out ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+        onClick={close} aria-hidden="true"
       />
-
-      {/* Drawer */}
       <div
-        className={`
-          fixed left-0 top-0 z-9999
-          h-100dvh w-[82vw] max-w-[310px]
-          flex flex-col
-          bg-white dark:bg-[#0d0d0d]
-          shadow-2xl
-          transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
-          ${open ? "translate-x-0" : "-translate-x-full"}
-        `}
-        aria-modal="true"
-        role="dialog"
-        aria-label="Navigation menu"
+        className={`fixed left-0 top-0 z-9999 h-100dvh w-[82vw] max-w-[310px] flex flex-col bg-white dark:bg-[#0d0d0d] shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${open ? "translate-x-0" : "-translate-x-full"}`}
+        aria-modal="true" role="dialog" aria-label="Navigation menu"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 shrink-0 border-b border-zinc-100 dark:border-[#1c1c1c]">
           <div>
-            <p className="text-sm font-extrabold text-zinc-900 dark:text-white tracking-tight">
-              The Saint's TechNet
-            </p>
-            <p className="text-[10px] font-semibold text-amber-500 uppercase tracking-widest mt-0.5">
-              Engineer-Verified. Community-Trusted.
-            </p>
+            <p className="text-sm font-extrabold text-zinc-900 dark:text-white tracking-tight">The Saint's TechNet</p>
+            <p className="text-[10px] font-semibold text-amber-500 uppercase tracking-widest mt-0.5">Built by an Engineer</p>
           </div>
-          <button
-            type="button"
-            onClick={close}
+          <button type="button" onClick={close}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 dark:bg-[#1c1c1c] text-zinc-500 dark:text-[#a3a3a3] hover:bg-zinc-200 dark:hover:bg-[#2a2a2a] transition-colors active:scale-95"
-            aria-label="Close menu"
-          >
+            aria-label="Close menu">
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        {/* Scrollable nav */}
+        {/* Nav */}
         <nav className="flex-1 overflow-y-auto overscroll-contain py-2 min-h-0">
 
           {/* Admin — owner only */}
           {isOwner && (
             <>
-              <Link
-                href="/admin"
-                onClick={close}
-                className="flex items-center gap-3 px-5 py-3.5 text-sm font-semibold border-l-2 border-zinc-900 dark:border-white bg-zinc-50 dark:bg-white/5 text-zinc-900 dark:text-white hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors"
-              >
+              <Link href="/admin" onClick={close}
+                className="flex items-center gap-3 px-5 py-3.5 text-sm font-semibold border-l-2 border-zinc-900 dark:border-white bg-zinc-50 dark:bg-white/5 text-zinc-900 dark:text-white hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-zinc-900 dark:bg-white shrink-0">
                   <LayoutDashboard className="h-3.5 w-3.5 text-white dark:text-zinc-900" />
                 </div>
                 Admin Dashboard
-                <span className="ml-auto text-[9px] font-black bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-1.5 py-0.5 rounded-full uppercase tracking-wide">
-                  Owner
-                </span>
+                <span className="ml-auto text-[9px] font-black bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-1.5 py-0.5 rounded-full uppercase tracking-wide">Owner</span>
               </Link>
               <div className="mx-5 my-1.5 border-t border-zinc-100 dark:border-[#1c1c1c]" />
             </>
           )}
 
-          {/* Main nav */}
+          {/* Main nav items */}
           {NAV_ITEMS.map(({ label, href, icon: Icon, highlight, highlightColor }) => {
             const colorMap: Record<string, string> = {
-              amber: "border-amber-500 bg-amber-50/70 dark:bg-amber-500/8 text-amber-700 dark:text-amber-400",
+              amber:  "border-amber-500 bg-amber-50/70 dark:bg-amber-500/8 text-amber-700 dark:text-amber-400",
               violet: "border-violet-500 bg-violet-50/70 dark:bg-violet-500/8 text-violet-700 dark:text-violet-400",
             };
             const iconColorMap: Record<string, string> = {
-              amber: "text-amber-500",
+              amber:  "text-amber-500",
               violet: "text-violet-500",
             };
-            const highlightClasses = highlight && highlightColor
+            const hlClass = highlight && highlightColor
               ? colorMap[highlightColor]
               : "border-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1a1a1a] hover:text-zinc-900 dark:hover:text-white";
-            const iconClasses = highlight && highlightColor
+            const iconClass = highlight && highlightColor
               ? iconColorMap[highlightColor]
               : "text-zinc-400 dark:text-zinc-500";
-
             return (
-              <Link
-                key={href + label}
-                href={href}
-                onClick={close}
-                className={`flex items-center gap-3 px-5 py-3.5 text-sm font-medium border-l-2 transition-colors ${highlightClasses}`}
-              >
-                <Icon className={`h-4 w-4 shrink-0 ${iconClasses}`} />
+              <Link key={href + label} href={href} onClick={close}
+                className={`flex items-center gap-3 px-5 py-3.5 text-sm font-medium border-l-2 transition-colors ${hlClass}`}>
+                <Icon className={`h-4 w-4 shrink-0 ${iconClass}`} />
                 {label}
               </Link>
             );
@@ -177,61 +143,40 @@ export function MobileNav() {
 
           <div className="mx-5 my-1.5 border-t border-zinc-100 dark:border-[#1c1c1c]" />
 
-          <SignedIn>
-            <Link
-              href="/orders"
-              onClick={close}
-              className="flex items-center gap-3 px-5 py-3.5 text-sm font-medium border-l-2 border-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1a1a1a] transition-colors"
-            >
+          <Show when="signed-in">
+            <Link href="/orders" onClick={close}
+              className="flex items-center gap-3 px-5 py-3.5 text-sm font-medium border-l-2 border-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1a1a1a] transition-colors">
               <Package className="h-4 w-4 text-zinc-400 dark:text-zinc-500" />
               My Orders
             </Link>
-            <Link
-              href="/profile"
-              onClick={close}
-              className="flex items-center gap-3 px-5 py-3.5 text-sm font-medium border-l-2 border-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1a1a1a] transition-colors"
-            >
+            <Link href="/profile" onClick={close}
+              className="flex items-center gap-3 px-5 py-3.5 text-sm font-medium border-l-2 border-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1a1a1a] transition-colors">
               <UserCircle className="h-4 w-4 text-zinc-400 dark:text-zinc-500" />
               My Profile
             </Link>
-            <Link
-              href="/referral"
-              onClick={close}
-              className="flex items-center gap-3 px-5 py-3.5 text-sm font-medium border-l-2 border-emerald-500 bg-emerald-50/70 dark:bg-emerald-500/8 text-emerald-700 dark:text-emerald-400 transition-colors"
-            >
+            <Link href="/referral" onClick={close}
+              className="flex items-center gap-3 px-5 py-3.5 text-sm font-medium border-l-2 border-emerald-500 bg-emerald-50/70 dark:bg-emerald-500/8 text-emerald-700 dark:text-emerald-400 transition-colors">
               <Gift className="h-4 w-4 shrink-0 text-emerald-500 dark:text-emerald-400" />
               Refer & Earn 🎁
-              <span className="ml-auto rounded-full bg-emerald-500 px-2 py-0.5 text-[9px] font-black text-white uppercase tracking-wide">
-                New
-              </span>
+              <span className="ml-auto rounded-full bg-emerald-500 px-2 py-0.5 text-[9px] font-black text-white uppercase tracking-wide">New</span>
             </Link>
-          </SignedIn>
+          </Show>
 
-          <button
-            type="button"
-            onClick={() => { openWishlist(); close(); }}
-            className="flex w-full items-center gap-3 px-5 py-3.5 text-sm font-medium border-l-2 border-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1a1a1a] transition-colors"
-          >
+          <button type="button" onClick={() => { openWishlist(); close(); }}
+            className="flex w-full items-center gap-3 px-5 py-3.5 text-sm font-medium border-l-2 border-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1a1a1a] transition-colors">
             <Heart className={`h-4 w-4 shrink-0 ${wishlistCount > 0 ? "fill-red-500 text-red-500" : "text-zinc-400 dark:text-zinc-500"}`} />
             Wishlist
             {wishlistCount > 0 && (
-              <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-                {wishlistCount}
-              </span>
+              <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">{wishlistCount}</span>
             )}
           </button>
 
-          <button
-            type="button"
-            onClick={() => { openCart(); close(); }}
-            className="flex w-full items-center gap-3 px-5 py-3.5 text-sm font-medium border-l-2 border-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1a1a1a] transition-colors"
-          >
+          <button type="button" onClick={() => { openCart(); close(); }}
+            className="flex w-full items-center gap-3 px-5 py-3.5 text-sm font-medium border-l-2 border-transparent text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1a1a1a] transition-colors">
             <ShoppingBag className="h-4 w-4 text-zinc-400 dark:text-zinc-500" />
             Cart
             {totalItems > 0 && (
-              <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-[10px] font-bold text-zinc-950">
-                {totalItems}
-              </span>
+              <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-[10px] font-bold text-zinc-950">{totalItems}</span>
             )}
           </button>
         </nav>
@@ -239,32 +184,23 @@ export function MobileNav() {
         {/* Footer */}
         <div className="border-t border-zinc-100 dark:border-[#1c1c1c] px-5 py-4 space-y-3.5 shrink-0">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
-              Theme
-            </span>
+            <span className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Theme</span>
             <ThemeToggle />
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
-              Account
-            </span>
-            <SignedIn>
-              <UserButton
-                afterSwitchSessionUrl="/"
-                appearance={{ elements: { avatarBox: "h-8 w-8" } }}
-              />
-            </SignedIn>
-            <SignedOut>
+            <span className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Account</span>
+            <Show when="signed-in">
+              <UserButton afterSwitchSessionUrl="/" appearance={{ elements: { avatarBox: "h-8 w-8" } }} />
+            </Show>
+            <Show when="signed-out">
               <SignInButton mode="modal">
                 <button className="rounded-lg bg-amber-500 px-4 py-1.5 text-xs font-bold text-zinc-950 hover:bg-amber-400 active:scale-95 transition-all">
                   Sign In
                 </button>
               </SignInButton>
-            </SignedOut>
+            </Show>
           </div>
-          <p className="text-[10px] text-zinc-400 dark:text-zinc-600 text-center pt-1">
-            CAC Registered · Since 2019 · Ships Worldwide
-          </p>
+          <p className="text-[10px] text-zinc-400 dark:text-zinc-600 text-center pt-1">CAC Registered · Since 2019 · Ships Worldwide</p>
         </div>
       </div>
     </>
@@ -272,16 +208,11 @@ export function MobileNav() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
+      <button type="button" onClick={() => setOpen(true)}
         className="md:hidden flex items-center justify-center h-9 w-9 rounded-lg text-zinc-600 dark:text-[#a3a3a3] hover:bg-zinc-100 dark:hover:bg-[#1a1a1a] transition-colors"
-        aria-label="Open navigation menu"
-        aria-expanded={open}
-      >
+        aria-label="Open navigation menu" aria-expanded={open}>
         <Menu className="h-5 w-5" />
       </button>
-
       {mounted && createPortal(drawer, document.body)}
     </>
   );

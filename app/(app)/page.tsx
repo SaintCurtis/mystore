@@ -61,6 +61,12 @@ export default async function HomePage({ searchParams }: PageProps) {
   const inStock = params.inStock === "true";
   const isHomepage = !categorySlug && !searchQuery;
 
+  const hasActiveFilters = !!(
+    categorySlug || searchQuery || condition || brandSlug ||
+    color || material || params.minPrice || params.maxPrice
+  );
+  const limitOnHomepage = !hasActiveFilters;
+
   const getQuery = () => {
     if (searchQuery && sort === "relevance") return FILTER_PRODUCTS_BY_RELEVANCE_QUERY;
     switch (sort) {
@@ -154,7 +160,6 @@ export default async function HomePage({ searchParams }: PageProps) {
     <div className="min-h-screen bg-zinc-50 dark:bg-[#0a0a0a] transition-colors duration-300">
 
       {isHomepage && <HeroSection />}
-
       {isHomepage && <MobileTrustBar />}
 
       {isHomepage && featuredProducts.length > 0 && (
@@ -163,7 +168,6 @@ export default async function HomePage({ searchParams }: PageProps) {
         </Suspense>
       )}
 
-      {/* Page Banner + Category Tiles */}
       <div className="border-b border-zinc-200 dark:border-[#1a1a1a] bg-zinc-50 dark:bg-[#0a0a0a] transition-colors duration-300">
         <div className="mx-auto max-w-7xl px-4 pt-6 sm:pt-8 sm:px-6 lg:px-8">
           <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-[#f1f1f1]">
@@ -184,9 +188,7 @@ export default async function HomePage({ searchParams }: PageProps) {
         </div>
       </div>
 
-      {/* Product Grid */}
       <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8 sm:px-6 lg:px-8">
-        {/* Mobile budget filter presets */}
         <Suspense fallback={null}>
           <MobilePricePresets />
         </Suspense>
@@ -196,6 +198,7 @@ export default async function HomePage({ searchParams }: PageProps) {
           searchQuery={searchQuery}
           brands={brands}
           models={models}
+          limitOnHomepage={limitOnHomepage}
         />
       </div>
 

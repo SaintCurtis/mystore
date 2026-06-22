@@ -1,6 +1,4 @@
 "use client";
-// FIX 5: All lucide-react icons replaced with @heroicons/react
-// Run: pnpm add @heroicons/react
 
 import Link from "next/link";
 import { useState } from "react";
@@ -17,10 +15,9 @@ import {
   Squares2X2Icon,
   DocumentTextIcon,
 } from "@heroicons/react/24/outline";
-import {
-  HeartIcon as HeartSolid,
-} from "@heroicons/react/24/solid";
-import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from "@clerk/nextjs";
+import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
+// Clerk v7: SignedIn/SignedOut replaced by <Show when="signed-in/out">
+import { Show, SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { useCartActions, useTotalItems } from "@/lib/store/cart-store-provider";
 import { useChatActions, useIsChatOpen } from "@/lib/store/chat-store-provider";
@@ -39,7 +36,6 @@ export function Header() {
   const { openWishlist } = useWishlistActions();
   const [searchOpen, setSearchOpen] = useState(false);
 
-  // Admin check — same pattern as MobileNav
   const { user } = useUser();
   const isOwner =
     !!user?.id &&
@@ -50,7 +46,6 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b border-zinc-200 dark:border-[#1f1f1f] bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-md transition-colors duration-300">
       <div className="mx-auto flex h-14 max-w-7xl items-center px-3 sm:px-6 lg:px-8 gap-2">
 
-        {/* Hamburger — mobile only */}
         <MobileNav />
 
         {/* Logo */}
@@ -76,10 +71,9 @@ export function Header() {
           <InstantSearch />
         </div>
 
-        {/* Mobile spacer */}
         <div className="flex-1 md:hidden" />
 
-        {/* ── Desktop right actions ─────────────────────────── */}
+        {/* ── Desktop right ── */}
         <div className="hidden md:flex items-center gap-1">
           <CurrencyToggle />
 
@@ -91,7 +85,7 @@ export function Header() {
             </Link>
           </Button>
 
-          <SignedIn>
+          <Show when="signed-in">
             <Button asChild variant="ghost" size="sm"
               className="hidden lg:flex items-center gap-1.5 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 dark:text-[#a3a3a3] dark:hover:text-[#f1f1f1] dark:hover:bg-[#1a1a1a] transition-colors">
               <Link href="/orders">
@@ -99,7 +93,7 @@ export function Header() {
                 <span className="text-sm font-medium">My Orders</span>
               </Link>
             </Button>
-          </SignedIn>
+          </Show>
 
           {!isChatOpen && (
             <Button onClick={openChat} size="sm"
@@ -112,11 +106,9 @@ export function Header() {
           <Button variant="ghost" size="icon"
             className="relative h-9 w-9 text-zinc-500 hover:text-red-500 hover:bg-red-50 dark:text-[#a3a3a3] dark:hover:text-red-400 dark:hover:bg-red-500/10"
             onClick={openWishlist}>
-            {wishlistCount > 0 ? (
-              <HeartSolid className="h-[18px] w-[18px] text-red-500 dark:text-red-400" />
-            ) : (
-              <HeartIcon className="h-[18px] w-[18px]" />
-            )}
+            {wishlistCount > 0
+              ? <HeartSolid className="h-[18px] w-[18px] text-red-500 dark:text-red-400" />
+              : <HeartIcon className="h-[18px] w-[18px]" />}
             {wishlistCount > 0 && (
               <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
                 {wishlistCount > 9 ? "9+" : wishlistCount}
@@ -137,10 +129,9 @@ export function Header() {
 
           <ThemeToggle />
 
-          <SignedIn>
+          <Show when="signed-in">
             <UserButton afterSwitchSessionUrl="/" appearance={{ elements: { avatarBox: "h-8 w-8" } }}>
               <UserButton.MenuItems>
-                {/* Admin link — owner only */}
                 {isOwner && (
                   <UserButton.Link
                     label="Admin Dashboard"
@@ -148,30 +139,15 @@ export function Header() {
                     href="/admin"
                   />
                 )}
-                <UserButton.Link
-                  label="My Orders"
-                  labelIcon={<ArchiveBoxIcon className="h-4 w-4" />}
-                  href="/orders"
-                />
-                <UserButton.Link
-                  label="My Profile"
-                  labelIcon={<UserIcon className="h-4 w-4" />}
-                  href="/profile"
-                />
-                <UserButton.Link
-                  label="Get a Quotation"
-                  labelIcon={<DocumentTextIcon className="h-4 w-4" />}
-                  href="/quotation"
-                />
-                <UserButton.Link
-                  label="Build My Setup"
-                  labelIcon={<WrenchScrewdriverIcon className="h-4 w-4" />}
-                  href="/build-my-setup"
-                />
+                <UserButton.Link label="My Orders" labelIcon={<ArchiveBoxIcon className="h-4 w-4" />} href="/orders" />
+                <UserButton.Link label="My Profile" labelIcon={<UserIcon className="h-4 w-4" />} href="/profile" />
+                <UserButton.Link label="Get a Quotation" labelIcon={<DocumentTextIcon className="h-4 w-4" />} href="/quotation" />
+                <UserButton.Link label="Build My Setup" labelIcon={<WrenchScrewdriverIcon className="h-4 w-4" />} href="/build-my-setup" />
               </UserButton.MenuItems>
             </UserButton>
-          </SignedIn>
-          <SignedOut>
+          </Show>
+
+          <Show when="signed-out">
             <SignInButton mode="modal">
               <Button variant="ghost" size="icon"
                 className="h-9 w-9 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 dark:text-[#a3a3a3] dark:hover:text-[#f1f1f1] dark:hover:bg-[#1a1a1a] transition-colors"
@@ -179,33 +155,25 @@ export function Header() {
                 <UserIcon className="h-[18px] w-[18px]" />
               </Button>
             </SignInButton>
-          </SignedOut>
+          </Show>
         </div>
 
-        {/* ── Mobile right ──────────────────────────────────── */}
+        {/* ── Mobile right ── */}
         <div className="flex md:hidden items-center gap-1 shrink-0">
           <CurrencyToggle />
 
-          <Button
-            variant="ghost"
-            size="icon"
+          <Button variant="ghost" size="icon"
             className="h-9 w-9 text-zinc-500 dark:text-[#a3a3a3]"
             onClick={() => setSearchOpen((v) => !v)}
-            aria-label={searchOpen ? "Close search" : "Open search"}
-          >
+            aria-label={searchOpen ? "Close search" : "Open search"}>
             {searchOpen
               ? <XMarkIcon className="h-4 w-4" />
-              : <MagnifyingGlassIcon className="h-4 w-4" />
-            }
+              : <MagnifyingGlassIcon className="h-4 w-4" />}
           </Button>
 
-          <Button
-            variant="ghost"
-            size="icon"
+          <Button variant="ghost" size="icon"
             className="relative h-9 w-9 text-zinc-500 dark:text-[#a3a3a3]"
-            onClick={openCart}
-            aria-label="Open cart"
-          >
+            onClick={openCart} aria-label="Open cart">
             <ShoppingBagIcon className="h-[18px] w-[18px]" />
             {totalItems > 0 && (
               <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[9px] font-bold text-zinc-950">
@@ -214,25 +182,19 @@ export function Header() {
             )}
           </Button>
 
-          <SignedIn>
-            <UserButton
-              afterSwitchSessionUrl="/"
-              appearance={{ elements: { avatarBox: "h-8 w-8" } }}
-            />
-          </SignedIn>
+          <Show when="signed-in">
+            <UserButton afterSwitchSessionUrl="/" appearance={{ elements: { avatarBox: "h-8 w-8" } }} />
+          </Show>
 
-          <SignedOut>
+          <Show when="signed-out">
             <SignInButton mode="modal">
-              <Button
-                variant="ghost"
-                size="icon"
+              <Button variant="ghost" size="icon"
                 className="h-9 w-9 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 dark:text-[#a3a3a3] dark:hover:text-[#f1f1f1] dark:hover:bg-[#1a1a1a] transition-colors"
-                title="Sign in to Saint's TechNet"
-              >
+                title="Sign in to Saint's TechNet">
                 <UserIcon className="h-[18px] w-[18px]" />
               </Button>
             </SignInButton>
-          </SignedOut>
+          </Show>
         </div>
       </div>
 
