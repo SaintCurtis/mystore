@@ -16,7 +16,6 @@ import { WelcomePopup } from "@/components/app/WelcomePopup";
 import { AppShell } from "@/components/app/AppShell";
 import { Footer } from "@/components/app/Footer";
 import { MobileBottomBar } from "@/components/app/MobileBottomBar";
-import { MobileCategoryPills } from "@/components/app/MobileCategoryPills";
 import { BuildMySetupFAB } from "@/components/app/BuildMySetupFAB";
 import { ReferralTracker } from "@/components/app/ReferralTracker";
 import { Suspense } from "react";
@@ -59,7 +58,6 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                   <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#0a0a0a] transition-colors duration-200">
                     <Header />
                     <Suspense fallback={<div className="h-10 md:hidden" />}>
-                      <MobileCategoryPills />
                     </Suspense>
                     <main className="flex-1">{children}</main>
                     <Footer />
