@@ -141,7 +141,7 @@ export function HeroSection() {
             {/* CTAs */}
             <div className={`mt-6 space-y-3 transition-all duration-700 delay-400 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
 
-              {/* Row 1 */}
+              {/* Row 1 — primary buttons */}
               <div className="flex flex-wrap items-center gap-3">
                 <Button asChild size="lg"
                   className="group h-12 bg-amber-500 px-6 sm:px-8 font-display text-sm font-bold tracking-wide text-zinc-950 shadow-lg shadow-amber-500/25 hover:bg-amber-400 transition-all duration-200">
@@ -164,7 +164,22 @@ export function HeroSection() {
                 </Button>
               </div>
 
-              {/* Row 2 — action cards */}
+              {/* ACASIS announcement strip — slim, clearly a "browse" nudge, not a feature */}
+              <Link
+                href="/?category=acasis"
+                className="group flex items-center gap-2.5 rounded-xl border border-blue-200/70 dark:border-blue-500/15 bg-blue-50/60 dark:bg-blue-500/5 px-4 py-2.5 transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50 dark:hover:bg-blue-500/8 w-fit"
+              >
+                <Zap className="h-3.5 w-3.5 shrink-0 text-blue-500 dark:text-blue-400" />
+                <span className="text-xs font-semibold text-blue-700 dark:text-blue-400">
+                  ACASIS docks & hubs now in stock
+                </span>
+                <span className="inline-flex items-center rounded-full bg-blue-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-blue-700 dark:text-blue-400">
+                  NEW
+                </span>
+                <ArrowRight className="h-3 w-3 shrink-0 text-blue-400 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+
+              {/* Row 2 — AI action cards */}
               <div className="flex flex-col sm:flex-row gap-3">
 
                 {/* Build My Setup */}
@@ -187,7 +202,7 @@ export function HeroSection() {
                   <ArrowRight className="h-4 w-4 shrink-0 text-amber-500 dark:text-amber-400 transition-transform group-hover:translate-x-1" />
                 </Link>
 
-                {/* ── Get a Quotation — mobile card ── */}
+                {/* Get a Quotation — mobile card */}
                 <Link href="/quotation"
                   className="sm:hidden group flex items-center gap-4 rounded-2xl border border-violet-200 dark:border-violet-500/20 bg-linear-to-r from-violet-50 to-purple-50 dark:from-violet-500/8 dark:to-purple-500/5 px-4 py-3.5 transition-all duration-200 hover:border-violet-400 dark:hover:border-violet-500/40 hover:shadow-md hover:shadow-violet-500/10 flex-1">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/15 dark:bg-violet-500/10 group-hover:bg-violet-500/25 transition-colors">
@@ -207,25 +222,6 @@ export function HeroSection() {
                   <ArrowRight className="h-4 w-4 shrink-0 text-violet-500 dark:text-violet-400 transition-transform group-hover:translate-x-1" />
                 </Link>
 
-                {/* ACASIS */}
-                <Link href="/?category=acasis"
-                  className="group flex items-center gap-4 rounded-2xl border border-blue-200 dark:border-blue-500/20 bg-linear-to-r from-blue-50 to-indigo-50 dark:from-blue-500/8 dark:to-indigo-500/5 px-4 py-3.5 transition-all duration-200 hover:border-blue-400 dark:hover:border-blue-500/40 hover:shadow-md hover:shadow-blue-500/10 flex-1">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/15 dark:bg-blue-500/10 group-hover:bg-blue-500/25 transition-colors">
-                    <Zap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-zinc-900 dark:text-[#f1f1f1] flex items-center gap-1.5">
-                      ACASIS Now In Stock
-                      <span className="inline-flex items-center rounded-full bg-blue-500/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-700 dark:text-blue-400">
-                        NEW
-                      </span>
-                    </p>
-                    <p className="text-xs text-zinc-500 dark:text-[#a3a3a3] mt-0.5 line-clamp-1">
-                      Docks, hubs & accessories
-                    </p>
-                  </div>
-                  <ArrowRight className="h-4 w-4 shrink-0 text-blue-500 dark:text-blue-400 transition-transform group-hover:translate-x-1" />
-                </Link>
               </div>
 
               {/* WhatsApp CTA — mobile only */}

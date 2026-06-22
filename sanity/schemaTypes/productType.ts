@@ -121,20 +121,15 @@ export const productType = defineType({
     }),
 
     // ── Tech Specs ─────────────────────────────────────────────
-    // The SpecExtractor button at the top of this group reads the
-    // description field and auto-fills all spec fields below via AI.
-    // You never need to type these manually.
     defineField({
       name: "specExtractorUI",
       title: "Auto-Extract Specs",
       type: "object",
       group: "specs",
-      // This field is purely a UI container — it holds no data.
-      // The SpecExtractor component patches sibling fields directly.
       components: { input: SpecExtractor },
       fields: [
-        // Dummy field so Sanity accepts the object type
-        defineField({ name: "_placeholder", type: "string", hidden: true }),
+        // Renamed from "_placeholder" — Sanity reserves the "_" prefix for system fields
+        defineField({ name: "placeholder", type: "string", hidden: true }),
       ],
     }),
     defineField({
