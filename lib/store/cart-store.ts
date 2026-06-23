@@ -126,6 +126,10 @@ export const createCartStore = (initState: CartState = defaultInitState) => {
         skipHydration: true,
         // Only persist items, not UI state
         partialize: (state) => ({ items: state.items }),
+        // Bump version whenever the store shape changes — Zustand will
+        // automatically discard any localStorage data from older versions
+        // instead of trying to rehydrate an incompatible shape and crashing.
+        version: 1,
       }
     )
   );
