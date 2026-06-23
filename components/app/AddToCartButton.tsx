@@ -18,6 +18,11 @@ interface AddToCartButtonProps {
   selectedVariants?: SelectedVariant[];
   /** When true, shows full "Add to Cart" label (for product detail page) */
   showLabel?: boolean;
+  /**
+   * Category slug of the product — passed as meta to addItem so the
+   * BundleSuggester knows whether to fire (laptops/computers only).
+   */
+  categorySlug?: string;
 }
 
 export function AddToCartButton({
@@ -29,6 +34,7 @@ export function AddToCartButton({
   className,
   selectedVariants = [],
   showLabel = false,
+  categorySlug,
 }: AddToCartButtonProps) {
   const { addItem, updateQuantity } = useCartActions();
 
@@ -42,8 +48,8 @@ export function AddToCartButton({
   const [justAdded, setJustAdded] = useState(false);
 
   const quantityInCart = cartItem?.quantity ?? 0;
-  const isOutOfStock = stock <= 0;
-  const isAtMax = quantityInCart >= stock;
+  const isOutOfStock   = stock <= 0;
+  const isAtMax        = quantityInCart >= stock;
 
   const handleAdd = () => {
     if (quantityInCart < stock) {
@@ -56,6 +62,8 @@ export function AddToCartButton({
           ...(selectedVariants.length > 0 && { selectedVariants }),
         },
         1,
+        // Pass categorySlug so cart store can fire bundle trigger for laptops
+        categorySlug ? { categorySlug } : undefined,
       );
       const specSummary =
         selectedVariants.length > 0

@@ -75,52 +75,50 @@ export const useCartStore = <T,>(selector: (store: CartStore) => T): T => {
 // Convenience Hooks
 // ============================================
 
-/**
- * Get all cart items
- */
+/** Get all cart items */
 export const useCartItems = () => useCartStore((state) => state.items);
 
-/**
- * Get cart open state
- */
+/** Get cart open state */
 export const useCartIsOpen = () => useCartStore((state) => state.isOpen);
 
-/**
- * Get total number of items in cart
- */
+/** Get total number of items in cart */
 export const useTotalItems = () =>
   useCartStore((state) =>
     state.items.reduce((sum, item) => sum + item.quantity, 0),
   );
 
-/**
- * Get total price of cart
- */
+/** Get total price of cart */
 export const useTotalPrice = () =>
   useCartStore((state) =>
     state.items.reduce((sum, item) => sum + item.price * item.quantity, 0),
   );
 
-/**
- * Find a specific item in cart
- */
+/** Find a specific item in cart */
 export const useCartItem = (productId: string) =>
   useCartStore((state) =>
     state.items.find((item) => item.productId === productId),
   );
 
 /**
- * Get all cart actions
- * Actions are stable references from zustand, safe to destructure
+ * Read the bundle trigger — used by BundleSuggester to know when
+ * a laptop/computer was just added to cart for the first time.
+ */
+export const useBundleTrigger = () =>
+  useCartStore((state) => state.bundleTrigger);
+
+/**
+ * Get all cart actions.
+ * Actions are stable references from zustand, safe to destructure.
  */
 export const useCartActions = () => {
-  const addItem = useCartStore((state) => state.addItem);
-  const removeItem = useCartStore((state) => state.removeItem);
-  const updateQuantity = useCartStore((state) => state.updateQuantity);
-  const clearCart = useCartStore((state) => state.clearCart);
-  const toggleCart = useCartStore((state) => state.toggleCart);
-  const openCart = useCartStore((state) => state.openCart);
-  const closeCart = useCartStore((state) => state.closeCart);
+  const addItem          = useCartStore((state) => state.addItem);
+  const removeItem       = useCartStore((state) => state.removeItem);
+  const updateQuantity   = useCartStore((state) => state.updateQuantity);
+  const clearCart        = useCartStore((state) => state.clearCart);
+  const toggleCart       = useCartStore((state) => state.toggleCart);
+  const openCart         = useCartStore((state) => state.openCart);
+  const closeCart        = useCartStore((state) => state.closeCart);
+  const clearBundleTrigger = useCartStore((state) => state.clearBundleTrigger);
 
   return {
     addItem,
@@ -130,5 +128,6 @@ export const useCartActions = () => {
     toggleCart,
     openCart,
     closeCart,
+    clearBundleTrigger,
   };
 };

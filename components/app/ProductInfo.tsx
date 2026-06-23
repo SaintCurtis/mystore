@@ -12,6 +12,7 @@ import { WishlistButton } from "@/components/app/WishlistButton";
 import { VariantSelector } from "@/components/app/VariantSelector";
 import { StickyAddToCart } from "@/components/app/StickyAddToCart";
 import { NegotiateButton } from "@/components/app/NegotiateButton";
+import { PaymentPlanCalculator } from "@/components/app/PaymentPlanCalculator";
 import { recordView } from "@/lib/hooks/useRecentlyViewed";
 import { useCurrency } from "@/lib/store/currency-store-provider";
 import { useCartActions } from "@/lib/store/cart-store-provider";
@@ -48,6 +49,12 @@ export function ProductInfo({ product }: ProductInfoProps) {
     : basePrice;
 
   const priceChanged = hasVariants && displayPrice !== basePrice;
+
+  // ── Category slug (for bundle trigger) ───────────────────────────────────
+  const categorySlug =
+    product.category?.slug ??
+    (product as any).category?.parentSlug ??
+    "";
 
   // ── Ref for sticky bar ────────────────────────────────────────────────────
   const ctaRef = useRef<HTMLDivElement>(null);
@@ -86,6 +93,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
         ...(selectedVariants.length > 0 && { selectedVariants }),
       },
       1,
+      { categorySlug },
     );
     toast.success("Proceeding to checkout…");
     router.push("/checkout");
@@ -129,6 +137,11 @@ export function ProductInfo({ product }: ProductInfoProps) {
         {/* Stock urgency */}
         <div className="mt-4">
           <StockUrgency stock={stock} productId={product._id} />
+        </div>
+
+        {/* Payment Plan Calculator */}
+        <div className="mt-5">
+          <PaymentPlanCalculator price={basePrice} />
         </div>
 
         {/* Description */}
@@ -180,6 +193,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
                   image={imageUrl ?? undefined}
                   stock={stock}
                   selectedVariants={selectedVariants}
+                  categorySlug={categorySlug}
                   showLabel={true}
                   className="flex-1 h-12 rounded-xl text-sm"
                 />

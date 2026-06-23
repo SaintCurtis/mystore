@@ -12,19 +12,33 @@ export interface CartItem {
   selectedVariants?: SelectedVariant[];
 }
 
+// Metadata passed with addItem to trigger bundle suggestions
+export interface AddItemMeta {
+  categorySlug?: string;
+}
+
+export interface BundleTrigger {
+  productName: string;
+  productPrice: number;
+  categorySlug: string;
+  _ts: number; // timestamp so the same product re-triggers if added again
+}
+
 export interface CartState {
   items: CartItem[];
   isOpen: boolean;
+  bundleTrigger: BundleTrigger | null;
 }
 
 export interface CartActions {
-  addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
+  addItem: (item: Omit<CartItem, "quantity">, quantity?: number, meta?: AddItemMeta) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
   toggleCart: () => void;
   openCart: () => void;
   closeCart: () => void;
+  clearBundleTrigger: () => void;
 }
 
 export type CartStore = CartState & CartActions;
@@ -33,6 +47,7 @@ export type CartStore = CartState & CartActions;
 export const defaultInitState: CartState = {
   items: [],
   isOpen: false,
+  bundleTrigger: null,
 };
 
 /**
@@ -46,11 +61,24 @@ export const createCartStore = (initState: CartState = defaultInitState) => {
       (set) => ({
         ...initState,
 
-        addItem: (item, quantity = 1) =>
+        addItem: (item, quantity = 1, meta) =>
           set((state) => {
             const existing = state.items.find(
               (i) => i.productId === item.productId
             );
+
+            // Only trigger bundle suggester on first add (not re-add)
+            const isFirstAdd = !existing;
+            const bundleTrigger =
+              isFirstAdd && meta?.categorySlug
+                ? {
+                    productName:  item.name,
+                    productPrice: item.price,
+                    categorySlug: meta.categorySlug,
+                    _ts: Date.now(),
+                  }
+                : state.bundleTrigger;
+
             if (existing) {
               return {
                 items: state.items.map((i) =>
@@ -58,9 +86,13 @@ export const createCartStore = (initState: CartState = defaultInitState) => {
                     ? { ...i, quantity: i.quantity + quantity }
                     : i
                 ),
+                bundleTrigger,
               };
             }
-            return { items: [...state.items, { ...item, quantity }] };
+            return {
+              items: [...state.items, { ...item, quantity }],
+              bundleTrigger,
+            };
           }),
 
         removeItem: (productId) =>
@@ -86,12 +118,13 @@ export const createCartStore = (initState: CartState = defaultInitState) => {
         toggleCart: () => set((state) => ({ isOpen: !state.isOpen })),
         openCart: () => set({ isOpen: true }),
         closeCart: () => set({ isOpen: false }),
+        clearBundleTrigger: () => set({ bundleTrigger: null }),
       }),
       {
         name: "cart-storage",
         // Skip automatic hydration - we'll trigger it manually on the client
         skipHydration: true,
-        // Only persist items, not UI state like isOpen
+        // Only persist items, not UI state
         partialize: (state) => ({ items: state.items }),
       }
     )
