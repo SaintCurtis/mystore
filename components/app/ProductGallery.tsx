@@ -48,14 +48,6 @@ export function ProductGallery({ images, videos, productName }: ProductGalleryPr
   const transitionLock = useRef(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  if (media.length === 0) {
-    return (
-      <div className="flex aspect-square items-center justify-center rounded-2xl bg-zinc-100 dark:bg-[#111111] border border-zinc-200 dark:border-[#1f1f1f]">
-        <span className="text-sm text-zinc-400">No images available</span>
-      </div>
-    );
-  }
-
   const total = media.length;
 
   const goTo = useCallback(
@@ -101,6 +93,15 @@ export function ProductGallery({ images, videos, productName }: ProductGalleryPr
       return () => clearTimeout(t);
     }
   }, [animState, handleTransitionEnd]);
+
+  // ── Early return AFTER all hooks are declared (Rules of Hooks) ──────────
+  if (media.length === 0) {
+    return (
+      <div className="flex aspect-square items-center justify-center rounded-2xl bg-zinc-100 dark:bg-[#111111] border border-zinc-200 dark:border-[#1f1f1f]">
+        <span className="text-sm text-zinc-400">No images available</span>
+      </div>
+    );
+  }
 
   function handleTouchStart(e: React.TouchEvent) {
     touchStartX.current = e.touches[0].clientX;

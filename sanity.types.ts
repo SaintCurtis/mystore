@@ -15,6 +15,36 @@
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
 // Source: schema.json
+export type NegotiationSession = {
+  _id: string;
+  _type: "negotiationSession";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  sessionId?: string;
+  userId?: string;
+  userEmail?: string;
+  productId?: string;
+  productSlug?: string;
+  productName?: string;
+  listedPrice?: number;
+  floorPrice?: number;
+  status?: "ai_active" | "owner_active" | "deal_struck" | "closed";
+  agreedPrice?: number;
+  closeBidAlert?: boolean;
+  customerBid?: number;
+  messages?: Array<{
+    role?: string;
+    content?: string;
+    sender?: string;
+    timestamp?: string;
+    _type: "message";
+    _key: string;
+  }>;
+  startedAt?: string;
+  lastActivityAt?: string;
+};
+
 export type ReferralClick = {
   _id: string;
   _type: "referralClick";
@@ -99,6 +129,7 @@ export type Order = {
   _updatedAt: string;
   _rev: string;
   orderNumber?: string;
+  status?: "paid" | "processing" | "shipped" | "delivered" | "cancelled";
   items?: Array<{
     product?: ProductReference;
     quantity?: number;
@@ -106,20 +137,30 @@ export type Order = {
     _key: string;
   }>;
   total?: number;
-  status?: "paid" | "shipped" | "delivered" | "cancelled";
+  subtotal?: number;
+  createdAt?: string;
   customer?: CustomerReference;
   clerkUserId?: string;
   email?: string;
+  buyerName?: string;
+  shippingFee?: number;
+  shippingMethod?: string;
   address?: {
     name?: string;
     line1?: string;
     line2?: string;
     city?: string;
+    state?: string;
+    lga?: string;
     postcode?: string;
     country?: string;
+    countryCode?: string;
   };
-  stripePaymentId?: string;
-  createdAt?: string;
+  paystackReference?: string;
+  isNegotiatedDeal?: boolean;
+  agreedPrice?: number;
+  originalPrice?: number;
+  savedAmount?: number;
 };
 
 export type CategoryReference = {
@@ -157,6 +198,13 @@ export type SanityImageAssetReference = {
   [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
 };
 
+export type SanityFileAssetReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "sanity.fileAsset";
+};
+
 export type Product = {
   _id: string;
   _type: "product";
@@ -183,12 +231,37 @@ export type Product = {
     | "starlight"
     | "graphite";
   dimensions?: string;
+  specExtractorUI?: {
+    placeholder?: string;
+  };
+  specDisplay?: string;
+  specProcessor?: string;
+  specRAM?: string;
+  specStorage?: string;
+  specGPU?: string;
+  specBattery?: string;
+  specOS?: string;
+  specConnectivity?: string;
+  specRefreshRate?: string;
+  specWeight?: string;
+  specExtras?: Array<{
+    label?: string;
+    value?: string;
+    _type: "specRow";
+    _key: string;
+  }>;
   images?: Array<{
     asset?: SanityImageAssetReference;
     media?: unknown;
     hotspot?: SanityImageHotspot;
     crop?: SanityImageCrop;
     _type: "image";
+    _key: string;
+  }>;
+  videos?: Array<{
+    asset?: SanityFileAssetReference;
+    media?: unknown;
+    _type: "file";
     _key: string;
   }>;
   stock?: number;
@@ -296,9 +369,26 @@ export type Customer = {
   _rev: string;
   email?: string;
   name?: string;
+  phone?: string;
+  phones?: Array<string>;
   clerkUserId?: string;
-  stripeCustomerId?: string;
   createdAt?: string;
+  savedAddresses?: Array<{
+    label?: string;
+    isDefault?: boolean;
+    name?: string;
+    line1?: string;
+    line2?: string;
+    city?: string;
+    state?: string;
+    lga?: string;
+    postcode?: string;
+    country?: string;
+    countryCode?: string;
+    _type: "savedAddress";
+    _key: string;
+  }>;
+  stripeCustomerId?: string;
 };
 
 export type SanityImagePaletteSwatch = {
@@ -399,6 +489,7 @@ export type Geopoint = {
 };
 
 export type AllSanitySchemaTypes =
+  | NegotiationSession
   | ReferralClick
   | Referral
   | ProductReference
@@ -411,6 +502,7 @@ export type AllSanitySchemaTypes =
   | BrandReference
   | ModelReference
   | SanityImageAssetReference
+  | SanityFileAssetReference
   | Product
   | SanityImageCrop
   | SanityImageHotspot
@@ -450,7 +542,7 @@ export type ADMIN_RECENT_ORDERS_QUERY_RESULT = Array<{
   _id: string;
   _createdAt: string;
   orderNumber: string | null;
-  status: "cancelled" | "delivered" | "paid" | "shipped" | null;
+  status: "cancelled" | "delivered" | "paid" | "processing" | "shipped" | null;
   totalAmount: null;
   customerName: string | null;
   customerEmail: string | null;
@@ -663,12 +755,51 @@ export type CUSTOMER_BY_STRIPE_ID_QUERY_RESULT = {
 // Source: lib/sanity/queries/negotiations.ts
 // Variable: NEGOTIATION_SESSIONS_QUERY
 // Query: *[  _type == "negotiationSession"] | order(closeBidAlert desc, lastActivityAt desc) {  _id,  sessionId,  productName,  productSlug,  listedPrice,  floorPrice,  customerBid,  agreedPrice,  status,  closeBidAlert,  startedAt,  lastActivityAt,  "messageCount": count(messages),  "lastMessage": messages[-1] {    role,    content,    sender,    timestamp,  },}
-export type NEGOTIATION_SESSIONS_QUERY_RESULT = Array<never>;
+export type NEGOTIATION_SESSIONS_QUERY_RESULT = Array<{
+  _id: string;
+  sessionId: string | null;
+  productName: string | null;
+  productSlug: string | null;
+  listedPrice: number | null;
+  floorPrice: number | null;
+  customerBid: number | null;
+  agreedPrice: number | null;
+  status: "ai_active" | "closed" | "deal_struck" | "owner_active" | null;
+  closeBidAlert: boolean | null;
+  startedAt: string | null;
+  lastActivityAt: string | null;
+  messageCount: number | null;
+  lastMessage: {
+    role: string | null;
+    content: string | null;
+    sender: string | null;
+    timestamp: string | null;
+  } | null;
+}>;
 
 // Source: lib/sanity/queries/negotiations.ts
 // Variable: NEGOTIATION_SESSION_BY_ID_QUERY
 // Query: *[  _type == "negotiationSession"  && sessionId == $sessionId][0] {  _id,  sessionId,  productName,  productSlug,  listedPrice,  floorPrice,  customerBid,  agreedPrice,  status,  closeBidAlert,  startedAt,  lastActivityAt,  messages[] {    role,    content,    sender,    timestamp,  },}
-export type NEGOTIATION_SESSION_BY_ID_QUERY_RESULT = null;
+export type NEGOTIATION_SESSION_BY_ID_QUERY_RESULT = {
+  _id: string;
+  sessionId: string | null;
+  productName: string | null;
+  productSlug: string | null;
+  listedPrice: number | null;
+  floorPrice: number | null;
+  customerBid: number | null;
+  agreedPrice: number | null;
+  status: "ai_active" | "closed" | "deal_struck" | "owner_active" | null;
+  closeBidAlert: boolean | null;
+  startedAt: string | null;
+  lastActivityAt: string | null;
+  messages: Array<{
+    role: string | null;
+    content: string | null;
+    sender: string | null;
+    timestamp: string | null;
+  }> | null;
+} | null;
 
 // Source: lib/sanity/queries/negotiations.ts
 // Variable: NEGOTIATION_ALERT_COUNT_QUERY
@@ -682,7 +813,7 @@ export type ORDERS_BY_USER_QUERY_RESULT = Array<{
   _id: string;
   orderNumber: string | null;
   total: number | null;
-  status: "cancelled" | "delivered" | "paid" | "shipped" | null;
+  status: "cancelled" | "delivered" | "paid" | "processing" | "shipped" | null;
   createdAt: string | null;
   itemCount: number | null;
   itemNames: Array<string | null> | null;
@@ -714,7 +845,7 @@ export type ORDER_BY_ID_QUERY_RESULT = {
     } | null;
   }> | null;
   total: number | null;
-  status: "cancelled" | "delivered" | "paid" | "shipped" | null;
+  status: "cancelled" | "delivered" | "paid" | "processing" | "shipped" | null;
   address: {
     name: string | null;
     line1: string | null;
@@ -723,7 +854,7 @@ export type ORDER_BY_ID_QUERY_RESULT = {
     postcode: string | null;
     country: string | null;
   } | null;
-  paystackReference: null;
+  paystackReference: string | null;
   createdAt: string | null;
 } | null;
 
@@ -735,7 +866,7 @@ export type RECENT_ORDERS_QUERY_RESULT = Array<{
   orderNumber: string | null;
   email: string | null;
   total: number | null;
-  status: "cancelled" | "delivered" | "paid" | "shipped" | null;
+  status: "cancelled" | "delivered" | "paid" | "processing" | "shipped" | null;
   createdAt: string | null;
 }>;
 
@@ -858,7 +989,14 @@ export type PRODUCT_BY_SLUG_QUERY_RESULT = {
     } | null;
     hotspot: SanityImageHotspot | null;
   }> | null;
-  videos: null;
+  videos: Array<{
+    _key: string;
+    asset: {
+      _id: string;
+      url: string | null;
+      mimeType: string | null;
+    } | null;
+  }> | null;
   category: {
     _id: string;
     title: string | null;
@@ -883,17 +1021,20 @@ export type PRODUCT_BY_SLUG_QUERY_RESULT = {
   featured: boolean | null;
   assemblyRequired: boolean | null;
   isNegotiable: boolean | null;
-  specDisplay: null;
-  specProcessor: null;
-  specRAM: null;
-  specStorage: null;
-  specGPU: null;
-  specBattery: null;
-  specOS: null;
-  specConnectivity: null;
-  specRefreshRate: null;
-  specWeight: null;
-  specExtras: null;
+  specDisplay: string | null;
+  specProcessor: string | null;
+  specRAM: string | null;
+  specStorage: string | null;
+  specGPU: string | null;
+  specBattery: string | null;
+  specOS: string | null;
+  specConnectivity: string | null;
+  specRefreshRate: string | null;
+  specWeight: string | null;
+  specExtras: Array<{
+    label: string | null;
+    value: string | null;
+  }> | null;
   variantGroups: Array<{
     type: "color" | "gpu" | "processor" | "ram" | "ssd" | "touchscreen" | null;
     label: string | null;
@@ -937,7 +1078,13 @@ export type FILTER_PRODUCTS_BY_NAME_QUERY_RESULT = Array<{
       url: string | null;
     } | null;
   }> | null;
-  videos: null;
+  videos: Array<{
+    _key: string;
+    asset: {
+      _id: string;
+      url: string | null;
+    } | null;
+  }> | null;
   category: {
     _id: string;
     title: string | null;
@@ -990,7 +1137,13 @@ export type FILTER_PRODUCTS_BY_PRICE_ASC_QUERY_RESULT = Array<{
       url: string | null;
     } | null;
   }> | null;
-  videos: null;
+  videos: Array<{
+    _key: string;
+    asset: {
+      _id: string;
+      url: string | null;
+    } | null;
+  }> | null;
   category: {
     _id: string;
     title: string | null;
@@ -1043,7 +1196,13 @@ export type FILTER_PRODUCTS_BY_PRICE_DESC_QUERY_RESULT = Array<{
       url: string | null;
     } | null;
   }> | null;
-  videos: null;
+  videos: Array<{
+    _key: string;
+    asset: {
+      _id: string;
+      url: string | null;
+    } | null;
+  }> | null;
   category: {
     _id: string;
     title: string | null;
@@ -1096,7 +1255,13 @@ export type FILTER_PRODUCTS_BY_RELEVANCE_QUERY_RESULT = Array<{
       url: string | null;
     } | null;
   }> | null;
-  videos: null;
+  videos: Array<{
+    _key: string;
+    asset: {
+      _id: string;
+      url: string | null;
+    } | null;
+  }> | null;
   category: {
     _id: string;
     title: string | null;
@@ -1367,7 +1532,7 @@ export type ORDERS_LAST_7_DAYS_QUERY_RESULT = Array<{
   _id: string;
   orderNumber: string | null;
   total: number | null;
-  status: "cancelled" | "delivered" | "paid" | "shipped" | null;
+  status: "cancelled" | "delivered" | "paid" | "processing" | "shipped" | null;
   createdAt: string | null;
   itemCount: number | null;
   items: Array<{

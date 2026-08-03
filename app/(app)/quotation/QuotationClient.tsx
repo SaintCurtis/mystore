@@ -254,8 +254,9 @@ function EmailModal({
             <p className="text-xs text-zinc-500 dark:text-[#a3a3a3]">We'll send a copy to your inbox</p>
           </div>
         </div>
-        <label className={labelClass}>Email address</label>
+        <label htmlFor="quotation-email" className={labelClass}>Email address</label>
         <input
+          id="quotation-email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -542,8 +543,9 @@ export function QuotationClient() {
               <div className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className={labelClass}>Name or organisation <span className="text-red-500">*</span></label>
+                    <label htmlFor="quotation-customer-name" className={labelClass}>Name or organisation <span className="text-red-500">*</span></label>
                     <input
+                      id="quotation-customer-name"
                       type="text"
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
@@ -552,8 +554,9 @@ export function QuotationClient() {
                     />
                   </div>
                   <div>
-                    <label className={labelClass}>Phone number</label>
+                    <label htmlFor="quotation-customer-phone" className={labelClass}>Phone number</label>
                     <input
+                      id="quotation-customer-phone"
                       type="tel"
                       value={customerPhone}
                       onChange={(e) => setCustomerPhone(e.target.value)}
@@ -564,8 +567,9 @@ export function QuotationClient() {
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className={labelClass}>Delivery address</label>
+                    <label htmlFor="quotation-customer-address" className={labelClass}>Delivery address</label>
                     <input
+                      id="quotation-customer-address"
                       type="text"
                       value={customerAddress}
                       onChange={(e) => setCustomerAddress(e.target.value)}
@@ -574,10 +578,11 @@ export function QuotationClient() {
                     />
                   </div>
                   <div>
-                    <label className={labelClass}>
+                    <label htmlFor="quotation-notes" className={labelClass}>
                       Notes <span className="text-zinc-400 text-xs font-normal">(optional)</span>
                     </label>
                     <input
+                      id="quotation-notes"
                       type="text"
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}

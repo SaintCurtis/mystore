@@ -518,18 +518,19 @@ export function CheckoutClient() {
 
                 {/* Full Name */}
                 <div>
-                  <label className={labelClass}>Full Name <span className="text-red-500">*</span></label>
-                  <input type="text" value={address.name}
+                  <label htmlFor="checkout-name" className={labelClass}>Full Name <span className="text-red-500">*</span></label>
+                  <input id="checkout-name" type="text" value={address.name}
                     onChange={(e) => setAddress((a) => ({ ...a, name: e.target.value }))}
                     placeholder="John Doe" className={inputClass} />
                 </div>
 
                 {/* ── Phone Number ── */}
                 <div>
-                  <label className={labelClass}>
+                  <label htmlFor="checkout-phone" className={labelClass}>
                     Phone Number <span className="text-red-500">*</span>
                   </label>
                   <input
+                    id="checkout-phone"
                     type="tel"
                     value={address.phone}
                     onChange={(e) => setAddress((a) => ({ ...a, phone: e.target.value }))}
@@ -540,11 +541,12 @@ export function CheckoutClient() {
 
                 {/* Street address */}
                 <div>
-                  <label className={labelClass}>
+                  <label htmlFor="checkout-address-line1" className={labelClass}>
                     Street Address <span className="text-red-500">*</span>
                     <span className="ml-2 text-[10px] font-normal text-amber-500">✦ smart suggestions enabled</span>
                   </label>
                   <input
+                    id="checkout-address-line1"
                     ref={addressInputRef}
                     type="text"
                     value={address.line1}
@@ -556,17 +558,17 @@ export function CheckoutClient() {
                 </div>
 
                 <div>
-                  <label className={labelClass}>Address Line 2 <span className="text-zinc-400 text-xs">(optional)</span></label>
-                  <input type="text" value={address.line2}
+                  <label htmlFor="checkout-address-line2" className={labelClass}>Address Line 2 <span className="text-zinc-400 text-xs">(optional)</span></label>
+                  <input id="checkout-address-line2" type="text" value={address.line2}
                     onChange={(e) => setAddress((a) => ({ ...a, line2: e.target.value }))}
                     placeholder="Apartment, floor, landmark" className={inputClass} />
                 </div>
 
                 {/* Country */}
                 <div>
-                  <label className={labelClass}>Country <span className="text-red-500">*</span></label>
+                  <label htmlFor="checkout-country" className={labelClass}>Country <span className="text-red-500">*</span></label>
                   <div className="relative">
-                    <select value={address.countryCode} onChange={(e) => handleCountryChange(e.target.value)} className={selectClass}>
+                    <select id="checkout-country" value={address.countryCode} onChange={(e) => handleCountryChange(e.target.value)} className={selectClass}>
                       {countriesLoading
                         ? <option>Loading countries…</option>
                         : countries.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)
@@ -578,8 +580,8 @@ export function CheckoutClient() {
 
                 {/* State */}
                 <div>
-                  <label className={labelClass}>State / Region <span className="text-red-500">*</span></label>
-                  <input type="text" value={address.state}
+                  <label htmlFor="checkout-state" className={labelClass}>State / Region <span className="text-red-500">*</span></label>
+                  <input id="checkout-state" type="text" value={address.state}
                     onChange={(e) => setAddress((a) => ({ ...a, state: e.target.value, lga: "" }))}
                     placeholder="Lagos" className={inputClass} />
                 </div>
@@ -587,9 +589,9 @@ export function CheckoutClient() {
                 {/* LGA — Nigeria only */}
                 {address.countryCode === "NG" && lgaOptions.length > 0 && (
                   <div>
-                    <label className={labelClass}>LGA (Local Government Area)</label>
+                    <label htmlFor="checkout-lga" className={labelClass}>LGA (Local Government Area)</label>
                     <div className="relative">
-                      <select value={address.lga}
+                      <select id="checkout-lga" value={address.lga}
                         onChange={(e) => setAddress((a) => ({ ...a, lga: e.target.value }))}
                         className={selectClass}>
                         <option value="">Select LGA…</option>
@@ -603,14 +605,14 @@ export function CheckoutClient() {
                 {/* City + Postcode */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className={labelClass}>City <span className="text-red-500">*</span></label>
-                    <input type="text" value={address.city}
+                    <label htmlFor="checkout-city" className={labelClass}>City <span className="text-red-500">*</span></label>
+                    <input id="checkout-city" type="text" value={address.city}
                       onChange={(e) => handleCityChange(e.target.value)}
                       placeholder="Lagos" className={inputClass} />
                   </div>
                   <div>
-                    <label className={labelClass}>Postcode <span className="text-red-500">*</span></label>
-                    <input type="text" value={address.postcode}
+                    <label htmlFor="checkout-postcode" className={labelClass}>Postcode <span className="text-red-500">*</span></label>
+                    <input id="checkout-postcode" type="text" value={address.postcode}
                       onChange={(e) => setAddress((a) => ({ ...a, postcode: e.target.value }))}
                       placeholder="100001" className={inputClass} />
                   </div>
@@ -619,7 +621,7 @@ export function CheckoutClient() {
                 {/* Shipping calculator */}
                 {(address.city || address.state) && address.country && (
                   <div className="pt-2 border-t border-zinc-100 dark:border-[#1a1a1a]">
-                    <label className={labelClass + " mb-3"}>Shipping Method <span className="text-red-500">*</span></label>
+                    <span className={`${labelClass} mb-3 block`}>Shipping Method <span className="text-red-500">*</span></span>
                     <ShippingCalculator
                       city={address.state || address.city}
                       country={address.country}
