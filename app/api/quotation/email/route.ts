@@ -1,6 +1,7 @@
 // app/api/quotation/email/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import { SITE_URL } from "@/lib/constants/site";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -154,7 +155,7 @@ export async function POST(req: NextRequest) {
           style="display:inline-block;background:#25D366;color:white;font-weight:700;font-size:13px;padding:10px 24px;border-radius:8px;text-decoration:none;margin-right:8px;">
           Accept on WhatsApp
         </a>
-        <a href="https://mystore-drab-nine.vercel.app/"
+        <a href="${SITE_URL}/"
           style="display:inline-block;background:#f59e0b;color:#0a0a0a;font-weight:700;font-size:13px;padding:10px 24px;border-radius:8px;text-decoration:none;">
           Shop Now
         </a>

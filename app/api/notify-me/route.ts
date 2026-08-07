@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { writeClient, client } from "@/sanity/lib/client";
 import { defineQuery } from "next-sanity";
+import { SITE_URL } from "@/lib/constants/site";
 
 // ✅ Lazy getter — only instantiated when a request is made, not at build time
 function getResend() {
@@ -110,7 +111,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ message: "No subscribers" });
     }
 
-    const productUrl = `https://mystore-drab-nine.vercel.app/products/${product.slug}`;
+    const productUrl = `${SITE_URL}/products/${product.slug}`;
     const resend = getResend();
 
     const results = await Promise.allSettled(

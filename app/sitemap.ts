@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
 import { client } from "@/sanity/lib/client";
 import { groq } from "next-sanity";
+import { SITE_URL } from "@/lib/constants/site";
 
-const BASE_URL = "https://mystore-drab-nine.vercel.app";
+const BASE_URL = SITE_URL;
 
 const PRODUCTS_FOR_SITEMAP = groq`*[_type == "product" && defined(slug.current)] {
   "slug": slug.current,

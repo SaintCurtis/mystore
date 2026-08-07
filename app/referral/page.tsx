@@ -8,6 +8,7 @@ import {
 } from "@/lib/sanity/queries/referral";
 import { ReferralDashboard } from "@/components/app/ReferralDashboard";
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/constants/site";
 
 export const metadata: Metadata = {
   title: "Refer & Earn | The Saint's TechNet",
@@ -33,7 +34,7 @@ export default async function ReferralPage() {
     redirect("/sign-in");
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mystore-drab-nine.vercel.app";
+  const baseUrl = SITE_URL;
 
   // Explicit type so TS never infers `never` after the null-check branch
   let referral: ReferralDoc = await client.fetch(REFERRAL_BY_USER_QUERY, { clerkUserId: userId });

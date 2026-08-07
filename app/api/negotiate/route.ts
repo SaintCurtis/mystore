@@ -13,6 +13,7 @@ import { Resend } from "resend";
 import { v4 as uuidv4 } from "uuid";
 import Anthropic from "@anthropic-ai/sdk";
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { SITE_URL } from "@/lib/constants/site";
 
 const writeClient = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
@@ -24,7 +25,7 @@ const writeClient = createClient({
 
 const FLOOR_ALERT_THRESHOLD = 0.10;
 const OWNER_EMAIL = process.env.OWNER_EMAIL ?? "iamsaintcurtis@gmail.com";
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://mystore-drab-nine.vercel.app";
+const BASE_URL = SITE_URL;
 
 // ── Floor proximity alert ─────────────────────────────────────────────────
 async function sendFloorAlert(params: {

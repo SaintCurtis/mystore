@@ -25,6 +25,7 @@ import {
   type SelectedVariant,
 } from "@/types/variants";
 import type { PRODUCT_BY_SLUG_QUERY_RESULT } from "@/sanity.types";
+import { SITE_URL } from "@/lib/constants/site";
 
 interface ProductInfoProps {
   product: NonNullable<PRODUCT_BY_SLUG_QUERY_RESULT>;
@@ -74,7 +75,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const productUrl =
     typeof window !== "undefined"
       ? window.location.href
-      : `https://mystore-drab-nine.vercel.app/products/${product.slug}`;
+      : `${SITE_URL}/products/${product.slug}`;
 
   // ── Buy Now handler ───────────────────────────────────────────────────────
   const handleBuyNow = () => {

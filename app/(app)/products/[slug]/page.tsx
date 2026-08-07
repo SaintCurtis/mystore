@@ -12,6 +12,7 @@ import { ProductInfo } from "@/components/app/ProductInfo";
 import { RecentlyViewed } from "@/components/app/RecentlyViewed";
 import { ProductRecommendations } from "@/components/app/ProductRecommendations";
 import { NotifyMe } from "@/components/app/NotifyMe";
+import { SITE_URL } from "@/lib/constants/site";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -70,8 +71,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
       priceCurrency: "NGN",
       price: p.price?.toString() ?? "0",
       availability: stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-      seller: { "@type": "Organization", name: "The Saint's TechNet", url: "https://mystore-drab-nine.vercel.app" },
-      url: `https://mystore-drab-nine.vercel.app/products/${p.slug}`,
+      seller: { "@type": "Organization", name: "The Saint's TechNet", url: SITE_URL },
+      url: `${SITE_URL}/products/${p.slug}`,
     },
   };
 

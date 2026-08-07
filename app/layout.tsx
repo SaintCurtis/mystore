@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { SITE_URL } from "@/lib/constants/site";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -16,8 +17,6 @@ const dmSans = DM_Sans({
   variable: "--font-body",
   display: "swap",
 });
-
-const BASE_URL = "https://mystore-drab-nine.vercel.app";
 
 function ChunkErrorHandler() {
   return (
@@ -49,7 +48,7 @@ function ChunkErrorHandler() {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL(BASE_URL),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "The Saint's TechNet — Engineer-Verified. Community-Trusted.",
     template: "%s | The Saint's TechNet",
@@ -62,7 +61,7 @@ export const metadata: Metadata = {
     "tech store Lagos", "buy laptop Lagos", "ACASIS Nigeria",
     "monitors Lagos", "gaming PC Nigeria", "EcoFlow Nigeria", "Starlink Nigeria",
   ],
-  authors: [{ name: "The Saint's TechNet", url: BASE_URL }],
+  authors: [{ name: "The Saint's TechNet", url: SITE_URL }],
   creator: "The Saint's TechNet",
   publisher: "The Saint's Technology Networks",
   robots: {
@@ -79,22 +78,22 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_NG",
-    url: BASE_URL,
+    url: SITE_URL,
     siteName: "The Saint's TechNet",
     title: "The Saint's TechNet — Engineer-Verified. Community-Trusted.",
     description:
       "Premium brand-new and foreign-used tech — engineer-verified, warranted, and shipped worldwide. CAC-registered since 2019.",
-    images: [{ url: `${BASE_URL}/og-image.jpg`, width: 1200, height: 630, alt: "The Saint's TechNet" }],
+    images: [{ url: `${SITE_URL}/og-image.jpg`, width: 1200, height: 630, alt: "The Saint's TechNet" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "The Saint's TechNet — Engineer-Verified. Community-Trusted.",
     description: "Premium brand-new and foreign-used tech — engineer-verified, warranted, and shipped worldwide.",
-    images: [`${BASE_URL}/og-image.jpg`],
+    images: [`${SITE_URL}/og-image.jpg`],
     creator: "@Saint_Curtis_",
     site: "@Saint_Curtis_",
   },
-  alternates: { canonical: BASE_URL },
+  alternates: { canonical: SITE_URL },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -113,7 +112,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#f59e0b" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'){document.documentElement.classList.add('dark')}else{document.documentElement.classList.remove('dark')}}catch(e){document.documentElement.classList.remove('dark')}})();`,

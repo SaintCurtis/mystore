@@ -11,6 +11,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { createClient } from "next-sanity";
+import { SITE_URL } from "@/lib/constants/site";
 
 const serverClient = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
@@ -110,7 +111,7 @@ export async function POST(req: NextRequest) {
   // FIX 1: Route to /checkout page instead of directly to Paystack.
   // The checkout page handles address + delivery + payment method selection.
   // It reads the negotiation params and shows the agreed price.
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://mystore-drab-nine.vercel.app";
+  const baseUrl = SITE_URL;
 
   const variantString = selectedVariants.length > 0
     ? selectedVariants.map((v) => `${v.type}:${v.label}`).join("|")
@@ -157,7 +158,7 @@ export async function PUT(req: NextRequest) {
     // FIX 2: NEXT_PUBLIC_BASE_URL is your real site domain.
     // VERCEL_URL is the internal deployment URL — it requires Vercel auth,
     // which is why customers were hitting vercel.com/login after payment.
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://mystore-drab-nine.vercel.app";
+    const baseUrl = SITE_URL;
 
     const totalAmount = agreedPrice + shippingFee;
     const amountKobo = Math.round(totalAmount * 100);

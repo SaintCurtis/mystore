@@ -4,6 +4,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { client } from "@/sanity/lib/client";
 import { PRODUCTS_BY_IDS_QUERY } from "@/lib/sanity/queries/products";
 import { getOrCreatePaystackCustomer } from "@/lib/actions/customer";
+import { SITE_URL } from "@/lib/constants/site";
 
 if (!process.env.PAYSTACK_SECRET_KEY) {
   throw new Error("PAYSTACK_SECRET_KEY is not defined");
@@ -122,10 +123,7 @@ export async function createCheckoutSession(
 
     const { sanityCustomerId } = await getOrCreatePaystackCustomer(userEmail, userName, userId);
 
-    const baseUrl =
-      process.env.NEXT_PUBLIC_BASE_URL ||
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
-      "http://localhost:3000";
+    const baseUrl = SITE_URL;
 
     const metadata = {
       clerkUserId: userId,

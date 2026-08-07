@@ -102,7 +102,7 @@ export function WelcomePopup() {
               <p className="font-display text-base font-bold text-zinc-900 dark:text-[#f1f1f1] leading-snug">
                 {greeting.text},{" "}
                 <span className="text-amber-600 dark:text-amber-400">
-                  {isSignedIn && firstName ? firstName : "Stranger"}
+                  {isSignedIn && firstName ? firstName : "Chief"}
                 </span>
                 !
               </p>
