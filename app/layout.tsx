@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     template: "%s | The Saint's TechNet",
   },
   description:
-    "Premium brand-new and foreign-used laptops, MacBooks, gaming PCs, monitors, accessories and content creation gear. CAC-registered. Warranty on every product. Worldwide shipping since 2019.",
+    "The smartest way to buy premium brand-new and foreign-used tech — engineer-verified, warranted, and shipped worldwide. Registered and recognized, serving thousands since 2019.",
   keywords: [
     "laptops Nigeria", "MacBook Nigeria", "gaming laptops Lagos",
     "foreign used laptops", "brand new laptops Nigeria", "The Saint's TechNet",
