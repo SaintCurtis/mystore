@@ -5,7 +5,6 @@ import { useState } from "react";
 import {
   ShoppingBagIcon,
   SparklesIcon,
-  CpuChipIcon,
   HeartIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
@@ -26,6 +25,7 @@ import { ThemeToggle } from "@/components/app/ThemeToggle";
 import { InstantSearch } from "@/components/app/InstantSearch";
 import { CurrencyToggle } from "@/components/app/CurrencyToggle";
 import { MobileNav } from "@/components/app/MobileNav";
+import { BrandMark } from "@/components/app/BrandMark";
 
 export function Header() {
   const { openCart } = useCartActions();
@@ -51,7 +51,7 @@ export function Header() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group shrink-0">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500 shadow-sm shadow-amber-500/20 transition-all group-hover:bg-amber-400 shrink-0">
-            <CpuChipIcon className="h-4 w-4 text-zinc-950" />
+            <BrandMark className="h-4 w-4 text-zinc-950" />
           </div>
           <div className="hidden sm:flex flex-col leading-none">
             <span className="text-sm font-extrabold tracking-tight text-zinc-900 dark:text-[#f1f1f1]">

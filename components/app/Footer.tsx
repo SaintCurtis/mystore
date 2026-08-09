@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Cpu, Mail, Phone, Send } from "lucide-react";
+import { Mail, Phone, Send } from "lucide-react";
+import { BrandMark } from "@/components/app/BrandMark";
 
 const SOCIAL_LINKS = [
   {
@@ -56,7 +57,7 @@ export function Footer() {
           <div className="flex flex-col gap-5 lg:col-span-1">
             <Link href="/" className="flex items-center gap-2.5 w-fit group">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500 shadow-sm shadow-amber-500/30 dark:shadow-amber-500/15 transition-all duration-200 group-hover:bg-amber-400">
-                <Cpu className="h-4 w-4 text-zinc-950" />
+                <BrandMark className="h-4 w-4 text-zinc-950" />
               </div>
               <div className="flex flex-col leading-none">
                 <span className="text-sm font-extrabold tracking-tight text-zinc-900 dark:text-[#f1f1f1]">
