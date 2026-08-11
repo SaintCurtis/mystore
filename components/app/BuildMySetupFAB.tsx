@@ -44,11 +44,11 @@ export function BuildMySetupFAB() {
         href="/build-my-setup"
         className="flex items-center gap-2 rounded-full bg-zinc-900 dark:bg-white px-4 py-2.5 shadow-lg shadow-black/20 border border-zinc-700 dark:border-zinc-200 transition-all duration-200 hover:scale-105 active:scale-95"
       >
-        <Wand2 className="h-4 w-4 text-amber-400 dark:text-amber-500 shrink-0" />
+        <Wand2 className="h-4 w-4 text-blue-400 dark:text-blue-500 shrink-0" />
         <span className="text-xs font-bold text-white dark:text-zinc-900 whitespace-nowrap">
           Build My Setup
         </span>
-        <span className="flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[9px] font-bold text-zinc-950">
+        <span className="flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[9px] font-bold text-white">
           AI
         </span>
       </Link>

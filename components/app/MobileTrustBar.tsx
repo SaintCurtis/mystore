@@ -2,11 +2,11 @@
 
 const ITEMS = [
   { emoji: "🔧", text: "Engineer-Inspected",         color: "text-blue-600 dark:text-blue-400"       },
-  { emoji: "⚡", text: "Fast Response",               color: "text-amber-500 dark:text-amber-400"     },
+  { emoji: "⚡", text: "Fast Response",               color: "text-blue-500 dark:text-blue-400"     },
   { emoji: "🇳🇬", text: "Lagos-Based",                color: "text-green-600 dark:text-green-400"     },
   { emoji: "💬", text: "WhatsApp Support",            color: "text-emerald-600 dark:text-emerald-400" },
   { emoji: "🔒", text: "Secure Checkout",             color: "text-violet-600 dark:text-violet-400"   },
-  { emoji: "🏆", text: "1,000+ Happy Buyers",         color: "text-orange-500 dark:text-orange-400"   },
+  { emoji: "🏆", text: "1,000+ Happy Buyers",         color: "text-blue-500 dark:text-blue-400"   },
   { emoji: "📦", text: "Worldwide Delivery",          color: "text-sky-600 dark:text-sky-400"         },
   { emoji: "✅", text: "CAC Registered · BN 9245886", color: "text-teal-600 dark:text-teal-400"       },
   { emoji: "🛡️", text: "Warranty On Everything",      color: "text-indigo-600 dark:text-indigo-400"   },

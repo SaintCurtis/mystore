@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
     <div style="background:#09090b;padding:24px 28px;">
       <table style="width:100%;"><tr>
         <td>
-          <p style="color:#f59e0b;font-weight:800;font-size:20px;margin:0;">The Saint's TechNet</p>
+          <p style="color:#1a56db;font-weight:800;font-size:20px;margin:0;">The Saint's TechNet</p>
           <p style="color:#71717a;font-size:11px;margin:8px 0 0 0;line-height:1.6;">
             Built by an Engineer · CAC Registered · Lagos, Nigeria<br>
             BN: 9245886 · iamsaintcurtis@gmail.com · +234 906 089 8951
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
         </td>
         <td style="text-align:right;vertical-align:top;">
           <p style="color:#a1a1aa;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;margin:0;">Quotation</p>
-          <p style="color:#f59e0b;font-family:monospace;font-size:16px;font-weight:700;margin:4px 0 0 0;">${quote.quoteNumber}</p>
+          <p style="color:#1a56db;font-family:monospace;font-size:16px;font-weight:700;margin:4px 0 0 0;">${quote.quoteNumber}</p>
         </td>
       </tr></table>
     </div>
@@ -131,14 +131,14 @@ export async function POST(req: NextRequest) {
           ${quote.vatAmount ? `<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;color:#52525b;"><span>${quote.vatNote} (7.5%)</span><span>${fmt(quote.vatAmount)}</span></div>` : ""}
           <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:700;padding:10px 0 0 0;border-top:2px solid #e4e4e7;margin-top:6px;">
             <span>Grand Total</span>
-            <span style="color:#d97706;">${fmt(quote.grandTotal)}</span>
+            <span style="color:#1a56db;">${fmt(quote.grandTotal)}</span>
           </div>
         </div>
       </div>
 
-      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:16px;margin-bottom:20px;">
-        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#b45309;margin:0 0 8px 0;">Note from the Engineer</p>
-        <p style="font-size:13px;color:#92400e;margin:0;line-height:1.6;">${quote.engineerNote}</p>
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;margin-bottom:20px;">
+        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a56db;margin:0 0 8px 0;">Note from the Engineer</p>
+        <p style="font-size:13px;color:#334155;margin:0;line-height:1.6;">${quote.engineerNote}</p>
       </div>
 
       <div style="margin-bottom:24px;">
@@ -156,7 +156,7 @@ export async function POST(req: NextRequest) {
           Accept on WhatsApp
         </a>
         <a href="${SITE_URL}/"
-          style="display:inline-block;background:#f59e0b;color:#0a0a0a;font-weight:700;font-size:13px;padding:10px 24px;border-radius:8px;text-decoration:none;">
+          style="display:inline-block;background:#1a56db;color:#0a0a0a;font-weight:700;font-size:13px;padding:10px 24px;border-radius:8px;text-decoration:none;">
           Shop Now
         </a>
       </div>

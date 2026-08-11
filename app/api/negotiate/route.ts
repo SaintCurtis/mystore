@@ -47,14 +47,14 @@ async function sendFloorAlert(params: {
       subject: `🔔 Close bid on ${productName} — ₦${customerBid.toLocaleString()}`,
       html: `
         <div style="font-family:sans-serif;max-width:540px;margin:0 auto;padding:24px">
-          <h2 style="color:#f59e0b;margin:0 0 16px">Customer bid is near your floor price</h2>
+          <h2 style="color:#1a56db;margin:0 0 16px">Customer bid is near your floor price</h2>
           <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
             <tr><td style="padding:8px 0;color:#666;width:140px">Product</td><td style="font-weight:600">${productName}</td></tr>
             <tr><td style="padding:8px 0;color:#666">Listed price</td><td style="font-weight:600">₦${listedPrice.toLocaleString()}</td></tr>
             <tr><td style="padding:8px 0;color:#666">Floor price</td><td style="font-weight:600">₦${floorPrice.toLocaleString()}</td></tr>
-            <tr><td style="padding:8px 0;color:#666">Customer bid</td><td style="font-weight:600;color:#f59e0b">₦${customerBid.toLocaleString()} (${savedPct}% off listed)</td></tr>
+            <tr><td style="padding:8px 0;color:#666">Customer bid</td><td style="font-weight:600;color:#1a56db">₦${customerBid.toLocaleString()} (${savedPct}% off listed)</td></tr>
           </table>
-          <a href="${adminUrl}" style="display:inline-block;background:#f59e0b;color:#000;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:700">
+          <a href="${adminUrl}" style="display:inline-block;background:#1a56db;color:#000;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:700">
             👀 View &amp; Take Over
           </a>
         </div>

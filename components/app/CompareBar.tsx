@@ -67,7 +67,7 @@ export function CompareBar() {
               <Button size="sm"
                 disabled={count < 2}
                 onClick={openDrawer}
-                className="gap-1.5 bg-amber-500 text-zinc-950 font-bold hover:bg-amber-400 disabled:opacity-40 shadow-sm shadow-amber-500/20">
+                className="gap-1.5 bg-blue-500 text-white font-bold hover:bg-blue-400 disabled:opacity-40 shadow-sm shadow-blue-500/20">
                 <GitCompare className="h-3.5 w-3.5" />
                 Compare
               </Button>
@@ -91,7 +91,7 @@ export function CompareBar() {
             {/* Drawer header */}
             <div className="sticky top-0 flex items-center justify-between border-b border-zinc-100 dark:border-[#1a1a1a] bg-white dark:bg-[#0f0f0f] px-6 py-4 z-10">
               <div className="flex items-center gap-2">
-                <GitCompare className="h-5 w-5 text-amber-500 dark:text-amber-400" />
+                <GitCompare className="h-5 w-5 text-blue-500 dark:text-blue-400" />
                 <h2 className="font-display text-lg font-bold text-zinc-900 dark:text-[#f1f1f1]">
                   Comparing {count} Products
                 </h2>
@@ -132,7 +132,7 @@ export function CompareBar() {
                           </div>
                           {/* Name */}
                           <Link href={`/products/${item.slug}`}
-                            className="text-sm font-semibold text-zinc-900 dark:text-[#f1f1f1] hover:text-amber-600 dark:hover:text-amber-400 transition-colors line-clamp-2 text-center max-w-40">
+                            className="text-sm font-semibold text-zinc-900 dark:text-[#f1f1f1] hover:text-blue-600 dark:hover:text-blue-400 transition-colors line-clamp-2 text-center max-w-40">
                             {item.name}
                           </Link>
                         </div>
@@ -166,7 +166,7 @@ export function CompareBar() {
                         return (
                           <td key={item.productId} className="px-3 py-3 text-center text-sm text-zinc-800 dark:text-[#f1f1f1]">
                             {row.key === "price"
-                              ? <span className="font-bold text-zinc-900 dark:text-amber-400">{value}</span>
+                              ? <span className="font-bold text-zinc-900 dark:text-blue-400">{value}</span>
                               : value}
                           </td>
                         );
@@ -185,7 +185,7 @@ export function CompareBar() {
                         <Button
                           size="sm"
                           onClick={() => addToCart({ productId: item.productId, name: item.name, price: item.price, image: item.image })}
-                          className="gap-1.5 bg-amber-500 text-zinc-950 font-bold hover:bg-amber-400 text-xs">
+                          className="gap-1.5 bg-blue-500 text-white font-bold hover:bg-blue-400 text-xs">
                           <ShoppingCart className="h-3 w-3" />
                           Add to Cart
                         </Button>

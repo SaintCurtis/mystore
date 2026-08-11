@@ -50,14 +50,14 @@ export function Header() {
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group shrink-0">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500 shadow-sm shadow-amber-500/20 transition-all group-hover:bg-amber-400 shrink-0">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500 shadow-sm shadow-blue-500/20 transition-all group-hover:bg-blue-400 shrink-0">
             <BrandMark className="h-4 w-4 text-zinc-950" />
           </div>
           <div className="hidden sm:flex flex-col leading-none">
             <span className="text-sm font-extrabold tracking-tight text-zinc-900 dark:text-[#f1f1f1]">
               The Saint's TechNet
             </span>
-            <span className="text-[10px] font-medium text-amber-500 tracking-wider uppercase">
+            <span className="text-[10px] font-medium text-blue-500 tracking-wider uppercase">
               Engineer-Verified. Community-Trusted.
             </span>
           </div>
@@ -78,7 +78,7 @@ export function Header() {
           <CurrencyToggle />
 
           <Button asChild variant="ghost" size="sm"
-            className="hidden lg:flex items-center gap-1.5 text-zinc-600 hover:text-amber-600 hover:bg-amber-50 dark:text-[#a3a3a3] dark:hover:text-amber-400 dark:hover:bg-amber-500/8 transition-colors">
+            className="hidden lg:flex items-center gap-1.5 text-zinc-600 hover:text-blue-600 hover:bg-blue-50 dark:text-[#a3a3a3] dark:hover:text-blue-400 dark:hover:bg-blue-500/8 transition-colors">
             <Link href="/build-my-setup">
               <WrenchScrewdriverIcon className="h-4 w-4" />
               <span className="text-sm font-medium">Build My Setup</span>
@@ -97,7 +97,7 @@ export function Header() {
 
           {!isChatOpen && (
             <Button onClick={openChat} size="sm"
-              className="gap-1.5 bg-linear-to-r from-amber-500 to-orange-500 text-white font-semibold shadow-sm hover:from-amber-400 hover:to-orange-400 transition-all duration-200 h-8 px-3">
+              className="gap-1.5 bg-linear-to-r from-blue-500 to-blue-500 text-white font-semibold shadow-sm hover:from-blue-400 hover:to-blue-400 transition-all duration-200 h-8 px-3">
               <SparklesIcon className="h-3.5 w-3.5" />
               <span className="text-xs font-bold">Ask AI</span>
             </Button>
@@ -121,7 +121,7 @@ export function Header() {
             onClick={openCart}>
             <ShoppingBagIcon className="h-[18px] w-[18px]" />
             {totalItems > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[9px] font-bold text-white">
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[9px] font-bold text-white">
                 {totalItems > 9 ? "9+" : totalItems}
               </span>
             )}
@@ -176,7 +176,7 @@ export function Header() {
             onClick={openCart} aria-label="Open cart">
             <ShoppingBagIcon className="h-[18px] w-[18px]" />
             {totalItems > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[9px] font-bold text-zinc-950">
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[9px] font-bold text-white">
                 {totalItems > 9 ? "9+" : totalItems}
               </span>
             )}

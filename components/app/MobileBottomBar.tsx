@@ -66,8 +66,8 @@ export function MobileBottomBar() {
             href="/"
             className={`flex flex-col items-center justify-center gap-0.5 py-2.5 transition-colors ${
               isHome
-                ? "text-amber-500 dark:text-amber-400"
-                : "text-zinc-500 dark:text-[#a3a3a3] active:text-amber-500"
+                ? "text-blue-500 dark:text-blue-400"
+                : "text-zinc-500 dark:text-[#a3a3a3] active:text-blue-500"
             }`}
           >
             <Home className="h-5 w-5" strokeWidth={isHome ? 2.5 : 1.8} />
@@ -80,7 +80,7 @@ export function MobileBottomBar() {
             onClick={() => setSearchOpen((v) => !v)}
             className={`flex flex-col items-center justify-center gap-0.5 py-2.5 transition-colors ${
               searchOpen
-                ? "text-amber-500 dark:text-amber-400"
+                ? "text-blue-500 dark:text-blue-400"
                 : "text-zinc-500 dark:text-[#a3a3a3]"
             }`}
           >
@@ -96,10 +96,10 @@ export function MobileBottomBar() {
               className="flex flex-col items-center justify-center gap-0.5 py-1 -mt-4"
               aria-label="Ask AI"
             >
-              <div className="flex h-[50px] w-[50px] items-center justify-center rounded-full bg-linear-to-br from-amber-500 to-orange-500 shadow-lg shadow-amber-500/40 ring-2 ring-white dark:ring-[#0a0a0a]">
+              <div className="flex h-[50px] w-[50px] items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-blue-500 shadow-lg shadow-blue-500/40 ring-2 ring-white dark:ring-[#0a0a0a]">
                 <Sparkles className="h-[22px] w-[22px] text-white" />
               </div>
-              <span className="text-[10px] font-bold text-amber-500 dark:text-amber-400">Ask AI</span>
+              <span className="text-[10px] font-bold text-blue-500 dark:text-blue-400">Ask AI</span>
             </button>
           ) : (
             <div className="flex flex-col items-center justify-center gap-0.5 py-1 -mt-4 opacity-40">
@@ -135,12 +135,12 @@ export function MobileBottomBar() {
           <button
             type="button"
             onClick={openCart}
-            className="relative flex flex-col items-center justify-center gap-0.5 py-2.5 text-zinc-500 dark:text-[#a3a3a3] transition-colors active:text-amber-500"
+            className="relative flex flex-col items-center justify-center gap-0.5 py-2.5 text-zinc-500 dark:text-[#a3a3a3] transition-colors active:text-blue-500"
             aria-label="Cart"
           >
             <ShoppingBag className="h-5 w-5" strokeWidth={1.8} />
             {totalItems > 0 && (
-              <span className="absolute top-1.5 right-3 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[9px] font-bold text-zinc-950">
+              <span className="absolute top-1.5 right-3 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[9px] font-bold text-white">
                 {totalItems > 9 ? "9+" : totalItems}
               </span>
             )}

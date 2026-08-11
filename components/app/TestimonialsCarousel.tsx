@@ -9,7 +9,7 @@ const TESTIMONIALS = [
   { id: 2, name: "Adaeze Nwosu", location: "Lagos, Nigeria", product: "ASUS ROG Strix SCAR 18", rating: 5, review: "I've bought from three different tech vendors on Instagram before. This is the first time nobody played games with me. He told me exactly what the laptop could and couldn't do before I bought it. That kind of honesty from a seller is rare in Nigeria.", initials: "AN", color: "bg-rose-600" },
   { id: 3, name: "Babatunde Fashola", location: "Port Harcourt, Nigeria", product: "Custom Gaming PC", rating: 5, review: "I described what I wanted my PC to do and he recommended the right build within my budget — didn't try to upsell me. Three months later, still running smooth. The after-sales support alone makes this worth it.", initials: "BF", color: "bg-emerald-600" },
   { id: 4, name: "Halima Abubakar", location: "Kano, Nigeria", product: "Dell XPS 13 (Brand New)", rating: 5, review: "Sent money from Kano to someone I only knew from Instagram — I was nervous. But the item arrived sealed, exactly as described, with a receipt and warranty card. I've since referred four colleagues. The trust is genuine.", initials: "HA", color: "bg-violet-600" },
-  { id: 5, name: "Tolu Adeyemi", location: "Ibadan, Nigeria", product: "Lenovo Legion Pro 5i", rating: 5, review: "My Lenovo Legion was packed like it was going to space — bubble wrap, box within a box, the works. Performance is insane for the price. A Computer Engineering graduate selling computers is just different. He speaks my language.", initials: "TA", color: "bg-amber-600" },
+  { id: 5, name: "Tolu Adeyemi", location: "Ibadan, Nigeria", product: "Lenovo Legion Pro 5i", rating: 5, review: "My Lenovo Legion was packed like it was going to space — bubble wrap, box within a box, the works. Performance is insane for the price. A Computer Engineering graduate selling computers is just different. He speaks my language.", initials: "TA", color: "bg-indigo-600" },
   { id: 6, name: "Prosper Chukwu", location: "Enugu, Nigeria", product: "EcoFlow DELTA 2", rating: 5, review: "With NEPA doing what they do, I needed reliable backup power. Saint helped me pick the right EcoFlow for my home office setup. Didn't just sell me the most expensive one — gave me an honest comparison. This is customer service done right.", initials: "PC", color: "bg-teal-600" },
 ];
 
@@ -56,9 +56,9 @@ export function TestimonialsCarousel() {
     <section className="bg-zinc-100 dark:bg-zinc-950 py-24 sm:py-32 transition-colors duration-300">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-16 text-center">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-amber-500 dark:text-amber-400">What Our Customers Say</p>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-blue-500 dark:text-blue-400">What Our Customers Say</p>
           <h2 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white sm:text-4xl lg:text-5xl">
-            Real People.{" "}<span className="text-amber-500 dark:text-amber-400">Real Experiences.</span>
+            Real People.{" "}<span className="text-blue-500 dark:text-blue-400">Real Experiences.</span>
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-base text-zinc-600 dark:text-zinc-400">
             Over 5 years of verified sales across Nigeria and beyond.
@@ -104,18 +104,18 @@ export function TestimonialsCarousel() {
           {/* Navigation dots + buttons */}
           <div className="mt-10 flex items-center justify-center gap-6">
             <Button variant="ghost" size="icon" onClick={prev}
-              className="h-10 w-10 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-amber-500 hover:bg-amber-500/10 hover:text-amber-500 dark:hover:text-amber-400">
+              className="h-10 w-10 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-blue-500 hover:bg-blue-500/10 hover:text-blue-500 dark:hover:text-blue-400">
               <ChevronLeft className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-2">
               {TESTIMONIALS.map((_, i) => (
                 <button key={i} onClick={() => goTo(i)}
-                  className={`rounded-full transition-all duration-300 ${i === current ? "w-6 h-2 bg-amber-500 dark:bg-amber-400" : "w-2 h-2 bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-500"}`}
+                  className={`rounded-full transition-all duration-300 ${i === current ? "w-6 h-2 bg-blue-500 dark:bg-blue-400" : "w-2 h-2 bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-500"}`}
                 />
               ))}
             </div>
             <Button variant="ghost" size="icon" onClick={next}
-              className="h-10 w-10 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-amber-500 hover:bg-amber-500/10 hover:text-amber-500 dark:hover:text-amber-400">
+              className="h-10 w-10 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-blue-500 hover:bg-blue-500/10 hover:text-blue-500 dark:hover:text-blue-400">
               <ChevronRight className="h-5 w-5" />
             </Button>
           </div>
@@ -127,8 +127,8 @@ export function TestimonialsCarousel() {
 
 function TestimonialCard({ testimonial, isActive = false }: { testimonial: (typeof TESTIMONIALS)[number]; isActive?: boolean }) {
   return (
-    <div className={`relative flex h-full flex-col rounded-2xl border p-6 transition-all duration-300 ${isActive ? "border-amber-500/40 bg-white dark:bg-zinc-900 shadow-xl shadow-amber-500/5" : "border-zinc-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/50"}`}>
-      <Quote className="mb-4 h-8 w-8 text-amber-500/40" />
+    <div className={`relative flex h-full flex-col rounded-2xl border p-6 transition-all duration-300 ${isActive ? "border-blue-500/40 bg-white dark:bg-zinc-900 shadow-xl shadow-blue-500/5" : "border-zinc-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/50"}`}>
+      <Quote className="mb-4 h-8 w-8 text-blue-500/40" />
       <StarRating rating={testimonial.rating} />
       <p className="mt-4 flex-1 text-sm leading-relaxed text-zinc-600 dark:text-zinc-300 sm:text-base">&ldquo;{testimonial.review}&rdquo;</p>
       <div className="mt-4 inline-flex w-fit items-center rounded-full bg-zinc-100 dark:bg-zinc-800 px-3 py-1">

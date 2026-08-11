@@ -50,7 +50,7 @@ const LOW_STOCK_QUERY = groq`*[_type == "product" && stock > 0 && stock <= 3] | 
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; className: string; icon: React.ReactNode }> = {
-    pending:   { label: "Pending",   className: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",         icon: <Clock className="h-3 w-3" />       },
+    pending:   { label: "Pending",   className: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",         icon: <Clock className="h-3 w-3" />       },
     completed: { label: "Completed", className: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400", icon: <CheckCircle className="h-3 w-3" /> },
     cancelled: { label: "Cancelled", className: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",                 icon: <XCircle className="h-3 w-3" />     },
   };
@@ -94,7 +94,7 @@ export default async function AdminDashboardPage() {
           { label: "Total Products", value: s?.totalProducts ?? 0, icon: Package,       color: "text-blue-600 dark:text-blue-400",      bg: "bg-blue-50 dark:bg-blue-900/20"       },
           { label: "In Stock",       value: s?.inStock ?? 0,       icon: CheckCircle,   color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
           { label: "Out of Stock",   value: s?.outOfStock ?? 0,    icon: AlertTriangle, color: "text-red-600 dark:text-red-400",         bg: "bg-red-50 dark:bg-red-900/20"         },
-          { label: "Total Orders",   value: s?.totalOrders ?? 0,   icon: ShoppingCart,  color: "text-amber-600 dark:text-amber-400",     bg: "bg-amber-50 dark:bg-amber-900/20"     },
+          { label: "Total Orders",   value: s?.totalOrders ?? 0,   icon: ShoppingCart,  color: "text-blue-600 dark:text-blue-400",     bg: "bg-blue-50 dark:bg-blue-900/20"     },
         ].map(({ label, value, icon: Icon, color, bg }) => (
           <div key={label} className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
             <div className="flex items-center justify-between">
@@ -129,7 +129,7 @@ export default async function AdminDashboardPage() {
         <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
           <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 px-5 py-4">
             <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">Recent Orders</h2>
-            <Link href="/admin/orders" className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400 hover:underline">
+            <Link href="/admin/orders" className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline">
               View all <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
@@ -151,7 +151,7 @@ export default async function AdminDashboardPage() {
                   </div>
                   <div className="flex items-center gap-3 shrink-0 ml-3">
                     {order.totalAmount && (
-                      <span className="text-sm font-semibold text-zinc-900 dark:text-amber-400">
+                      <span className="text-sm font-semibold text-zinc-900 dark:text-blue-400">
                         ₦{Number(order.totalAmount).toLocaleString()}
                       </span>
                     )}
@@ -167,10 +167,10 @@ export default async function AdminDashboardPage() {
         <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
           <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 px-5 py-4">
             <h2 className="font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-amber-500" />
+              <AlertTriangle className="h-4 w-4 text-blue-500" />
               Low Stock (≤3 units)
             </h2>
-            <Link href="/admin/inventory" className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400 hover:underline">
+            <Link href="/admin/inventory" className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline">
               Manage <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
@@ -193,7 +193,7 @@ export default async function AdminDashboardPage() {
                     <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
                       product.stock === 1
                         ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                        : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                        : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
                     }`}>
                       {product.stock} left
                     </span>
@@ -220,10 +220,10 @@ export default async function AdminDashboardPage() {
               key={label}
               href={href}
               target={href.startsWith("/studio") ? "_blank" : undefined}
-              className="flex flex-col gap-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 transition-all hover:border-amber-500/50 hover:shadow-md dark:hover:border-amber-500/30"
+              className="flex flex-col gap-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 transition-all hover:border-blue-500/50 hover:shadow-md dark:hover:border-blue-500/30"
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10">
-                <Icon className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10">
+                <Icon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{label}</p>

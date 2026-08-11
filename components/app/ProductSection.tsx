@@ -92,15 +92,11 @@ export function ProductSection({
           <button
             type="button"
             onClick={openMobileFilters}
-            className="filter-cta-alive relative w-full h-14 rounded-2xl font-bold text-base text-zinc-950 active:scale-[0.98] transition-transform duration-150 overflow-hidden"
-            style={{
-              background: "linear-gradient(90deg, #f59e0b 0%, #fbbf24 45%, #f97316 100%)",
-            }}
+            className="filter-cta-alive relative w-full h-14 rounded-2xl bg-blue-600 font-bold text-base text-white active:scale-[0.98] transition-transform duration-150"
           >
             <span className="relative z-10 flex items-center justify-center gap-3">
               <SlidersHorizontal className="h-5 w-5 shrink-0" strokeWidth={2.5} />
               <span className="tracking-wide">Find Your Perfect Product</span>
-              <span className="gem-dot" />
             </span>
           </button>
         ) : (
@@ -108,7 +104,7 @@ export function ProductSection({
             <button
               type="button"
               onClick={openMobileFilters}
-              className="relative flex-1 h-14 rounded-2xl bg-amber-500 font-bold text-base text-zinc-950 shadow-lg shadow-amber-500/30 active:scale-[0.98] transition-transform duration-150"
+              className="relative flex-1 h-14 rounded-2xl bg-blue-500 font-bold text-base text-white shadow-lg shadow-blue-500/30 active:scale-[0.98] transition-transform duration-150"
             >
               <span className="flex items-center justify-center gap-3">
                 <SlidersHorizontal className="h-5 w-5 shrink-0" strokeWidth={2.5} />
@@ -117,7 +113,7 @@ export function ProductSection({
                     ? "1 Filter Active"
                     : `${activeFilterCount} Filters Active`}
                 </span>
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-950 text-[11px] font-black text-amber-400">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-950 text-[11px] font-black text-blue-400">
                   {activeFilterCount}
                 </span>
               </span>
@@ -126,7 +122,7 @@ export function ProductSection({
             <button
               type="button"
               onClick={() => { window.location.href = "/"; }}
-              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border-2 border-amber-500/40 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 active:scale-95 transition-transform duration-150"
+              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border-2 border-blue-500/40 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 active:scale-95 transition-transform duration-150"
               aria-label="Clear all filters"
             >
               <X className="h-5 w-5" strokeWidth={2.5} />
@@ -169,7 +165,7 @@ export function ProductSection({
             {filtersOpen ? "Hide Filters" : "Show Filters"}
           </span>
           {activeFilterCount > 0 && (
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-[10px] font-bold text-zinc-950">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold text-white">
               {activeFilterCount}
             </span>
           )}
@@ -205,7 +201,7 @@ export function ProductSection({
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-bold text-zinc-900 dark:text-white">Filters</p>
                   {activeFilterCount > 0 && (
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-[10px] font-bold text-zinc-950">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold text-white">
                       {activeFilterCount}
                     </span>
                   )}
@@ -229,7 +225,7 @@ export function ProductSection({
               <button
                 type="button"
                 onClick={closeMobileFilters}
-                className="flex w-full h-12 items-center justify-center gap-2 rounded-xl bg-amber-500 text-zinc-950 font-bold text-sm shadow-lg shadow-amber-500/25 hover:bg-amber-400 active:scale-[0.98] transition-all duration-150"
+                className="flex w-full h-12 items-center justify-center gap-2 rounded-xl bg-blue-500 text-white font-bold text-sm shadow-lg shadow-blue-500/25 hover:bg-blue-400 active:scale-[0.98] transition-all duration-150"
               >
                 <Check className="h-4 w-4" />
                 {activeFilterCount > 0

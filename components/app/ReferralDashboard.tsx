@@ -99,9 +99,9 @@ export function ReferralDashboard({
 
   const leaderboardIcons = [Crown, Medal, Award];
   const leaderboardColors = [
-    "text-amber-400",
+    "text-blue-400",
     "text-zinc-400",
-    "text-amber-700",
+    "text-blue-700",
   ];
 
   return (
@@ -111,22 +111,22 @@ export function ReferralDashboard({
       <div className="relative overflow-hidden bg-zinc-900 dark:bg-[#0f0f0f] border-b border-zinc-800">
         <div className="absolute inset-0 opacity-5"
           style={{
-            backgroundImage: `radial-gradient(circle at 20% 50%, #f59e0b 0%, transparent 50%),
-                             radial-gradient(circle at 80% 20%, #f59e0b 0%, transparent 40%)`,
+            backgroundImage: `radial-gradient(circle at 20% 50%, #1a56db 0%, transparent 50%),
+                             radial-gradient(circle at 80% 20%, #1a56db 0%, transparent 40%)`,
           }}
         />
         <div className="relative mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3 mb-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/20 border border-amber-500/30">
-              <Gift className="h-5 w-5 text-amber-400" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/20 border border-blue-500/30">
+              <Gift className="h-5 w-5 text-blue-400" />
             </div>
-            <span className="text-xs font-bold uppercase tracking-widest text-amber-400">
+            <span className="text-xs font-bold uppercase tracking-widest text-blue-400">
               Refer & Earn
             </span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
             Share the love,<br />
-            <span className="text-amber-400">earn rewards</span>
+            <span className="text-blue-400">earn rewards</span>
           </h1>
           <p className="mt-3 text-sm text-zinc-400 max-w-md">
             Every friend you refer who places an order earns you rewards.
@@ -141,7 +141,7 @@ export function ReferralDashboard({
         <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#111111] overflow-hidden shadow-sm">
           <div className="p-5 sm:p-6">
             <div className="flex items-center gap-2 mb-4">
-              <Zap className="h-4 w-4 text-amber-500" />
+              <Zap className="h-4 w-4 text-blue-500" />
               <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
                 Your Referral Link
               </p>
@@ -160,7 +160,7 @@ export function ReferralDashboard({
                       "flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all duration-200",
                       copied
                         ? "bg-emerald-500 text-white"
-                        : "bg-amber-500 text-zinc-950 hover:bg-amber-400 active:scale-95",
+                        : "bg-blue-500 text-white hover:bg-blue-400 active:scale-95",
                     )}
                   >
                     {copied ? (
@@ -173,7 +173,7 @@ export function ReferralDashboard({
 
                 <div className="flex items-center gap-2 mb-5">
                   <span className="text-xs text-zinc-500 dark:text-zinc-400">Your code:</span>
-                  <span className="rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-1 text-sm font-black tracking-widest text-amber-600 dark:text-amber-400">
+                  <span className="rounded-lg bg-blue-500/10 border border-blue-500/20 px-3 py-1 text-sm font-black tracking-widest text-blue-600 dark:text-blue-400">
                     {referral?.code}
                   </span>
                 </div>
@@ -225,8 +225,8 @@ export function ReferralDashboard({
             {
               icon: Banknote, label: "Total Earned",
               value: `₦${stats.earned.toLocaleString()}`,
-              color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-900/20",
-              border: "border-amber-100 dark:border-amber-900/30",
+              color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20",
+              border: "border-blue-100 dark:border-blue-900/30",
             },
             {
               icon: Zap, label: "Conv. Rate",
@@ -272,12 +272,12 @@ export function ReferralDashboard({
                   { step: "03", title: "You earn", desc: "Earn rewards for every successful order. The more you refer, the more you earn.", icon: Banknote },
                 ].map(({ step, title, desc, icon: Icon }) => (
                   <div key={step} className="flex gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/20">
-                      <Icon className="h-4 w-4 text-amber-500" />
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 border border-blue-500/20">
+                      <Icon className="h-4 w-4 text-blue-500" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-0.5">
-                        <span className="text-[10px] font-black tracking-widest text-amber-500/60">STEP {step}</span>
+                        <span className="text-[10px] font-black tracking-widest text-blue-500/60">STEP {step}</span>
                       </div>
                       <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{title}</p>
                       <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 leading-relaxed">{desc}</p>
@@ -287,8 +287,8 @@ export function ReferralDashboard({
               </div>
             </div>
 
-            <div className="rounded-2xl border border-amber-200 dark:border-amber-900/40 bg-amber-50 dark:bg-amber-900/10 p-5">
-              <p className="text-xs font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400 mb-3">
+            <div className="rounded-2xl border border-blue-200 dark:border-blue-900/40 bg-blue-50 dark:bg-blue-900/10 p-5">
+              <p className="text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-3">
                 💡 Pro tips to maximise earnings
               </p>
               <ul className="space-y-2">
@@ -298,8 +298,8 @@ export function ReferralDashboard({
                   "Tell friends about the Engineer-verified guarantee — it converts well",
                   "Post before festive seasons — Christmas, UTME period, new academic year",
                 ].map((tip) => (
-                  <li key={tip} className="flex items-start gap-2 text-xs text-amber-800 dark:text-amber-300">
-                    <ChevronRight className="h-3 w-3 mt-0.5 shrink-0 text-amber-500" />
+                  <li key={tip} className="flex items-start gap-2 text-xs text-blue-800 dark:text-blue-300">
+                    <ChevronRight className="h-3 w-3 mt-0.5 shrink-0 text-blue-500" />
                     {tip}
                   </li>
                 ))}
@@ -360,7 +360,7 @@ export function ReferralDashboard({
         {activeTab === "leaderboard" && (
           <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#111111] overflow-hidden">
             <div className="border-b border-zinc-100 dark:border-zinc-800 px-5 py-4 flex items-center gap-2">
-              <Trophy className="h-4 w-4 text-amber-500" />
+              <Trophy className="h-4 w-4 text-blue-500" />
               <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Top Referrers</p>
             </div>
             {leaderboard.length === 0 ? (
@@ -382,7 +382,7 @@ export function ReferralDashboard({
                     <div key={entry._id}
                       className={cn(
                         "flex items-center gap-4 px-5 py-4 transition-colors",
-                        isCurrentUser && "bg-amber-50 dark:bg-amber-900/10",
+                        isCurrentUser && "bg-blue-50 dark:bg-blue-900/10",
                       )}>
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center">
                         {i < 3 ? (
@@ -400,7 +400,7 @@ export function ReferralDashboard({
                         </p>
                       </div>
                       <div className="text-right shrink-0">
-                        <p className="text-sm font-black text-amber-500">
+                        <p className="text-sm font-black text-blue-500">
                           ₦{(entry.totalEarned ?? 0).toLocaleString()}
                         </p>
                         <p className="text-[10px] text-zinc-400">earned</p>

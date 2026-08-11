@@ -128,7 +128,7 @@ function PinGate({ onAuth }: { onAuth: () => void }) {
               className={cn(
                 "h-12 w-10 rounded-xl border text-center text-lg font-bold transition-all",
                 "bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100",
-                "focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500",
+                "focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500",
                 error
                   ? "border-red-400 dark:border-red-500"
                   : "border-zinc-200 dark:border-zinc-700",
@@ -147,7 +147,7 @@ function PinGate({ onAuth }: { onAuth: () => void }) {
         <Button
           onClick={() => submit(digits.join(""))}
           disabled={digits.join("").length < 6 || loading}
-          className="w-full h-11 bg-amber-500 text-zinc-950 font-bold hover:bg-amber-400 disabled:opacity-40"
+          className="w-full h-11 bg-blue-500 text-white font-bold hover:bg-blue-400 disabled:opacity-40"
         >
           {loading ? (
             <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Verifying…</>

@@ -53,7 +53,7 @@ export default async function OrdersPage() {
           </div>
           <Link
             href="/build-my-setup"
-            className="hidden sm:flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-50 dark:bg-amber-500/8 px-3 py-2 text-sm font-semibold text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-500/15 transition-colors"
+            className="hidden sm:flex items-center gap-1.5 rounded-lg border border-blue-500/30 bg-blue-50 dark:bg-blue-500/8 px-3 py-2 text-sm font-semibold text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/15 transition-colors"
           >
             <Wand2 className="h-4 w-4" />
             Build My Setup
@@ -72,7 +72,7 @@ export default async function OrdersPage() {
               <Link
                 key={order._id}
                 href={`/orders/${order._id}`}
-                className="group block rounded-xl border border-zinc-200 dark:border-[#1a1a1a] bg-white dark:bg-[#111111] transition-all hover:border-zinc-300 dark:hover:border-amber-500/20 hover:shadow-lg dark:hover:shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
+                className="group block rounded-xl border border-zinc-200 dark:border-[#1a1a1a] bg-white dark:bg-[#111111] transition-all hover:border-zinc-300 dark:hover:border-blue-500/20 hover:shadow-lg dark:hover:shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
               >
                 <div className="flex gap-4 p-5">
                   <StackedProductImages
@@ -99,7 +99,7 @@ export default async function OrdersPage() {
                       <p className="text-sm text-zinc-500 dark:text-[#a3a3a3]">
                         {order.itemCount} {order.itemCount === 1 ? "item" : "items"}
                       </p>
-                      <p className="text-lg font-semibold text-zinc-900 dark:text-amber-400">
+                      <p className="text-lg font-semibold text-zinc-900 dark:text-blue-400">
                         {formatPrice(order.total)}
                       </p>
                     </div>
@@ -111,7 +111,7 @@ export default async function OrdersPage() {
                     {order.itemNames?.slice(0, 2).filter(Boolean).join(", ")}
                     {(order.itemNames?.length ?? 0) > 2 && "..."}
                   </p>
-                  <span className="flex shrink-0 items-center gap-1 text-sm font-medium text-zinc-500 dark:text-[#a3a3a3] transition-colors group-hover:text-amber-600 dark:group-hover:text-amber-400">
+                  <span className="flex shrink-0 items-center gap-1 text-sm font-medium text-zinc-500 dark:text-[#a3a3a3] transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400">
                     View order
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                   </span>

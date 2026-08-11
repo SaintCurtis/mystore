@@ -134,7 +134,7 @@ function ProductRowContent(handle: DocumentHandle) {
               <div className="mt-1 flex items-center gap-1 sm:hidden">
                 <Badge
                   variant="outline"
-                  className="h-5 gap-1 border-orange-300 bg-orange-50 px-1.5 text-[10px] font-medium text-orange-600 dark:border-orange-500/50 dark:bg-orange-950/50 dark:text-orange-400"
+                  className="h-5 gap-1 border-blue-300 bg-blue-50 px-1.5 text-[10px] font-medium text-blue-600 dark:border-blue-500/50 dark:bg-blue-950/50 dark:text-blue-400"
                 >
                   <CircleAlert className="h-3 w-3" />
                   Draft
@@ -163,7 +163,7 @@ function ProductRowContent(handle: DocumentHandle) {
               {lowStock && (
                 <Badge
                   variant="secondary"
-                  className="h-5 bg-amber-100 px-1.5 text-[10px] text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+                  className="h-5 bg-blue-100 px-1.5 text-[10px] text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
                 >
                   Low
                 </Badge>
@@ -194,7 +194,7 @@ function ProductRowContent(handle: DocumentHandle) {
           {lowStock && (
             <Badge
               variant="secondary"
-              className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+              className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
             >
               Low
             </Badge>

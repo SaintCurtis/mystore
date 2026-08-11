@@ -33,7 +33,7 @@ type Tab = "contact" | "addresses";
 // ── Styles ────────────────────────────────────────────────────────────────
 
 const inputClass =
-  "w-full rounded-lg border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] px-3 py-2.5 text-sm text-zinc-900 dark:text-[#f1f1f1] placeholder-zinc-400 dark:placeholder-[#555] focus:border-amber-500 dark:focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500/30 transition-colors";
+  "w-full rounded-lg border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] px-3 py-2.5 text-sm text-zinc-900 dark:text-[#f1f1f1] placeholder-zinc-400 dark:placeholder-[#555] focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-colors";
 
 // ── Component ─────────────────────────────────────────────────────────────
 
@@ -113,7 +113,7 @@ export function ProfileClient({
       onClick={() => setTab(t)}
       className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${
         tab === t
-          ? "bg-amber-500 text-zinc-950"
+          ? "bg-blue-500 text-white"
           : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-[#1a1a1a]"
       }`}
     >
@@ -136,8 +136,8 @@ export function ProfileClient({
 
         {/* Profile header */}
         <div className="mb-8 flex items-center gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-amber-500 shadow-lg shadow-amber-500/20">
-            <span className="text-lg font-extrabold text-zinc-950">{initials || "?"}</span>
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-blue-500 shadow-lg shadow-blue-500/20">
+            <span className="text-lg font-extrabold text-white">{initials || "?"}</span>
           </div>
           <div>
             <h1 className="text-2xl font-bold text-zinc-900 dark:text-[#f1f1f1]">
@@ -208,12 +208,12 @@ export function ProfileClient({
                       key={i}
                       className="flex items-center gap-3 rounded-lg border border-zinc-100 dark:border-[#1a1a1a] bg-zinc-50 dark:bg-[#0d0d0d] px-3 py-2.5"
                     >
-                      <Phone className="h-4 w-4 text-amber-500 shrink-0" />
+                      <Phone className="h-4 w-4 text-blue-500 shrink-0" />
                       <span className="text-sm text-zinc-900 dark:text-[#f1f1f1] flex-1">
                         {phone}
                       </span>
                       {i === 0 && (
-                        <span className="flex items-center gap-1 text-[9px] font-bold bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full uppercase tracking-wide">
+                        <span className="flex items-center gap-1 text-[9px] font-bold bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded-full uppercase tracking-wide">
                           <CheckCircle className="h-2.5 w-2.5" /> Primary
                         </span>
                       )}
@@ -235,7 +235,7 @@ export function ProfileClient({
                 <Button
                   onClick={addPhone}
                   disabled={saving || !newPhone.trim()}
-                  className="shrink-0 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold"
+                  className="shrink-0 bg-blue-500 hover:bg-blue-400 text-white font-bold"
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
@@ -259,7 +259,7 @@ export function ProfileClient({
                 </p>
                 <Link
                   href="/"
-                  className="inline-flex mt-4 rounded-lg bg-amber-500 hover:bg-amber-400 px-5 py-2 text-sm font-bold text-zinc-950 transition-colors"
+                  className="inline-flex mt-4 rounded-lg bg-blue-500 hover:bg-blue-400 px-5 py-2 text-sm font-bold text-white transition-colors"
                 >
                   Start Shopping
                 </Link>
@@ -270,7 +270,7 @@ export function ProfileClient({
                   key={addr._key}
                   className={`rounded-xl border bg-white dark:bg-[#111111] p-4 transition-colors ${
                     addr.isDefault
-                      ? "border-amber-200 dark:border-amber-500/20"
+                      ? "border-blue-200 dark:border-blue-500/20"
                       : "border-zinc-200 dark:border-[#1a1a1a]"
                   }`}
                 >
@@ -283,7 +283,7 @@ export function ProfileClient({
                         {addr.label}
                       </span>
                       {addr.isDefault && (
-                        <span className="text-[9px] font-bold bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full uppercase tracking-wide">
+                        <span className="text-[9px] font-bold bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded-full uppercase tracking-wide">
                           Default
                         </span>
                       )}

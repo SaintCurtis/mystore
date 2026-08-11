@@ -127,9 +127,9 @@ function AgreeDealModal({
               <p className="font-bold text-red-600 dark:text-red-400">₦{session.floorPrice.toLocaleString()}</p>
             </div>
             {session.customerBid && (
-              <div className="flex-1 rounded-xl bg-amber-50 dark:bg-amber-900/20 px-3 py-2.5 text-center">
-                <p className="text-xs text-amber-500 mb-0.5">Customer bid</p>
-                <p className="font-bold text-amber-700 dark:text-amber-400">₦{session.customerBid.toLocaleString()}</p>
+              <div className="flex-1 rounded-xl bg-blue-50 dark:bg-blue-900/20 px-3 py-2.5 text-center">
+                <p className="text-xs text-blue-500 mb-0.5">Customer bid</p>
+                <p className="font-bold text-blue-700 dark:text-blue-400">₦{session.customerBid.toLocaleString()}</p>
               </div>
             )}
           </div>
@@ -155,7 +155,7 @@ function AgreeDealModal({
 
             {/* Validation feedback */}
             {isBelowFloor && (
-              <p className="mt-2 text-xs font-medium text-amber-600 dark:text-amber-400">
+              <p className="mt-2 text-xs font-medium text-blue-600 dark:text-blue-400">
                 ⚠️ Below your floor price of ₦{session.floorPrice.toLocaleString()} — you can still confirm
               </p>
             )}
@@ -415,7 +415,7 @@ export default function NegotiationSessionPage() {
     return (
       <div className="text-center py-24">
         <p className="text-zinc-500">Session not found.</p>
-        <Link href="/admin/negotiations" className="mt-4 inline-block text-sm text-amber-600 hover:underline">
+        <Link href="/admin/negotiations" className="mt-4 inline-block text-sm text-blue-600 hover:underline">
           ← Back to Negotiations
         </Link>
       </div>
@@ -474,7 +474,7 @@ export default function NegotiationSessionPage() {
                 <span>Listed <strong className="text-zinc-900 dark:text-zinc-100">₦{session.listedPrice?.toLocaleString()}</strong></span>
                 <span>Floor <strong className="text-red-600 dark:text-red-400">₦{session.floorPrice?.toLocaleString()}</strong></span>
                 {session.customerBid && (
-                  <span>Customer bid <strong className="text-amber-600 dark:text-amber-400">₦{session.customerBid.toLocaleString()}</strong></span>
+                  <span>Customer bid <strong className="text-blue-600 dark:text-blue-400">₦{session.customerBid.toLocaleString()}</strong></span>
                 )}
                 {session.agreedPrice && (
                   <span>Agreed <strong className="text-green-600 dark:text-green-400">₦{session.agreedPrice.toLocaleString()}</strong></span>
@@ -496,7 +496,7 @@ export default function NegotiationSessionPage() {
 
               {session.status === "ai_active" && (
                 <Button size="sm" onClick={handleTakeover} disabled={takingOver}
-                  className="gap-1.5 bg-amber-500 text-zinc-950 hover:bg-amber-400 font-bold">
+                  className="gap-1.5 bg-blue-500 text-white hover:bg-blue-400 font-bold">
                   {takingOver
                     ? <><Spinner className="h-3.5 w-3.5" /> Taking over…</>
                     : <><UserIcon className="h-3.5 w-3.5" /> Take Over</>
@@ -545,7 +545,7 @@ export default function NegotiationSessionPage() {
             <span className={cn(
               "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold",
               session.status === "ai_active"    && "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-              session.status === "owner_active" && "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
+              session.status === "owner_active" && "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
               session.status === "deal_struck"  && "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
               session.status === "closed"       && "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400",
             )}>
@@ -555,7 +555,7 @@ export default function NegotiationSessionPage() {
               {session.status === "closed"       && <><XCircleIcon className="h-3 w-3" /> Closed</>}
             </span>
             <Link href={`/products/${session.productSlug}`} target="_blank"
-              className="text-xs text-zinc-400 hover:text-amber-600 dark:hover:text-amber-400 underline underline-offset-2 transition-colors">
+              className="text-xs text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 underline underline-offset-2 transition-colors">
               View product →
             </Link>
           </div>
@@ -580,7 +580,7 @@ export default function NegotiationSessionPage() {
                   <div key={i} className={cn("flex", isCustomer ? "justify-end" : "justify-start")}>
                     <div className={cn(
                       "max-w-[78%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed",
-                      isCustomer && "bg-amber-500 text-zinc-950 rounded-br-sm",
+                      isCustomer && "bg-blue-500 text-white rounded-br-sm",
                       isAI       && "bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 rounded-bl-sm",
                       isOwner    && "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-bl-sm",
                     )}>
@@ -610,8 +610,8 @@ export default function NegotiationSessionPage() {
             <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3">
               <div className="mb-2 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-                  <p className="text-xs font-medium text-amber-600 dark:text-amber-400">
+                  <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+                  <p className="text-xs font-medium text-blue-600 dark:text-blue-400">
                     You are live — customer sees your messages as "The Saint's TechNet"
                   </p>
                 </div>
@@ -630,16 +630,16 @@ export default function NegotiationSessionPage() {
                   placeholder="Type your message to the customer…"
                   rows={2}
                   disabled={sending}
-                  className="flex-1 resize-none rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-3.5 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 disabled:opacity-50 transition-colors"
+                  className="flex-1 resize-none rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-3.5 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 disabled:opacity-50 transition-colors"
                 />
                 <button
                   onClick={sendOwnerMessage}
                   disabled={!ownerInput.trim() || sending}
-                  className="w-10 h-10 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center shrink-0 transition-all"
+                  className="w-10 h-10 rounded-xl bg-blue-500 hover:bg-blue-400 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center shrink-0 transition-all"
                 >
                   {sending
-                    ? <Spinner className="w-4 h-4 text-zinc-950" />
-                    : <PaperAirplaneIcon className="w-4 h-4 text-zinc-950" />
+                    ? <Spinner className="w-4 h-4 text-white" />
+                    : <PaperAirplaneIcon className="w-4 h-4 text-white" />
                   }
                 </button>
               </div>

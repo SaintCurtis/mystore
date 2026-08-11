@@ -108,7 +108,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
         {product.category && (
           <Link
             href={`/?category=${product.category.slug}`}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-500 transition-colors hover:text-amber-500 dark:hover:text-amber-400"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-500 transition-colors hover:text-blue-500 dark:hover:text-blue-400"
           >
             <Tag className="h-3 w-3" />
             {product.category.title}
@@ -123,7 +123,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
         {/* Price + stock */}
         <div className="mt-5 flex items-center gap-4">
           <div className="flex flex-col gap-0.5">
-            <p className="font-display text-3xl font-bold tracking-tight text-zinc-900 dark:text-amber-400">
+            <p className="font-display text-3xl font-bold tracking-tight text-zinc-900 dark:text-blue-400">
               {formatInCurrency(displayPrice)}
             </p>
             {priceChanged && displayPrice > basePrice && (
@@ -159,7 +159,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
               <span className="text-base font-bold text-zinc-900 dark:text-zinc-100">
                 Choose a Variant
               </span>
-              <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">
+              <span className="rounded-full bg-blue-500/15 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400">
                 Optional upgrade
               </span>
             </div>
@@ -181,7 +181,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
                 <button
                   type="button"
                   onClick={handleBuyNow}
-                  className="flex flex-1 h-12 items-center justify-center gap-2 rounded-xl bg-amber-500 text-zinc-950 font-display text-sm font-bold tracking-wide shadow-lg shadow-amber-500/25 hover:bg-amber-400 hover:shadow-amber-400/30 transition-all duration-200 active:scale-[0.98]"
+                  className="flex flex-1 h-12 items-center justify-center gap-2 rounded-xl bg-blue-500 text-white font-display text-sm font-bold tracking-wide shadow-lg shadow-blue-500/25 hover:bg-blue-400 hover:shadow-blue-400/30 transition-all duration-200 active:scale-[0.98]"
                 >
                   <Zap className="h-4 w-4 shrink-0" />
                   Buy Now
@@ -260,7 +260,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
               key={label}
               className="flex flex-col items-center gap-1.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 py-3 text-center transition-colors"
             >
-              <Icon className="h-4 w-4 text-amber-500 dark:text-amber-400" />
+              <Icon className="h-4 w-4 text-blue-500 dark:text-blue-400" />
               <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">{label}</p>
               <p className="text-[11px] text-zinc-500">{sub}</p>
             </div>

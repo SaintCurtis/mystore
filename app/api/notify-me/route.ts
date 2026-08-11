@@ -55,7 +55,7 @@ export async function POST(req: Request) {
         subject: `You're on the waitlist for ${productName}`,
         html: `
           <div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:24px;">
-            <div style="background:#f59e0b;border-radius:12px;padding:4px 16px;display:inline-block;margin-bottom:16px;">
+            <div style="background:#1a56db;border-radius:12px;padding:4px 16px;display:inline-block;margin-bottom:16px;">
               <span style="color:#000;font-weight:800;font-size:14px;">THE SAINT'S TECHNET</span>
             </div>
             <h2 style="font-size:22px;font-weight:800;margin:0 0 8px;">You're on the waitlist! 🎉</h2>
@@ -122,7 +122,7 @@ export async function GET(req: Request) {
           subject: `${product.name} is back in stock! 🔥`,
           html: `
             <div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:24px;">
-              <div style="background:#f59e0b;border-radius:12px;padding:4px 16px;display:inline-block;margin-bottom:16px;">
+              <div style="background:#1a56db;border-radius:12px;padding:4px 16px;display:inline-block;margin-bottom:16px;">
                 <span style="color:#000;font-weight:800;font-size:14px;">THE SAINT'S TECHNET</span>
               </div>
               <h2 style="font-size:22px;font-weight:800;margin:0 0 8px;">It's back! 🎉</h2>
@@ -131,7 +131,7 @@ export async function GET(req: Request) {
                 Limited units — grab yours before it sells out again!
               </p>
               ${product.image ? `<img src="${product.image}" alt="${product.name}" style="width:100%;border-radius:12px;margin-bottom:16px;" />` : ""}
-              <a href="${productUrl}" style="display:inline-block;background:#f59e0b;color:#000;font-weight:800;padding:12px 28px;border-radius:8px;text-decoration:none;font-size:15px;">
+              <a href="${productUrl}" style="display:inline-block;background:#1a56db;color:#000;font-weight:800;padding:12px 28px;border-radius:8px;text-decoration:none;font-size:15px;">
                 Shop Now →
               </a>
               <p style="color:#999;font-size:12px;margin-top:20px;">

@@ -34,7 +34,7 @@ export function StockBadge({ productId, stock, className }: StockBadgeProps) {
       <Badge
         variant="secondary"
         className={cn(
-          "w-fit shrink-0 bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400",
+          "w-fit shrink-0 bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-400",
           className
         )}
       >

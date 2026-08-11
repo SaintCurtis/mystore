@@ -75,7 +75,7 @@ export function VariantSelector({ groups, selected, onChange }: VariantSelectorP
                 className={cn(
                   "group flex w-fit items-center gap-3 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-all duration-200",
                   isOn
-                    ? "border-amber-500 bg-amber-500/10 text-amber-600 dark:text-amber-400 shadow-sm shadow-amber-500/10"
+                    ? "border-blue-500 bg-blue-500/10 text-blue-600 dark:text-blue-400 shadow-sm shadow-blue-500/10"
                     : "border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] text-zinc-600 dark:text-[#a3a3a3] hover:border-zinc-300 dark:hover:border-[#3a3a3a]",
                 )}
               >
@@ -84,7 +84,7 @@ export function VariantSelector({ groups, selected, onChange }: VariantSelectorP
                   className={cn(
                     "relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border-2 transition-all duration-200",
                     isOn
-                      ? "border-amber-500 bg-amber-500"
+                      ? "border-blue-500 bg-blue-500"
                       : "border-zinc-300 dark:border-zinc-600 bg-zinc-100 dark:bg-zinc-800",
                   )}
                 >
@@ -103,7 +103,7 @@ export function VariantSelector({ groups, selected, onChange }: VariantSelectorP
                 </span>
 
                 {isOn && (
-                  <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-amber-500">
+                  <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-blue-500">
                     <Check className="h-3 w-3 text-white" strokeWidth={3} />
                   </span>
                 )}
@@ -124,13 +124,13 @@ export function VariantSelector({ groups, selected, onChange }: VariantSelectorP
                   <span className="text-xs font-semibold text-zinc-600 dark:text-[#a3a3a3]">
                     — {sel.label}
                     {sel.priceAdjustment !== 0 && (
-                      <span className="text-amber-500 dark:text-amber-400">
+                      <span className="text-blue-500 dark:text-blue-400">
                         {" "}(+₦{sel.priceAdjustment.toLocaleString()})
                       </span>
                     )}
                   </span>
                 ) : (
-                  <span className="text-xs font-semibold text-amber-500 dark:text-amber-400">
+                  <span className="text-xs font-semibold text-blue-500 dark:text-blue-400">
                     — choose a color
                   </span>
                 )}
@@ -148,7 +148,7 @@ export function VariantSelector({ groups, selected, onChange }: VariantSelectorP
                       className={cn(
                         "relative h-8 w-8 rounded-full transition-all duration-150",
                         isSelected
-                          ? "ring-2 ring-amber-500 ring-offset-2 ring-offset-white dark:ring-offset-[#0a0a0a] scale-110 shadow-md shadow-amber-500/20"
+                          ? "ring-2 ring-blue-500 ring-offset-2 ring-offset-white dark:ring-offset-[#0a0a0a] scale-110 shadow-md shadow-blue-500/20"
                           : "ring-1 ring-zinc-200 dark:ring-zinc-700 hover:ring-zinc-400 dark:hover:ring-zinc-500 hover:scale-105",
                         !opt.inStock && "opacity-30 cursor-not-allowed",
                       )}
@@ -185,13 +185,13 @@ export function VariantSelector({ groups, selected, onChange }: VariantSelectorP
                 <span className="text-xs font-semibold text-zinc-500 dark:text-[#a3a3a3]">
                   — {sel.label}
                   {sel.priceAdjustment !== 0 && (
-                    <span className="text-amber-500 dark:text-amber-400">
+                    <span className="text-blue-500 dark:text-blue-400">
                       {" "}(+₦{sel.priceAdjustment.toLocaleString()})
                     </span>
                   )}
                 </span>
               ) : (
-                <span className="text-xs font-semibold text-amber-500 dark:text-amber-400">
+                <span className="text-xs font-semibold text-blue-500 dark:text-blue-400">
                   — choose an option
                 </span>
               )}
@@ -211,14 +211,14 @@ export function VariantSelector({ groups, selected, onChange }: VariantSelectorP
                     className={cn(
                       "relative flex flex-col items-start gap-0.5 rounded-xl border-2 px-3.5 py-2.5 text-left transition-all duration-150",
                       isSelected
-                        ? "border-amber-500 bg-amber-500/10 shadow-sm shadow-amber-500/10"
+                        ? "border-blue-500 bg-blue-500/10 shadow-sm shadow-blue-500/10"
                         : "border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] hover:border-zinc-300 dark:hover:border-[#3a3a3a]",
                       !opt.inStock && "opacity-30 cursor-not-allowed",
                     )}
                   >
                     {/* Selected checkmark badge */}
                     {isSelected && (
-                      <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 shadow-sm">
+                      <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 shadow-sm">
                         <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />
                       </span>
                     )}
@@ -234,7 +234,7 @@ export function VariantSelector({ groups, selected, onChange }: VariantSelectorP
                     <span className={cn(
                       "text-sm font-semibold leading-none",
                       isSelected
-                        ? "text-amber-700 dark:text-amber-400"
+                        ? "text-blue-700 dark:text-blue-400"
                         : "text-zinc-800 dark:text-[#f1f1f1]",
                     )}>
                       {opt.label}
@@ -245,7 +245,7 @@ export function VariantSelector({ groups, selected, onChange }: VariantSelectorP
                       <span className={cn(
                         "text-[11px] font-medium leading-none",
                         isSelected
-                          ? "text-amber-500 dark:text-amber-400"
+                          ? "text-blue-500 dark:text-blue-400"
                           : "text-zinc-400 dark:text-zinc-500",
                       )}>
                         {delta > 0

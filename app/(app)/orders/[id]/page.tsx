@@ -36,7 +36,7 @@ interface Order {
 // ── Timeline config ──────────────────────────────────────────────
 const STEPS = [
   { key: "paid",      label: "Payment Confirmed", sub: "Payment received and verified",        icon: CreditCard,    activeColor: "text-emerald-600 dark:text-emerald-400", activeBg: "bg-emerald-100 dark:bg-emerald-500/15", activeBorder: "border-emerald-300 dark:border-emerald-500/40" },
-  { key: "processing",label: "Processing",        sub: "Verifying and packing your order",     icon: Clock,         activeColor: "text-amber-600 dark:text-amber-400",   activeBg: "bg-amber-100 dark:bg-amber-500/15",   activeBorder: "border-amber-300 dark:border-amber-500/40"   },
+  { key: "processing",label: "Processing",        sub: "Verifying and packing your order",     icon: Clock,         activeColor: "text-blue-600 dark:text-blue-400",   activeBg: "bg-blue-100 dark:bg-blue-500/15",   activeBorder: "border-blue-300 dark:border-blue-500/40"   },
   { key: "shipped",   label: "Shipped",           sub: "Your order is on its way",             icon: Truck,         activeColor: "text-blue-600 dark:text-blue-400",     activeBg: "bg-blue-100 dark:bg-blue-500/15",     activeBorder: "border-blue-300 dark:border-blue-500/40"     },
   { key: "delivered", label: "Delivered",         sub: "Order delivered successfully! 🎉",     icon: CheckCircle2,  activeColor: "text-emerald-600 dark:text-emerald-400", activeBg: "bg-emerald-100 dark:bg-emerald-500/15", activeBorder: "border-emerald-300 dark:border-emerald-500/40" },
 ];
@@ -108,14 +108,14 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                     <div key={step.key} className="relative flex items-start gap-4">
                       <div className={`relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-500 ${done ? `${step.activeBg} ${step.activeBorder}` : "bg-zinc-50 dark:bg-[#0d0d0d] border-zinc-200 dark:border-[#2a2a2a]"}`}>
                         <Icon className={`h-4 w-4 ${done ? step.activeColor : "text-zinc-300 dark:text-[#333]"}`} />
-                        {current && <span className="absolute -inset-1.5 rounded-full animate-ping opacity-20 bg-amber-400" />}
+                        {current && <span className="absolute -inset-1.5 rounded-full animate-ping opacity-20 bg-blue-400" />}
                       </div>
                       <div className="flex-1 pt-1.5">
                         <div className="flex items-center justify-between gap-2">
                           <p className={`text-sm font-semibold ${done ? "text-zinc-900 dark:text-[#f1f1f1]" : "text-zinc-400 dark:text-[#444]"}`}>
                             {step.label}
                             {current && (
-                              <span className="ml-2 inline-flex items-center rounded-full bg-amber-100 dark:bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700 dark:text-amber-400">
+                              <span className="ml-2 inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-700 dark:text-blue-400">
                                 Current
                               </span>
                             )}
@@ -158,13 +158,13 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                         : <div className="flex h-full items-center justify-center text-xs text-zinc-400">No image</div>}
                     </div>
                     <div className="flex flex-1 flex-col justify-between min-w-0">
-                      <Link href={`/products/${item.product?.slug}`} className="font-medium text-zinc-900 dark:text-[#f1f1f1] hover:text-amber-600 dark:hover:text-amber-400 transition-colors line-clamp-2">
+                      <Link href={`/products/${item.product?.slug}`} className="font-medium text-zinc-900 dark:text-[#f1f1f1] hover:text-blue-600 dark:hover:text-blue-400 transition-colors line-clamp-2">
                         {item.product?.name ?? "Unknown Product"}
                       </Link>
                       <p className="text-sm text-zinc-500 dark:text-[#a3a3a3]">Qty: {item.quantity}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="font-semibold text-zinc-900 dark:text-amber-400">{formatPrice((item.priceAtPurchase ?? 0) * (item.quantity ?? 1))}</p>
+                      <p className="font-semibold text-zinc-900 dark:text-blue-400">{formatPrice((item.priceAtPurchase ?? 0) * (item.quantity ?? 1))}</p>
                       {(item.quantity ?? 1) > 1 && <p className="text-xs text-zinc-500 dark:text-[#a3a3a3]">{formatPrice(item.priceAtPurchase ?? 0)} each</p>}
                     </div>
                   </div>
@@ -182,7 +182,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                 <div className="flex justify-between"><span className="text-zinc-500 dark:text-[#a3a3a3]">Subtotal</span><span className="text-zinc-900 dark:text-[#f1f1f1]">{formatPrice(order.total)}</span></div>
                 <div className="border-t border-zinc-100 dark:border-[#1a1a1a] pt-2 flex justify-between font-bold text-base">
                   <span className="text-zinc-900 dark:text-[#f1f1f1]">Total</span>
-                  <span className="text-zinc-900 dark:text-amber-400">{formatPrice(order.total)}</span>
+                  <span className="text-zinc-900 dark:text-blue-400">{formatPrice(order.total)}</span>
                 </div>
               </div>
             </div>

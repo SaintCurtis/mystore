@@ -44,11 +44,6 @@ export function HeroSection() {
       <div aria-hidden className="pointer-events-none absolute inset-0 hidden dark:block"
         style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.025) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
 
-      {/* Glows */}
-      <div aria-hidden className="pointer-events-none absolute -top-48 -left-48 h-[600px] w-[600px] rounded-full"
-        style={{ background: "radial-gradient(circle, rgba(245,158,11,0.10) 0%, transparent 60%)" }} />
-      <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 h-[400px] w-[400px] rounded-full hidden dark:block"
-        style={{ background: "radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 65%)" }} />
 
       <div className="relative mx-auto max-w-7xl px-4 pt-8 pb-0 sm:px-6 sm:pt-16 lg:px-8 lg:pt-20">
         <div className="flex flex-col lg:flex-row lg:items-end lg:gap-20">
@@ -57,12 +52,12 @@ export function HeroSection() {
           <div className="flex-1 pb-8 lg:pb-16">
 
             {/* CAC pill */}
-            <div className={`mb-4 inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/8 px-3 py-1.5 transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-              <span className="text-xs font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400 sm:hidden">
+            <div className={`mb-4 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/8 px-3 py-1.5 transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
+              <span className="text-xs font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-400 sm:hidden">
                 BN: 9245886 · Est. 2019
               </span>
-              <span className="text-xs font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400 hidden sm:inline">
+              <span className="text-xs font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-400 hidden sm:inline">
                 BN: 9245886 · Est. 2019 · Computer Sales & Engineering
               </span>
             </div>
@@ -79,7 +74,7 @@ export function HeroSection() {
                   <br />
                   to Buy{" "}
                   <span
-                    className={`text-amber-500 dark:text-amber-400 transition-all duration-350 inline-block ${
+                    className={`text-blue-500 dark:text-blue-400 transition-all duration-350 inline-block ${
                       visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
                     }`}
                   >
@@ -89,7 +84,7 @@ export function HeroSection() {
                   <span className="relative">
                     in Nigeria
                     <svg aria-hidden className="absolute -bottom-1.5 left-0 w-full overflow-visible" viewBox="0 0 300 10" fill="none" preserveAspectRatio="none">
-                      <path d="M0 8 Q75 2 150 6 Q225 10 300 4" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                      <path d="M0 8 Q75 2 150 6 Q225 10 300 4" stroke="#1a56db" strokeWidth="2.5" strokeLinecap="round" fill="none" />
                     </svg>
                   </span>
                   .
@@ -103,7 +98,7 @@ export function HeroSection() {
                 <span className="font-extrabold">to Buy </span>
                 <span className="relative inline-block">
                   <span
-                    className={`font-bold text-amber-500 dark:text-amber-400 transition-all duration-350 inline-block ${
+                    className={`font-bold text-blue-500 dark:text-blue-400 transition-all duration-350 inline-block ${
                       visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3"
                     }`}
                   >
@@ -115,7 +110,7 @@ export function HeroSection() {
                 <span className="relative font-semibold text-zinc-700 dark:text-[#d4d4d4]">
                   Nigeria
                   <svg aria-hidden className="absolute -bottom-2 left-0 w-full overflow-visible" viewBox="0 0 500 10" fill="none" preserveAspectRatio="none">
-                    <path d="M0 8 Q125 2 250 6 Q375 10 500 4" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                    <path d="M0 8 Q125 2 250 6 Q375 10 500 4" stroke="#1a56db" strokeWidth="2.5" strokeLinecap="round" fill="none" />
                   </svg>
                 </span>
                 <span className="font-semibold text-zinc-500 dark:text-[#a3a3a3]">.</span>
@@ -123,7 +118,7 @@ export function HeroSection() {
             </h1>
 
             {/* Tagline */}
-            <p className={`mt-4 text-sm font-semibold italic text-amber-600 dark:text-amber-400 sm:text-lg transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
+            <p className={`mt-4 text-sm font-semibold italic text-blue-600 dark:text-blue-400 sm:text-lg transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
               Engineer-verified. Warranty on everything. Since 2019.
             </p>
 
@@ -144,7 +139,7 @@ export function HeroSection() {
               {/* Row 1 — primary buttons */}
               <div className="flex flex-wrap items-center gap-3">
                 <Button asChild size="lg"
-                  className="group h-12 bg-amber-500 px-6 sm:px-8 font-display text-sm font-bold tracking-wide text-zinc-950 shadow-lg shadow-amber-500/25 hover:bg-amber-400 transition-all duration-200">
+                  className="group h-12 bg-blue-500 px-6 sm:px-8 font-display text-sm font-bold tracking-wide text-white shadow-lg shadow-blue-500/25 hover:bg-blue-400 transition-all duration-200">
                   <Link href="/">
                     Shop All Products
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -184,14 +179,14 @@ export function HeroSection() {
 
                 {/* Build My Setup */}
                 <Link href="/build-my-setup"
-                  className="group flex items-center gap-4 rounded-2xl border border-amber-200 dark:border-amber-500/20 bg-linear-to-r from-amber-50 to-orange-50 dark:from-amber-500/8 dark:to-orange-500/5 px-4 py-3.5 transition-all duration-200 hover:border-amber-400 dark:hover:border-amber-500/40 hover:shadow-md hover:shadow-amber-500/10 flex-1">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/15 dark:bg-amber-500/10 group-hover:bg-amber-500/25 transition-colors">
-                    <Wand2 className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  className="group flex items-center gap-4 rounded-2xl border border-blue-200 dark:border-blue-500/20 bg-linear-to-r from-blue-50 to-blue-50 dark:from-blue-500/8 dark:to-blue-500/5 px-4 py-3.5 transition-all duration-200 hover:border-blue-400 dark:hover:border-blue-500/40 hover:shadow-md hover:shadow-blue-500/10 flex-1">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/15 dark:bg-blue-500/10 group-hover:bg-blue-500/25 transition-colors">
+                    <Wand2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-zinc-900 dark:text-[#f1f1f1] flex items-center gap-1.5">
                       Build My Setup
-                      <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700 dark:text-amber-400">
+                      <span className="inline-flex items-center gap-0.5 rounded-full bg-blue-500/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-700 dark:text-blue-400">
                         <Sparkles className="h-2.5 w-2.5" /> AI
                       </span>
                     </p>
@@ -199,12 +194,12 @@ export function HeroSection() {
                       Tell our AI your budget & needs
                     </p>
                   </div>
-                  <ArrowRight className="h-4 w-4 shrink-0 text-amber-500 dark:text-amber-400 transition-transform group-hover:translate-x-1" />
+                  <ArrowRight className="h-4 w-4 shrink-0 text-blue-500 dark:text-blue-400 transition-transform group-hover:translate-x-1" />
                 </Link>
 
                 {/* Get a Quotation — mobile card */}
                 <Link href="/quotation"
-                  className="sm:hidden group flex items-center gap-4 rounded-2xl border border-violet-200 dark:border-violet-500/20 bg-linear-to-r from-violet-50 to-purple-50 dark:from-violet-500/8 dark:to-purple-500/5 px-4 py-3.5 transition-all duration-200 hover:border-violet-400 dark:hover:border-violet-500/40 hover:shadow-md hover:shadow-violet-500/10 flex-1">
+                  className="sm:hidden group flex items-center gap-4 rounded-2xl border border-violet-200 dark:border-violet-500/20 bg-linear-to-r from-violet-50 to-violet-50 dark:from-violet-500/8 dark:to-violet-500/5 px-4 py-3.5 transition-all duration-200 hover:border-violet-400 dark:hover:border-violet-500/40 hover:shadow-md hover:shadow-black/5 flex-1">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/15 dark:bg-violet-500/10 group-hover:bg-violet-500/25 transition-colors">
                     <FileText className="h-5 w-5 text-violet-600 dark:text-violet-400" />
                   </div>
@@ -243,8 +238,8 @@ export function HeroSection() {
           <div className={`hidden lg:flex flex-col gap-3 pb-16 w-64 shrink-0 transition-all duration-700 delay-500 ${mounted ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"}`}>
             {TRUST_BADGES.map(({ icon: Icon, label, sub }) => (
               <div key={label} className="flex items-center gap-3 rounded-xl border border-zinc-200 dark:border-[#1f1f1f] bg-white dark:bg-[#111111] px-4 py-3.5 transition-colors">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10">
-                  <Icon className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/10">
+                  <Icon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-zinc-900 dark:text-[#f1f1f1]">{label}</p>
@@ -255,7 +250,7 @@ export function HeroSection() {
 
             {/* Get a Quote — highlighted 4th card */}
             <Link href="/quotation"
-              className="group flex items-center gap-3 rounded-xl border-2 border-violet-300 dark:border-violet-500/40 bg-linear-to-br from-violet-50 to-purple-50 dark:from-violet-500/10 dark:to-purple-500/8 px-4 py-3.5 transition-all duration-200 hover:border-violet-400 dark:hover:border-violet-500/60 hover:shadow-md hover:shadow-violet-500/15">
+              className="group flex items-center gap-3 rounded-xl border-2 border-violet-300 dark:border-violet-500/40 bg-linear-to-br from-violet-50 to-violet-50 dark:from-violet-500/10 dark:to-violet-500/8 px-4 py-3.5 transition-all duration-200 hover:border-violet-400 dark:hover:border-violet-500/60 hover:shadow-md hover:shadow-black/5">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-500/15 group-hover:bg-violet-500/25 transition-colors">
                 <FileText className="h-4 w-4 text-violet-600 dark:text-violet-400" />
               </div>

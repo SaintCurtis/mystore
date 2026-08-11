@@ -65,7 +65,7 @@ function statusBadge(status: string, alert: boolean) {
     <span className={cn(
       "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold",
       status === "ai_active"    && "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-      status === "owner_active" && "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+      status === "owner_active" && "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
       status === "deal_struck"  && "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
       status === "closed"       && "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400",
     )}>
@@ -153,7 +153,7 @@ export default async function NegotiationsPage() {
                 <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-zinc-500 dark:text-zinc-400 mb-1">
                   <span>Listed <strong className="text-zinc-700 dark:text-zinc-300">₦{s.listedPrice?.toLocaleString()}</strong></span>
                   {s.customerBid && (
-                    <span>Bid <strong className="text-amber-600 dark:text-amber-400">₦{s.customerBid.toLocaleString()}</strong></span>
+                    <span>Bid <strong className="text-blue-600 dark:text-blue-400">₦{s.customerBid.toLocaleString()}</strong></span>
                   )}
                   {s.agreedPrice && (
                     <span>Agreed <strong className="text-green-600 dark:text-green-400">₦{s.agreedPrice.toLocaleString()}</strong></span>

@@ -143,8 +143,8 @@ export function BuildMySetupClient() {
             Back to Shop
           </Link>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 dark:bg-amber-500/8">
-              <Wand2 className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 dark:bg-blue-500/8">
+              <Wand2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
               <h1 className="font-display text-2xl font-extrabold text-zinc-900 dark:text-[#f1f1f1]">
@@ -163,9 +163,9 @@ export function BuildMySetupClient() {
                 <div key={s} className="flex items-center gap-2">
                   <div className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-colors ${
                     step === s
-                      ? "bg-amber-500 text-zinc-950"
+                      ? "bg-blue-500 text-white"
                       : (["use-case", "budget", "preferences"] as Step[]).indexOf(step) > i
-                        ? "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                        ? "bg-blue-500/20 text-blue-600 dark:text-blue-400"
                         : "bg-zinc-200 dark:bg-[#1a1a1a] text-zinc-500 dark:text-[#555]"
                   }`}>
                     {i + 1}
@@ -197,17 +197,17 @@ export function BuildMySetupClient() {
                   onClick={() => setUseCase(id)}
                   className={`flex flex-col items-start gap-3 rounded-2xl border-2 p-5 text-left transition-all duration-200 ${
                     useCase === id
-                      ? "border-amber-500 bg-amber-50 dark:bg-amber-500/8"
+                      ? "border-blue-500 bg-blue-50 dark:bg-blue-500/8"
                       : "border-zinc-200 dark:border-[#1f1f1f] bg-white dark:bg-[#111111] hover:border-zinc-300 dark:hover:border-[#2a2a2a]"
                   }`}
                 >
                   <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${
-                    useCase === id ? "bg-amber-500/15" : "bg-zinc-100 dark:bg-[#1a1a1a]"
+                    useCase === id ? "bg-blue-500/15" : "bg-zinc-100 dark:bg-[#1a1a1a]"
                   }`}>
-                    <Icon className={`h-5 w-5 ${useCase === id ? "text-amber-600 dark:text-amber-400" : "text-zinc-500 dark:text-[#a3a3a3]"}`} />
+                    <Icon className={`h-5 w-5 ${useCase === id ? "text-blue-600 dark:text-blue-400" : "text-zinc-500 dark:text-[#a3a3a3]"}`} />
                   </div>
                   <div>
-                    <p className={`font-bold ${useCase === id ? "text-amber-700 dark:text-amber-400" : "text-zinc-900 dark:text-[#f1f1f1]"}`}>
+                    <p className={`font-bold ${useCase === id ? "text-blue-700 dark:text-blue-400" : "text-zinc-900 dark:text-[#f1f1f1]"}`}>
                       {label}
                     </p>
                     <p className="mt-0.5 text-xs text-zinc-500 dark:text-[#a3a3a3]">{desc}</p>
@@ -218,7 +218,7 @@ export function BuildMySetupClient() {
             <Button
               disabled={!useCase}
               onClick={() => setStep("budget")}
-              className="w-full h-12 bg-amber-500 text-zinc-950 font-bold hover:bg-amber-400 disabled:opacity-40"
+              className="w-full h-12 bg-blue-500 text-white font-bold hover:bg-blue-400 disabled:opacity-40"
             >
               Continue <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
@@ -239,11 +239,11 @@ export function BuildMySetupClient() {
                   onClick={() => setBudget(id)}
                   className={`flex flex-col gap-1 rounded-2xl border-2 p-5 text-left transition-all duration-200 ${
                     budget === id
-                      ? "border-amber-500 bg-amber-50 dark:bg-amber-500/8"
+                      ? "border-blue-500 bg-blue-50 dark:bg-blue-500/8"
                       : "border-zinc-200 dark:border-[#1f1f1f] bg-white dark:bg-[#111111] hover:border-zinc-300 dark:hover:border-[#2a2a2a]"
                   }`}
                 >
-                  <p className={`font-bold text-sm ${budget === id ? "text-amber-700 dark:text-amber-400" : "text-zinc-900 dark:text-[#f1f1f1]"}`}>
+                  <p className={`font-bold text-sm ${budget === id ? "text-blue-700 dark:text-blue-400" : "text-zinc-900 dark:text-[#f1f1f1]"}`}>
                     {label}
                   </p>
                   <p className="text-xs text-zinc-500 dark:text-[#a3a3a3]">{sub}</p>
@@ -256,7 +256,7 @@ export function BuildMySetupClient() {
                 Back
               </Button>
               <Button disabled={!budget} onClick={() => setStep("preferences")}
-                className="flex-1 h-12 bg-amber-500 text-zinc-950 font-bold hover:bg-amber-400 disabled:opacity-40">
+                className="flex-1 h-12 bg-blue-500 text-white font-bold hover:bg-blue-400 disabled:opacity-40">
                 Continue <ChevronRight className="ml-1 h-4 w-4" />
               </Button>
             </div>
@@ -274,7 +274,7 @@ export function BuildMySetupClient() {
               onChange={(e) => setPreferences(e.target.value)}
               placeholder={`e.g. "I need something portable, prefer ASUS or Lenovo, already have a monitor, need something that can handle video editing..."`}
               rows={4}
-              className="w-full rounded-xl border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] px-4 py-3 text-sm text-zinc-900 dark:text-[#f1f1f1] placeholder-zinc-400 dark:placeholder-[#555] focus:border-amber-500 dark:focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500/30 resize-none transition-colors"
+              className="w-full rounded-xl border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] px-4 py-3 text-sm text-zinc-900 dark:text-[#f1f1f1] placeholder-zinc-400 dark:placeholder-[#555] focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30 resize-none transition-colors"
             />
             <p className="text-xs text-zinc-500 dark:text-[#a3a3a3]">
               The more you tell us, the better the recommendation. Leave blank for a general recommendation.
@@ -285,7 +285,7 @@ export function BuildMySetupClient() {
                 Back
               </Button>
               <Button onClick={generateSetup}
-                className="flex-1 h-12 bg-amber-500 text-zinc-950 font-bold hover:bg-amber-400 gap-2">
+                className="flex-1 h-12 bg-blue-500 text-white font-bold hover:bg-blue-400 gap-2">
                 <Sparkles className="h-4 w-4" />
                 Build My Setup
               </Button>
@@ -298,8 +298,8 @@ export function BuildMySetupClient() {
           <div className="space-y-6">
             {isLoading && (
               <div className="flex flex-col items-center gap-4 py-20">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 dark:bg-amber-500/8">
-                  <Loader2 className="h-8 w-8 animate-spin text-amber-500 dark:text-amber-400" />
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-500/10 dark:bg-blue-500/8">
+                  <Loader2 className="h-8 w-8 animate-spin text-blue-500 dark:text-blue-400" />
                 </div>
                 <div className="text-center">
                   <p className="font-semibold text-zinc-900 dark:text-[#f1f1f1]">
@@ -315,7 +315,7 @@ export function BuildMySetupClient() {
             {error && (
               <div className="rounded-xl border border-red-200 dark:border-red-500/20 bg-red-50 dark:bg-red-500/8 p-6 text-center">
                 <p className="text-red-700 dark:text-red-400 font-medium">{error}</p>
-                <Button onClick={reset} className="mt-4 bg-amber-500 text-zinc-950 hover:bg-amber-400">
+                <Button onClick={reset} className="mt-4 bg-blue-500 text-white hover:bg-blue-400">
                   Try Again
                 </Button>
               </div>
@@ -324,10 +324,10 @@ export function BuildMySetupClient() {
             {result && !isLoading && (
               <>
                 {/* Result header card */}
-                <div className="rounded-2xl border border-amber-200 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/5 p-6">
+                <div className="rounded-2xl border border-blue-200 dark:border-blue-500/20 bg-blue-50 dark:bg-blue-500/5 p-6">
                   <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                    <h2 className="font-display text-xl font-bold text-amber-800 dark:text-amber-400">
+                    <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    <h2 className="font-display text-xl font-bold text-blue-800 dark:text-blue-400">
                       {result.title}
                     </h2>
                   </div>
@@ -341,12 +341,12 @@ export function BuildMySetupClient() {
                       <p className="text-xs text-zinc-500 dark:text-[#555]">
                         Total bundle price
                         {items.length !== result.items.length && items.length > 0 && (
-                          <span className="ml-1 text-amber-600 dark:text-amber-400">
+                          <span className="ml-1 text-blue-600 dark:text-blue-400">
                             ({items.length} of {result.items.length} items)
                           </span>
                         )}
                       </p>
-                      <p className="text-2xl font-extrabold text-zinc-900 dark:text-amber-400">
+                      <p className="text-2xl font-extrabold text-zinc-900 dark:text-blue-400">
                         {formatPrice(currentTotal)}
                       </p>
                     </div>
@@ -364,7 +364,7 @@ export function BuildMySetupClient() {
                       <Button
                         onClick={buyAll}
                         disabled={items.length === 0}
-                        className="flex-1 sm:flex-none gap-1.5 bg-amber-500 text-zinc-950 font-bold hover:bg-amber-400 shadow-lg shadow-amber-500/25 disabled:opacity-40 text-sm"
+                        className="flex-1 sm:flex-none gap-1.5 bg-blue-500 text-white font-bold hover:bg-blue-400 shadow-lg shadow-blue-500/25 disabled:opacity-40 text-sm"
                       >
                         <Zap className="h-4 w-4 shrink-0" />
                         Buy All
@@ -391,7 +391,7 @@ export function BuildMySetupClient() {
                         className="flex gap-4 rounded-xl border border-zinc-200 dark:border-[#1f1f1f] bg-white dark:bg-[#111111] p-4 transition-all duration-200"
                       >
                         {/* Number badge */}
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 dark:bg-amber-500/8 text-sm font-bold text-amber-600 dark:text-amber-400">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 dark:bg-blue-500/8 text-sm font-bold text-blue-600 dark:text-blue-400">
                           {index + 1}
                         </div>
 
@@ -405,20 +405,20 @@ export function BuildMySetupClient() {
                         {/* Product info */}
                         <div className="flex-1 min-w-0">
                           {item.categoryTitle && (
-                            <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400">
                               {item.categoryTitle}
                             </p>
                           )}
                           <Link
                             href={`/products/${item.slug}`}
-                            className="font-semibold text-zinc-900 dark:text-[#f1f1f1] hover:text-amber-600 dark:hover:text-amber-400 transition-colors text-sm line-clamp-1"
+                            className="font-semibold text-zinc-900 dark:text-[#f1f1f1] hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm line-clamp-1"
                           >
                             {item.name}
                           </Link>
                           <p className="mt-0.5 text-xs text-zinc-500 dark:text-[#a3a3a3] line-clamp-2">
                             {item.reason}
                           </p>
-                          <p className="mt-1.5 font-bold text-zinc-900 dark:text-amber-400">
+                          <p className="mt-1.5 font-bold text-zinc-900 dark:text-blue-400">
                             {formatPrice(item.price)}
                           </p>
                         </div>
@@ -428,7 +428,7 @@ export function BuildMySetupClient() {
                           <Button
                             size="sm"
                             onClick={() => addSingleToCart(item)}
-                            className="bg-amber-500 text-zinc-950 hover:bg-amber-400 text-xs font-bold px-3 h-8"
+                            className="bg-blue-500 text-white hover:bg-blue-400 text-xs font-bold px-3 h-8"
                           >
                             Add
                           </Button>
@@ -458,7 +458,7 @@ export function BuildMySetupClient() {
                     </Button>
                     <Button
                       onClick={buyAll}
-                      className="flex-1 h-12 gap-2 bg-amber-500 text-zinc-950 font-bold hover:bg-amber-400 shadow-lg shadow-amber-500/20"
+                      className="flex-1 h-12 gap-2 bg-blue-500 text-white font-bold hover:bg-blue-400 shadow-lg shadow-blue-500/20"
                     >
                       <Zap className="h-4 w-4" />
                       Buy All ({items.length} item{items.length !== 1 ? "s" : ""})

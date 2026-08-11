@@ -385,8 +385,8 @@ export function NegotiationChat({
       {!hideHeader && (
         <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-amber-500/15 flex items-center justify-center shrink-0">
-              <ChatBubbleLeftRightIcon className="w-4 h-4 text-amber-500" />
+            <div className="w-9 h-9 rounded-full bg-blue-500/15 flex items-center justify-center shrink-0">
+              <ChatBubbleLeftRightIcon className="w-4 h-4 text-blue-500" />
             </div>
             <div>
               <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 leading-tight">
@@ -394,7 +394,7 @@ export function NegotiationChat({
               </p>
               <p className="text-xs leading-tight">
                 {ownerActiveRef.current
-                  ? <span className="text-amber-500 font-medium">● Live — owner is here</span>
+                  ? <span className="text-blue-500 font-medium">● Live — owner is here</span>
                   : <span className="text-zinc-500 dark:text-zinc-400">{product.name}</span>
                 }
               </p>
@@ -416,7 +416,7 @@ export function NegotiationChat({
 
       {/* ── Price strip ── */}
       <div className="flex items-center gap-2 px-4 py-2 bg-zinc-50 dark:bg-zinc-900/50 border-b border-zinc-200 dark:border-zinc-800 shrink-0">
-        <TagIcon className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+        <TagIcon className="w-3.5 h-3.5 text-blue-500 shrink-0" />
         <p className="text-xs text-zinc-600 dark:text-zinc-400">
           Listed at{" "}
           <span className="font-semibold text-zinc-900 dark:text-zinc-100">
@@ -440,7 +440,7 @@ export function NegotiationChat({
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             <div className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
               msg.role === "user"
-                ? "bg-amber-500 text-zinc-950 rounded-br-sm"
+                ? "bg-blue-500 text-white rounded-br-sm"
                 : msg.fromOwner
                 ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-bl-sm"
                 : "bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 rounded-bl-sm"
@@ -501,7 +501,7 @@ export function NegotiationChat({
           {roundsLeft === 0 ? (
             <p className="text-xs text-center text-zinc-400 py-2">
               Session ended.{" "}
-              <button onClick={onClose} className="text-amber-500 underline underline-offset-2">Close</button>
+              <button onClick={onClose} className="text-blue-500 underline underline-offset-2">Close</button>
             </p>
           ) : (
             <div className="flex items-end gap-2">
@@ -513,17 +513,17 @@ export function NegotiationChat({
                 placeholder={ownerActiveRef.current ? "Reply to the owner…" : "Make your offer…"}
                 rows={1}
                 disabled={isStreaming}
-                className="flex-1 resize-none rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 px-3.5 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 disabled:opacity-50 transition-colors leading-relaxed max-h-28 overflow-y-auto"
+                className="flex-1 resize-none rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 px-3.5 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 disabled:opacity-50 transition-colors leading-relaxed max-h-28 overflow-y-auto"
                 style={{ fieldSizing: "content" } as React.CSSProperties}
               />
               <button
                 onClick={sendMessage}
                 disabled={!input.trim() || isStreaming}
-                className="w-10 h-10 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center shrink-0 transition-all duration-150 shadow-md shadow-amber-500/20"
+                className="w-10 h-10 rounded-xl bg-blue-500 hover:bg-blue-400 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center shrink-0 transition-all duration-150 shadow-md shadow-blue-500/20"
               >
                 {isStreaming
-                  ? <Spinner className="w-4 h-4 text-zinc-950" />
-                  : <PaperAirplaneIcon className="w-4 h-4 text-zinc-950" />
+                  ? <Spinner className="w-4 h-4 text-white" />
+                  : <PaperAirplaneIcon className="w-4 h-4 text-white" />
                 }
               </button>
             </div>

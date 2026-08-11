@@ -92,7 +92,7 @@ export function SpecExtractor(props: ObjectInputProps) {
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "center",
           width: "32px", height: "32px", borderRadius: "8px", flexShrink: 0,
-          background: "linear-gradient(135deg, #f59e0b, #f97316)",
+          background: "linear-gradient(135deg, #1a56db, #1a56db)",
           color: "white", fontSize: "16px",
         }}>
           &#10022;
@@ -118,7 +118,7 @@ export function SpecExtractor(props: ObjectInputProps) {
           cursor: status === "loading" ? "not-allowed" : "pointer",
           background: status === "loading"
             ? "#d1d5db"
-            : "linear-gradient(135deg, #f59e0b, #f97316)",
+            : "linear-gradient(135deg, #1a56db, #1a56db)",
           color: status === "loading" ? "#9ca3af" : "#1a1a1a",
         }}
       >
@@ -153,9 +153,9 @@ export function SpecExtractor(props: ObjectInputProps) {
       {(status === "error" || status === "empty") && (
         <div style={{
           padding: "10px 12px", borderRadius: "6px", fontSize: "12px",
-          background: status === "error" ? "#fef2f2" : "#fffbeb",
-          border: `1px solid ${status === "error" ? "#fecaca" : "#fde68a"}`,
-          color: status === "error" ? "#dc2626" : "#92400e",
+          background: status === "error" ? "#fef2f2" : "#f8fafc",
+          border: `1px solid ${status === "error" ? "#fecaca" : "#e2e8f0"}`,
+          color: status === "error" ? "#dc2626" : "#334155",
         }}>
           {message}
         </div>

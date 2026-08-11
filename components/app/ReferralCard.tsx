@@ -62,7 +62,7 @@ export function NotifyMe({ productId, productName }: NotifyMeProps) {
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-[#1f1f1f] bg-zinc-50 dark:bg-[#0f0f0f] p-4 space-y-3">
       <div className="flex items-center gap-2">
-        <Bell className="h-4 w-4 text-amber-500 dark:text-amber-400" />
+        <Bell className="h-4 w-4 text-blue-500 dark:text-blue-400" />
         <p className="text-sm font-semibold text-zinc-900 dark:text-[#f1f1f1]">
           Notify me when available
         </p>
@@ -78,12 +78,12 @@ export function NotifyMe({ productId, productName }: NotifyMeProps) {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="your@email.com"
           required
-          className="flex-1 rounded-lg border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] px-3 py-2 text-sm text-zinc-900 dark:text-[#f1f1f1] placeholder-zinc-400 dark:placeholder-[#555] focus:border-amber-500 dark:focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500/30 transition-colors"
+          className="flex-1 rounded-lg border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] px-3 py-2 text-sm text-zinc-900 dark:text-[#f1f1f1] placeholder-zinc-400 dark:placeholder-[#555] focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-colors"
         />
         <Button
           type="submit"
           disabled={status === "loading" || !email.trim()}
-          className="shrink-0 bg-amber-500 text-zinc-950 font-bold hover:bg-amber-400 disabled:opacity-50"
+          className="shrink-0 bg-blue-500 text-white font-bold hover:bg-blue-400 disabled:opacity-50"
         >
           {status === "loading" ? (
             <Loader2 className="h-4 w-4 animate-spin" />

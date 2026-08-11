@@ -181,12 +181,12 @@ export function SmartWelcome({ allCategorySlugs = [] }: SmartWelcomeProps) {
 
   return (
     <div className="relative mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 pt-4">
-      <div className="rounded-2xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/20 p-4 sm:p-5">
+      <div className="rounded-2xl border border-blue-200 dark:border-blue-800/50 bg-blue-50 dark:bg-blue-950/20 p-4 sm:p-5">
         {/* Header */}
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-amber-500/15 flex items-center justify-center shrink-0">
-              <SparklesIcon className="w-4 h-4 text-amber-500" />
+            <div className="w-8 h-8 rounded-full bg-blue-500/15 flex items-center justify-center shrink-0">
+              <SparklesIcon className="w-4 h-4 text-blue-500" />
             </div>
             <div>
               <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 leading-tight">
@@ -212,7 +212,7 @@ export function SmartWelcome({ allCategorySlugs = [] }: SmartWelcomeProps) {
             <Link
               key={product._id}
               href={`/products/${product.slug}`}
-              className="group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden hover:border-amber-400 dark:hover:border-amber-600 transition-all duration-200 hover:shadow-md hover:shadow-amber-500/10"
+              className="group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden hover:border-blue-400 dark:hover:border-blue-600 transition-all duration-200 hover:shadow-md hover:shadow-blue-500/10"
             >
               <div className="relative aspect-square bg-zinc-50 dark:bg-zinc-800 overflow-hidden">
                 {product.imageUrl ? (
@@ -233,7 +233,7 @@ export function SmartWelcome({ allCategorySlugs = [] }: SmartWelcomeProps) {
                 <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 line-clamp-2 leading-snug">
                   {product.name}
                 </p>
-                <p className="text-xs font-bold text-amber-600 dark:text-amber-400 mt-1">
+                <p className="text-xs font-bold text-blue-600 dark:text-blue-400 mt-1">
                   {formatInCurrency(product.price)}
                 </p>
                 {product.reason && (
@@ -250,7 +250,7 @@ export function SmartWelcome({ allCategorySlugs = [] }: SmartWelcomeProps) {
         <div className="mt-3 flex justify-end">
           <Link
             href="/"
-            className="inline-flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400 hover:underline underline-offset-2 font-medium"
+            className="inline-flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline underline-offset-2 font-medium"
           >
             Browse all products
             <ArrowRightIcon className="w-3 h-3" />

@@ -104,8 +104,8 @@ export function BundleSuggester() {
         {/* Header */}
         <div className="flex items-start justify-between px-5 pt-2 pb-4 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/15">
-              <Sparkles className="h-4 w-4 text-amber-500" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/15">
+              <Sparkles className="h-4 w-4 text-blue-500" />
             </div>
             <div>
               <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
@@ -129,7 +129,7 @@ export function BundleSuggester() {
         <div className="flex-1 overflow-y-auto px-5 pb-4 min-h-0">
           {loading ? (
             <div className="flex flex-col items-center justify-center gap-3 py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
+              <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
               <p className="text-sm text-zinc-500">Finding the best pairings…</p>
             </div>
           ) : bundles.length === 0 ? (
@@ -172,14 +172,14 @@ export function BundleSuggester() {
                       <Link
                         href={`/products/${product.slug}`}
                         onClick={handleClose}
-                        className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 line-clamp-1 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                        className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 line-clamp-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                       >
                         {product.name}
                       </Link>
                       <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5 line-clamp-1 italic">
                         {product.reason}
                       </p>
-                      <p className="text-sm font-bold text-amber-500 dark:text-amber-400 mt-1">
+                      <p className="text-sm font-bold text-blue-500 dark:text-blue-400 mt-1">
                         {formatInCurrency(product.price)}
                       </p>
                     </div>
@@ -192,7 +192,7 @@ export function BundleSuggester() {
                       className={`flex shrink-0 h-9 w-9 items-center justify-center rounded-xl transition-all duration-200 active:scale-95 ${
                         isAdded
                           ? "bg-emerald-500 text-white cursor-default"
-                          : "bg-amber-500 text-zinc-950 hover:bg-amber-400 shadow-md shadow-amber-500/25"
+                          : "bg-blue-500 text-white hover:bg-blue-400 shadow-md shadow-blue-500/25"
                       }`}
                     >
                       {isAdded ? (

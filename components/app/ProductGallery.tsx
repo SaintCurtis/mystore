@@ -272,10 +272,10 @@ export function ProductGallery({ images, videos, productName }: ProductGalleryPr
             )}
           </div>
 
-          <div className="h-0.5 w-full bg-linear-to-r from-transparent via-amber-500/60 to-transparent" />
+          <div className="h-0.5 w-full bg-linear-to-r from-transparent via-blue-500/60 to-transparent" />
         </div>
 
-        <div className="pointer-events-none absolute -inset-px rounded-2xl ring-1 ring-amber-500/10" />
+        <div className="pointer-events-none absolute -inset-px rounded-2xl ring-1 ring-blue-500/10" />
       </div>
 
       {/* Dot indicators — mobile */}
@@ -289,7 +289,7 @@ export function ProductGallery({ images, videos, productName }: ProductGalleryPr
               className={cn(
                 "rounded-full transition-all duration-300",
                 i === current
-                  ? "h-2 w-6 bg-amber-500"
+                  ? "h-2 w-6 bg-blue-500"
                   : "h-2 w-2 bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400",
               )}
               aria-label={`Go to item ${i + 1}`}
@@ -311,7 +311,7 @@ export function ProductGallery({ images, videos, productName }: ProductGalleryPr
               className={cn(
                 "relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 transition-all duration-200",
                 current === index
-                  ? "border-amber-500 shadow-sm shadow-amber-500/20 scale-105"
+                  ? "border-blue-500 shadow-sm shadow-blue-500/20 scale-105"
                   : "border-zinc-200 dark:border-[#1f1f1f] hover:border-zinc-400 dark:hover:border-[#3a3a3a] opacity-70 hover:opacity-100",
               )}
             >
@@ -329,7 +329,7 @@ export function ProductGallery({ images, videos, productName }: ProductGalleryPr
                 </div>
               )}
               {current === index && (
-                <div className="absolute inset-0 bg-amber-500/5 rounded-xl" />
+                <div className="absolute inset-0 bg-blue-500/5 rounded-xl" />
               )}
             </button>
           ))}

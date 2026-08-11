@@ -20,8 +20,8 @@ export default function ReturnPolicyPage() {
         </Link>
 
         <div className="flex items-center gap-4 mb-10">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/20">
-            <RotateCcw className="h-6 w-6 text-amber-500" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 border border-blue-500/20">
+            <RotateCcw className="h-6 w-6 text-blue-500" />
           </div>
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
@@ -36,8 +36,8 @@ export default function ReturnPolicyPage() {
         <div className="space-y-8">
 
           {/* highlight box */}
-          <div className="rounded-xl border border-amber-500/30 bg-amber-500/8 p-5">
-            <p className="text-base font-bold text-amber-600 dark:text-amber-400 mb-1">
+          <div className="rounded-xl border border-blue-500/30 bg-blue-500/8 p-5">
+            <p className="text-base font-bold text-blue-600 dark:text-blue-400 mb-1">
               7-Day Return Window
             </p>
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
@@ -146,17 +146,17 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function ContactBlock() {
   return (
-    <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-5 mt-4">
-      <p className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-1">
+    <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-5 mt-4">
+      <p className="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-1">
         Want to start a return?
       </p>
       <p className="text-sm text-zinc-600 dark:text-zinc-400">
         Message us on{" "}
-        <a href="https://wa.me/2349060898951" className="text-amber-600 dark:text-amber-400 underline underline-offset-2">
+        <a href="https://wa.me/2349060898951" className="text-blue-600 dark:text-blue-400 underline underline-offset-2">
           WhatsApp
         </a>{" "}
         or{" "}
-        <a href="mailto:iamsaintcurtis@gmail.com" className="text-amber-600 dark:text-amber-400 underline underline-offset-2">
+        <a href="mailto:iamsaintcurtis@gmail.com" className="text-blue-600 dark:text-blue-400 underline underline-offset-2">
           email us
         </a>{" "}
         with your order number. We respond within 24 hours.

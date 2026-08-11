@@ -59,7 +59,7 @@ export function CheckoutButton({
 
   return (
     <Button
-      className="w-full h-12 gap-2 bg-amber-500 text-zinc-950 font-bold hover:bg-amber-400 shadow-lg shadow-amber-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+      className="w-full h-12 gap-2 bg-blue-500 text-white font-bold hover:bg-blue-400 shadow-lg shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
       disabled={disabled || isLoading}
       onClick={handleCheckout}
     >

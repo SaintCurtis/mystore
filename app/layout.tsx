@@ -109,7 +109,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <ChunkErrorHandler />
-        <meta name="theme-color" content="#f59e0b" />
+        <meta name="theme-color" content="#1a56db" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />

@@ -27,8 +27,8 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
       <div className="min-h-screen bg-zinc-50 dark:bg-[#0a0a0a] flex items-center justify-center px-4 transition-colors">
         <div className="mx-auto max-w-md w-full text-center space-y-6">
           <div className="flex justify-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-orange-100 dark:bg-orange-500/10">
-              <CheckCircle2 className="h-10 w-10 text-orange-500 dark:text-orange-400" />
+            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-blue-100 dark:bg-blue-500/10">
+              <CheckCircle2 className="h-10 w-10 text-blue-500 dark:text-blue-400" />
             </div>
           </div>
           <div>
@@ -48,7 +48,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
               "You'll receive updates via WhatsApp",
             ].map((step, i) => (
               <div key={i} className="flex items-start gap-3">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-xs font-bold text-amber-600 dark:text-amber-400">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-500/15 text-xs font-bold text-blue-600 dark:text-blue-400">
                   {i + 1}
                 </span>
                 <p className="text-sm text-zinc-600 dark:text-[#a3a3a3]">{step}</p>
@@ -56,7 +56,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
             ))}
           </div>
           <div className="flex flex-col gap-3">
-            <Button asChild className="w-full bg-amber-500 text-zinc-950 font-bold hover:bg-amber-400 h-11">
+            <Button asChild className="w-full bg-blue-500 text-white font-bold hover:bg-blue-400 h-11">
               <Link href="/orders">
                 <Package className="mr-2 h-4 w-4" /> Track My Orders
               </Link>
@@ -126,8 +126,8 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
 
         {/* Order details card */}
         <div className="rounded-2xl border border-zinc-200 dark:border-[#1a1a1a] bg-white dark:bg-[#111111] overflow-hidden">
-          <div className="border-b border-zinc-100 dark:border-[#1a1a1a] bg-amber-50 dark:bg-amber-500/5 px-5 py-3">
-            <p className="text-xs font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-400">
+          <div className="border-b border-zinc-100 dark:border-[#1a1a1a] bg-blue-50 dark:bg-blue-500/5 px-5 py-3">
+            <p className="text-xs font-semibold uppercase tracking-widest text-blue-700 dark:text-blue-400">
               Payment Reference
             </p>
             <p className="mt-0.5 font-mono text-sm font-bold text-zinc-900 dark:text-[#f1f1f1] break-all">
@@ -144,7 +144,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
             {session.amountTotal && (
               <div className="flex justify-between py-3 text-sm">
                 <span className="text-zinc-500 dark:text-[#a3a3a3]">Amount Paid</span>
-                <span className="font-bold text-zinc-900 dark:text-amber-400">{formatPrice(session.amountTotal / 100)}</span>
+                <span className="font-bold text-zinc-900 dark:text-blue-400">{formatPrice(session.amountTotal / 100)}</span>
               </div>
             )}
             <div className="flex justify-between py-3 text-sm">
@@ -163,7 +163,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
             "Track your order anytime in My Orders",
           ].map((step, i) => (
             <div key={i} className="flex items-start gap-3">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-xs font-bold text-amber-600 dark:text-amber-400">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-500/15 text-xs font-bold text-blue-600 dark:text-blue-400">
                 {i + 1}
               </span>
               <p className="text-sm text-zinc-600 dark:text-[#a3a3a3]">{step}</p>
@@ -173,7 +173,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
 
         {/* Actions */}
         <div className="flex flex-col gap-3">
-          <Button asChild className="w-full h-11 bg-amber-500 text-zinc-950 font-bold hover:bg-amber-400">
+          <Button asChild className="w-full h-11 bg-blue-500 text-white font-bold hover:bg-blue-400">
             <Link href="/orders">
               <Package className="mr-2 h-4 w-4" /> Track My Order
             </Link>

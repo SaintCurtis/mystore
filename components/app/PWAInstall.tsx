@@ -61,8 +61,8 @@ export function PWAInstall() {
     <div className="fixed bottom-20 left-4 right-4 z-40 sm:left-auto sm:right-6 sm:w-80 animate-in slide-in-from-bottom-4 duration-300">
       <div className="flex items-start gap-3 rounded-2xl border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] p-4 shadow-2xl dark:shadow-black/60">
         {/* Icon */}
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
-          <Smartphone className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/10">
+          <Smartphone className="h-5 w-5 text-blue-600 dark:text-blue-400" />
         </div>
 
         {/* Content */}
@@ -76,7 +76,7 @@ export function PWAInstall() {
           <div className="mt-3 flex gap-2">
             <button
               onClick={handleInstall}
-              className="flex items-center gap-1.5 rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-bold text-zinc-950 hover:bg-amber-400 transition-colors"
+              className="flex items-center gap-1.5 rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-400 transition-colors"
             >
               <Download className="h-3.5 w-3.5" />
               Install App

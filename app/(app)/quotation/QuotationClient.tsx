@@ -56,7 +56,7 @@ interface GeneratedQuote {
 // ── Styles ────────────────────────────────────────────────────────────────
 
 const inputClass =
-  "w-full rounded-lg border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] px-3 py-2.5 text-sm text-zinc-900 dark:text-[#f1f1f1] placeholder-zinc-400 dark:placeholder-[#555] focus:border-amber-500 dark:focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500/30 transition-colors";
+  "w-full rounded-lg border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] px-3 py-2.5 text-sm text-zinc-900 dark:text-[#f1f1f1] placeholder-zinc-400 dark:placeholder-[#555] focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-colors";
 
 const labelClass = "mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300";
 
@@ -196,7 +196,7 @@ function ProductSearchInput({
                       <p className="text-xs text-zinc-400 truncate capitalize">{product.category}</p>
                     )}
                   </div>
-                  <span className="text-sm font-bold text-amber-600 dark:text-amber-400 shrink-0">
+                  <span className="text-sm font-bold text-blue-600 dark:text-blue-400 shrink-0">
                     {formatPrice(product.price)}
                   </span>
                 </button>
@@ -413,7 +413,7 @@ export function QuotationClient() {
 <div style="max-width:700px;margin:0 auto;background:white;">
   <div style="background:#09090b;padding:24px 28px;display:flex;justify-content:space-between;align-items:flex-start;">
     <div>
-      <p style="color:#f59e0b;font-weight:800;font-size:20px;letter-spacing:-0.02em;">The Saint's TechNet</p>
+      <p style="color:#1a56db;font-weight:800;font-size:20px;letter-spacing:-0.02em;">The Saint's TechNet</p>
       <p style="color:#71717a;font-size:11px;margin-top:6px;line-height:1.6;">
         Built by an Engineer · CAC Registered · Lagos, Nigeria<br>
         BN: 9245886 · iamsaintcurtis@gmail.com · +234 906 089 8951
@@ -421,7 +421,7 @@ export function QuotationClient() {
     </div>
     <div style="text-align:right;">
       <p style="color:#a1a1aa;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;">Quotation</p>
-      <p style="color:#f59e0b;font-family:monospace;font-size:18px;font-weight:700;margin-top:4px;">${quote.quoteNumber}</p>
+      <p style="color:#1a56db;font-family:monospace;font-size:18px;font-weight:700;margin-top:4px;">${quote.quoteNumber}</p>
     </div>
   </div>
 
@@ -459,14 +459,14 @@ export function QuotationClient() {
         </div>
         ${quote.vatAmount ? `<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;color:#52525b;"><span>${quote.vatNote} (7.5%)</span><span>${fmt(quote.vatAmount)}</span></div>` : ""}
         <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:700;padding:10px 0 0;border-top:2px solid #e4e4e7;margin-top:6px;">
-          <span>Grand Total</span><span style="color:#d97706;">${fmt(quote.grandTotal)}</span>
+          <span>Grand Total</span><span style="color:#1a56db;">${fmt(quote.grandTotal)}</span>
         </div>
       </div>
     </div>
 
-    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:16px;">
-      <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#b45309;margin-bottom:8px;">Note from the Engineer</p>
-      <p style="font-size:13px;color:#92400e;line-height:1.6;">${quote.engineerNote}</p>
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;">
+      <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a56db;margin-bottom:8px;">Note from the Engineer</p>
+      <p style="font-size:13px;color:#334155;line-height:1.6;">${quote.engineerNote}</p>
     </div>
 
     <div>
@@ -518,7 +518,7 @@ export function QuotationClient() {
               <ArrowLeft className="h-4 w-4" /> Back to shop
             </Link>
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-500 shrink-0 shadow-lg shadow-violet-500/20">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-500 shrink-0 shadow-sm">
                 <FileText className="h-6 w-6 text-white" />
               </div>
               <div>
@@ -648,14 +648,14 @@ export function QuotationClient() {
                             updateItem(item.id, "fromCatalogue", false);
                           }}
                           placeholder="0"
-                          className={inputClass + " pl-7 text-right " + (item.fromCatalogue ? "bg-amber-50 dark:bg-amber-950/20 border-amber-300 dark:border-amber-700/50" : "")}
+                          className={inputClass + " pl-7 text-right " + (item.fromCatalogue ? "bg-blue-50 dark:bg-blue-950/20 border-blue-300 dark:border-blue-700/50" : "")}
                         />
                       </div>
                       {item.unitPrice > 0 && item.quantity > 1 && (
                         <p className="text-right text-[10px] text-zinc-400 mt-0.5">= {formatPrice(item.unitPrice * item.quantity)}</p>
                       )}
                       {item.fromCatalogue && (
-                        <p className="text-right text-[10px] text-amber-600 dark:text-amber-400 mt-0.5">✦ catalogue price</p>
+                        <p className="text-right text-[10px] text-blue-600 dark:text-blue-400 mt-0.5">✦ catalogue price</p>
                       )}
                     </div>
                     <div className="col-span-1 flex justify-center items-center pt-2.5">
@@ -676,7 +676,7 @@ export function QuotationClient() {
                       Estimated total
                       {filledItems.length > 0 && <span className="ml-1.5 text-xs text-zinc-400">({filledItems.length} {filledItems.length === 1 ? "item" : "items"})</span>}
                     </span>
-                    <span className="text-base font-bold text-zinc-900 dark:text-amber-400">{formatPrice(estimatedTotal)}</span>
+                    <span className="text-base font-bold text-zinc-900 dark:text-blue-400">{formatPrice(estimatedTotal)}</span>
                   </div>
                   {filledItems.length > 1 && (
                     <div className="mt-2 space-y-1">
@@ -695,7 +695,7 @@ export function QuotationClient() {
             <Button
               onClick={generateQuote}
               disabled={loading || filledItems.length === 0}
-              className="w-full h-12 bg-violet-600 hover:bg-violet-500 text-white font-bold text-sm shadow-lg shadow-violet-500/20 gap-2 transition-all disabled:opacity-40"
+              className="w-full h-12 bg-violet-600 hover:bg-violet-500 text-white font-bold text-sm shadow-sm gap-2 transition-all disabled:opacity-40"
             >
               {loading ? (
                 <><Loader2 className="h-4 w-4 animate-spin" /> Generating your quotation…</>
@@ -798,7 +798,7 @@ function QuotePrintLayout({ quote }: { quote: GeneratedQuote }) {
       {/* Letterhead */}
       <div style={{ backgroundColor: "#09090b", padding: "20px 24px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
-          <p style={{ color: "#f59e0b", fontWeight: 800, fontSize: "18px", margin: 0, letterSpacing: "-0.02em" }}>
+          <p style={{ color: "#1a56db", fontWeight: 800, fontSize: "18px", margin: 0, letterSpacing: "-0.02em" }}>
             The Saint's TechNet
           </p>
           <p style={{ color: "#71717a", fontSize: "11px", marginTop: "6px", lineHeight: 1.5 }}>
@@ -810,7 +810,7 @@ function QuotePrintLayout({ quote }: { quote: GeneratedQuote }) {
           <p style={{ color: "#a1a1aa", fontSize: "10px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", margin: 0 }}>
             Quotation
           </p>
-          <p style={{ color: "#f59e0b", fontFamily: "monospace", fontSize: "16px", fontWeight: 700, marginTop: "2px" }}>
+          <p style={{ color: "#1a56db", fontFamily: "monospace", fontSize: "16px", fontWeight: 700, marginTop: "2px" }}>
             {quote.quoteNumber}
           </p>
         </div>
@@ -875,15 +875,15 @@ function QuotePrintLayout({ quote }: { quote: GeneratedQuote }) {
             )}
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "16px", fontWeight: 700, padding: "8px 0 0 0", borderTop: "2px solid #e4e4e7", marginTop: "6px" }}>
               <span>Grand Total</span>
-              <span style={{ color: "#d97706" }}>{formatPrice(quote.grandTotal)}</span>
+              <span style={{ color: "#1a56db" }}>{formatPrice(quote.grandTotal)}</span>
             </div>
           </div>
         </div>
 
         {/* Engineer note */}
-        <div style={{ backgroundColor: "#fffbeb", border: "1px solid #fde68a", borderRadius: "10px", padding: "14px 16px" }}>
-          <p style={{ fontSize: "10px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#b45309", margin: "0 0 6px 0" }}>Note from the Engineer</p>
-          <p style={{ fontSize: "13px", color: "#92400e", margin: 0, lineHeight: 1.6 }}>{quote.engineerNote}</p>
+        <div style={{ backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "14px 16px" }}>
+          <p style={{ fontSize: "10px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#1a56db", margin: "0 0 6px 0" }}>Note from the Engineer</p>
+          <p style={{ fontSize: "13px", color: "#334155", margin: 0, lineHeight: 1.6 }}>{quote.engineerNote}</p>
         </div>
 
         {/* Terms */}
@@ -892,7 +892,7 @@ function QuotePrintLayout({ quote }: { quote: GeneratedQuote }) {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 16px" }}>
             {quote.terms.map((term, i) => (
               <div key={i} style={{ display: "flex", gap: "6px", fontSize: "11px", color: "#71717a" }}>
-                <span style={{ color: "#f59e0b", flexShrink: 0 }}>✦</span>{term}
+                <span style={{ color: "#1a56db", flexShrink: 0 }}>✦</span>{term}
               </div>
             ))}
           </div>

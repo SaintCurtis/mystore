@@ -108,7 +108,7 @@ function FeaturedSlide({ product }: { product: FeaturedProduct }) {
       {/* Content */}
       <div className="flex w-full flex-col justify-center px-6 py-8 md:w-2/5 md:px-10 lg:px-16">
         {product.category && (
-          <Badge variant="secondary" className="mb-4 w-fit bg-amber-500/20 text-amber-400 hover:bg-amber-500/30">
+          <Badge variant="secondary" className="mb-4 w-fit bg-blue-500/20 text-blue-400 hover:bg-blue-500/30">
             {product.category.title}
           </Badge>
         )}

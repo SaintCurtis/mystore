@@ -27,7 +27,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
       signUpFallbackRedirectUrl="/"
       appearance={{
         variables: {
-          colorPrimary: "#f59e0b",
+          colorPrimary: "#1a56db",
           colorBackground: "#ffffff",
           borderRadius: "0.75rem",
           fontFamily: "var(--font-body)",
@@ -38,14 +38,14 @@ function AppLayout({ children }: { children: React.ReactNode }) {
           headerTitle: "font-extrabold tracking-tight text-zinc-900",
           headerSubtitle: "text-zinc-500",
           formButtonPrimary:
-            "bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-zinc-950 font-bold shadow-sm shadow-amber-500/20 transition-all",
+            "bg-blue-500 hover:bg-blue-400 active:bg-blue-600 text-white font-bold shadow-sm shadow-blue-500/20 transition-all",
           formFieldInput:
-            "border-zinc-200 focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 rounded-xl",
+            "border-zinc-200 focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 rounded-xl",
           socialButtonsBlockButton:
             "border-zinc-200 hover:bg-zinc-50 text-zinc-700 font-medium rounded-xl",
           dividerLine: "bg-zinc-100",
           identityPreviewText: "text-zinc-700",
-          formResendCodeLink: "text-amber-600 hover:text-amber-500",
+          formResendCodeLink: "text-blue-600 hover:text-blue-500",
         },
       }}
     >

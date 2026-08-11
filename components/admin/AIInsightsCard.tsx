@@ -268,7 +268,7 @@ export function AIInsightsCard() {
             className={cn(
               "mt-1 text-lg font-bold",
               rawMetrics.unfulfilledCount > 0
-                ? "text-amber-600"
+                ? "text-blue-600"
                 : "text-emerald-600",
             )}
           >
@@ -320,7 +320,7 @@ export function AIInsightsCard() {
               {insights.inventory.alerts.map((alert, i) => (
                 <div
                   key={i}
-                  className="flex items-start gap-2 rounded-lg bg-amber-50 p-2 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-200"
+                  className="flex items-start gap-2 rounded-lg bg-blue-50 p-2 text-sm text-blue-800 dark:bg-blue-950/30 dark:text-blue-200"
                 >
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                   <span>{alert}</span>
@@ -334,7 +334,7 @@ export function AIInsightsCard() {
                 key={i}
                 className="flex items-start gap-2 text-sm text-zinc-700 dark:text-zinc-300"
               >
-                <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
                 <span>{rec}</span>
               </li>
             ))}

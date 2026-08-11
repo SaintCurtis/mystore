@@ -98,7 +98,7 @@ function OrderDetailContent({ handle }: { handle: DocumentHandle }) {
               Order {data.orderNumber}
             </h1>
             {data.isNegotiatedDeal && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-900/30 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:text-amber-400">
+              <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 dark:bg-blue-900/30 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:text-blue-400">
                 <CheckBadgeIcon className="h-3.5 w-3.5" /> Negotiated Deal
               </span>
             )}
@@ -148,7 +148,7 @@ function OrderDetailContent({ handle }: { handle: DocumentHandle }) {
                       </span>
                       {item.product?.slug && (
                         <Link href={`/products/${item.product.slug}`} target="_blank"
-                          className="shrink-0 text-zinc-400 hover:text-amber-500 transition-colors">
+                          className="shrink-0 text-zinc-400 hover:text-blue-500 transition-colors">
                           <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
                         </Link>
                       )}
@@ -200,7 +200,7 @@ function OrderDetailContent({ handle }: { handle: DocumentHandle }) {
               </div>
               <div className="border-t border-zinc-100 dark:border-zinc-800 pt-2 flex justify-between font-bold text-base">
                 <span className="text-zinc-900 dark:text-zinc-100">Total</span>
-                <span className="text-zinc-900 dark:text-amber-400">{formatPrice(data.total)}</span>
+                <span className="text-zinc-900 dark:text-blue-400">{formatPrice(data.total)}</span>
               </div>
             </div>
           </div>
@@ -268,7 +268,7 @@ function OrderDetailContent({ handle }: { handle: DocumentHandle }) {
             <Link
               href={`/studio/structure/order;${handle.documentId}`}
               target="_blank"
-              className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-amber-600 hover:text-amber-500 dark:text-amber-400 dark:hover:text-amber-300 transition-colors"
+              className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
             >
               Open in Studio <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
             </Link>

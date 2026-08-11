@@ -56,14 +56,14 @@ export function Footer() {
           {/* Brand */}
           <div className="flex flex-col gap-5 lg:col-span-1">
             <Link href="/" className="flex items-center gap-2.5 w-fit group">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500 shadow-sm shadow-amber-500/30 dark:shadow-amber-500/15 transition-all duration-200 group-hover:bg-amber-400">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500 shadow-sm shadow-blue-500/30 dark:shadow-blue-500/15 transition-all duration-200 group-hover:bg-blue-400">
                 <BrandMark className="h-4 w-4 text-zinc-950" />
               </div>
               <div className="flex flex-col leading-none">
                 <span className="text-sm font-extrabold tracking-tight text-zinc-900 dark:text-[#f1f1f1]">
                   The Saint's TechNet
                 </span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-500">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-blue-500">
                   CAC Registered
                 </span>
               </div>
@@ -81,7 +81,7 @@ export function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-300 dark:border-[#2a2a2a] text-zinc-500 dark:text-[#a3a3a3] transition-all duration-200 hover:border-amber-500/50 hover:bg-amber-500/8 hover:text-amber-600 dark:hover:text-amber-400"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-300 dark:border-[#2a2a2a] text-zinc-500 dark:text-[#a3a3a3] transition-all duration-200 hover:border-blue-500/50 hover:bg-blue-500/8 hover:text-blue-600 dark:hover:text-blue-400"
                 >
                   {icon}
                 </Link>
@@ -95,7 +95,7 @@ export function Footer() {
             <ul className="flex flex-col gap-3">
               {QUICK_LINKS.map(({ label, href }) => (
                 <li key={label}>
-                  <Link href={href} className="text-sm text-zinc-600 dark:text-[#a3a3a3] transition-colors hover:text-amber-600 dark:hover:text-amber-400">
+                  <Link href={href} className="text-sm text-zinc-600 dark:text-[#a3a3a3] transition-colors hover:text-blue-600 dark:hover:text-blue-400">
                     {label}
                   </Link>
                 </li>
@@ -109,7 +109,7 @@ export function Footer() {
             <ul className="flex flex-col gap-3">
               {POLICY_LINKS.map(({ label, href }) => (
                 <li key={label}>
-                  <Link href={href} className="text-sm text-zinc-600 dark:text-[#a3a3a3] transition-colors hover:text-amber-600 dark:hover:text-amber-400">
+                  <Link href={href} className="text-sm text-zinc-600 dark:text-[#a3a3a3] transition-colors hover:text-blue-600 dark:hover:text-blue-400">
                     {label}
                   </Link>
                 </li>
@@ -119,7 +119,7 @@ export function Footer() {
             <div className="mt-8 flex flex-col gap-2">
               {["Warranty on every product", "7-day hassle-free returns", "Worldwide shipping"].map((item) => (
                 <div key={item} className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-blue-500 shrink-0" />
                   <span className="text-xs text-zinc-500 dark:text-[#a3a3a3]">{item}</span>
                 </div>
               ))}
@@ -141,12 +141,12 @@ export function Footer() {
                     {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                     className="group flex items-start gap-3"
                   >
-                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-zinc-300 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] text-zinc-500 dark:text-[#a3a3a3] transition-colors group-hover:border-amber-500/40 group-hover:text-amber-600 dark:group-hover:text-amber-400">
+                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-zinc-300 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] text-zinc-500 dark:text-[#a3a3a3] transition-colors group-hover:border-blue-500/40 group-hover:text-blue-600 dark:group-hover:text-blue-400">
                       <Icon className="h-3.5 w-3.5" />
                     </div>
                     <div>
                       <p className="text-xs text-zinc-400 dark:text-[#555]">{label}</p>
-                      <p className="text-sm text-zinc-700 dark:text-[#a3a3a3] transition-colors group-hover:text-amber-600 dark:group-hover:text-amber-400 break-all">
+                      <p className="text-sm text-zinc-700 dark:text-[#a3a3a3] transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 break-all">
                         {value}
                       </p>
                     </div>

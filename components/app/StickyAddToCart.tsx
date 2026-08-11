@@ -93,14 +93,14 @@ export function StickyAddToCart({
           : "translate-y-full opacity-0 pointer-events-none",
       )}
     >
-      <div className="mx-3 mb-2 overflow-hidden rounded-2xl border border-amber-500/30 bg-white/95 dark:bg-[#111111]/95 backdrop-blur-md shadow-2xl shadow-black/20">
+      <div className="mx-3 mb-2 overflow-hidden rounded-2xl border border-blue-500/30 bg-white/95 dark:bg-[#111111]/95 backdrop-blur-md shadow-2xl shadow-black/20">
         <div className="flex items-center gap-3 px-4 py-3">
           {/* Product name + price */}
           <div className="flex flex-col min-w-0 flex-1">
             <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate">
               {name}
             </p>
-            <p className="text-sm font-bold text-amber-500 dark:text-amber-400">
+            <p className="text-sm font-bold text-blue-500 dark:text-blue-400">
               {formatInCurrency(price)}
             </p>
           </div>
@@ -114,7 +114,7 @@ export function StickyAddToCart({
               "flex shrink-0 items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold transition-all duration-200 active:scale-95",
               justAdded
                 ? "bg-emerald-500 text-white"
-                : "bg-amber-500 text-zinc-950 shadow-lg shadow-amber-500/30 hover:bg-amber-400",
+                : "bg-blue-500 text-white shadow-lg shadow-blue-500/30 hover:bg-blue-400",
             )}
           >
             {justAdded ? (

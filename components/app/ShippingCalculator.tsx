@@ -320,7 +320,7 @@ export function ShippingCalculator({
               onClick={() => onSelect(option)}
               className={`w-full text-left rounded-xl border p-3 transition-all duration-200 ${
                 isSelected
-                  ? "border-amber-500/60 bg-amber-500/8 dark:bg-amber-500/10"
+                  ? "border-blue-500/60 bg-blue-500/8 dark:bg-blue-500/10"
                   : "border-zinc-200 dark:border-[#2a2a2a] hover:border-zinc-300 dark:hover:border-[#3a3a3a] bg-white dark:bg-[#111111]"
               }`}
             >
@@ -328,7 +328,7 @@ export function ShippingCalculator({
                 <div className="flex items-start gap-2.5">
                   <span className="text-lg leading-none mt-0.5">{option.icon}</span>
                   <div>
-                    <p className={`text-sm font-semibold ${isSelected ? "text-amber-600 dark:text-amber-400" : "text-zinc-900 dark:text-[#f1f1f1]"}`}>
+                    <p className={`text-sm font-semibold ${isSelected ? "text-blue-600 dark:text-blue-400" : "text-zinc-900 dark:text-[#f1f1f1]"}`}>
                       {option.method}
                     </p>
                     <p className="text-[11px] text-zinc-500 dark:text-[#888] mt-0.5">
@@ -343,13 +343,13 @@ export function ShippingCalculator({
                   {option.price === 0 ? (
                     <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">Free</span>
                   ) : (
-                    <span className={`text-sm font-bold ${isSelected ? "text-amber-600 dark:text-amber-400" : "text-zinc-900 dark:text-[#f1f1f1]"}`}>
+                    <span className={`text-sm font-bold ${isSelected ? "text-blue-600 dark:text-blue-400" : "text-zinc-900 dark:text-[#f1f1f1]"}`}>
                       ₦{option.price.toLocaleString()}
                     </span>
                   )}
                   {isSelected && (
                     <div className="mt-1 flex justify-end">
-                      <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[8px] text-white font-bold">✓</span>
+                      <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[8px] text-white font-bold">✓</span>
                     </div>
                   )}
                 </div>
