@@ -6,6 +6,8 @@ import { useCurrency } from "@/lib/store/currency-store-provider";
 
 interface PaymentPlanCalculatorProps {
   price: number; // always NGN
+  productName: string;
+  productUrl: string;
 }
 
 const PLANS = [
@@ -17,7 +19,7 @@ const PLANS = [
 
 const WHATSAPP_NUMBER = "2349060898951";
 
-export function PaymentPlanCalculator({ price }: PaymentPlanCalculatorProps) {
+export function PaymentPlanCalculator({ price, productName, productUrl }: PaymentPlanCalculatorProps) {
   const [open, setOpen]         = useState(false);
   const [selected, setSelected] = useState<number>(3);
   const { formatInCurrency }    = useCurrency();
@@ -29,7 +31,16 @@ export function PaymentPlanCalculator({ price }: PaymentPlanCalculatorProps) {
   const interestNGN   = total - price;
 
   const waMessage = encodeURIComponent(
-    `Hi! I'm interested in a ${plan.months}-month payment plan for a product priced at ₦${price.toLocaleString()}. Can we discuss this?`
+    `Hi! I'm interested in a payment plan for this product:\n\n` +
+      `*${productName}*\n` +
+      `Price: ₦${price.toLocaleString()}\n` +
+      `${productUrl}\n\n` +
+      `Plan: ${plan.months} months\n` +
+      `Monthly: ₦${Math.round(monthly).toLocaleString()}` +
+      (hasInterest
+        ? `\nTotal (incl. ${(plan.interestRate * 100).toFixed(0)}% fee): ₦${Math.round(total).toLocaleString()}`
+        : "") +
+      `\n\nCan we discuss this?`
   );
   const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${waMessage}`;
 

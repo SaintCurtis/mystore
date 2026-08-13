@@ -142,7 +142,11 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
         {/* Payment Plan Calculator */}
         <div className="mt-5">
-          <PaymentPlanCalculator price={basePrice} />
+          <PaymentPlanCalculator
+            price={basePrice}
+            productName={product.name ?? "Unknown Product"}
+            productUrl={productUrl}
+          />
         </div>
 
         {/* Description */}
