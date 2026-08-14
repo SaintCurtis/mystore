@@ -308,7 +308,7 @@ Only send this signal when the agreed price is AT OR ABOVE ₦${floorPrice.toLoc
 
         try {
           const stream = anthropic.messages.stream({
-            model: "claude-sonnet-4-20250514",
+            model: "claude-sonnet-5",
             max_tokens: 400,
             system: systemPrompt,
             messages: aiMessages,
