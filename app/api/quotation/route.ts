@@ -105,6 +105,6 @@ Rules:
     return NextResponse.json({ success: true, quote });
   } catch (err) {
     console.error("[quotation POST]", err);
-    return NextResponse.json({ error: "Failed to generate quotation" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to generate quotation, retry" }, { status: 500 });
   }
 }
