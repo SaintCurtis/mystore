@@ -12,7 +12,7 @@ import { WishlistButton } from "@/components/app/WishlistButton";
 import { VariantSelector } from "@/components/app/VariantSelector";
 import { StickyAddToCart } from "@/components/app/StickyAddToCart";
 import { NegotiateButton } from "@/components/app/NegotiateButton";
-import { PaymentPlanCalculator } from "@/components/app/PaymentPlanCalculator";
+import { LayawayCalculator } from "@/components/app/LayawayCalculator";
 import { recordView } from "@/lib/hooks/useRecentlyViewed";
 import { useCurrency } from "@/lib/store/currency-store-provider";
 import { useCartActions } from "@/lib/store/cart-store-provider";
@@ -140,9 +140,9 @@ export function ProductInfo({ product }: ProductInfoProps) {
           <StockUrgency stock={stock} productId={product._id} />
         </div>
 
-        {/* Payment Plan Calculator */}
+        {/* Layaway Calculator */}
         <div className="mt-5">
-          <PaymentPlanCalculator
+          <LayawayCalculator
             price={basePrice}
             productName={product.name ?? "Unknown Product"}
             productUrl={productUrl}
