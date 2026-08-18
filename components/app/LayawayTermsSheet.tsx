@@ -100,7 +100,9 @@ export function LayawayTermsSheet({
               <span className="text-sm text-zinc-700 dark:text-zinc-300">
                 <strong className="font-semibold">Price moves, you&apos;re protected.</strong>{" "}
                 Price drops — you get the lower price automatically. Price rises — we notify
-                you first; top up or cancel for a full refund, your call.
+                you first; top up or cancel for a full refund, your call. Your locked price is
+                valid for 90 days from your start date — plans still open after that get
+                re-checked the same way.
               </span>
             </li>
             <li className="flex gap-3">

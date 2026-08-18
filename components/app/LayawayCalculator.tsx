@@ -16,12 +16,11 @@ interface LayawayCalculatorProps {
 const PACE_OPTIONS = [
   { months: 2, label: "2 months" },
   { months: 3, label: "3 months" },
-  { months: 6, label: "6 months" },
-  { months: 12, label: "12 months" },
 ] as const;
 
 const WHATSAPP_NUMBER = "2349060898951";
 const RESERVATION_THRESHOLD = 0.5; // 50% paid locks the unit
+const PRICE_LOCK_VALIDITY_DAYS = 90; // price re-checked if a plan runs longer than this
 
 export function LayawayCalculator({ price, productName, productUrl }: LayawayCalculatorProps) {
   const [open, setOpen] = useState(false);
@@ -85,7 +84,7 @@ export function LayawayCalculator({ price, productName, productUrl }: LayawayCal
             <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
               Pick a rough pace (optional — pay any amount, any time)
             </p>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {PACE_OPTIONS.map((p) => (
                 <button
                   key={p.months}
@@ -141,10 +140,12 @@ export function LayawayCalculator({ price, productName, productUrl }: LayawayCal
           {/* Disclaimer + full policy sheet + WhatsApp CTA */}
           <div className="space-y-2.5">
             <p className="text-[11px] text-zinc-400 dark:text-zinc-500 leading-relaxed">
-              * Pace above is just a guide — pay faster, slower, or in irregular amounts.
-              Zero interest either way. See the full{" "}
+              * Pace above is just a guide — pay faster, slower, or in irregular amounts,
+              zero interest either way. Your price is locked for {PRICE_LOCK_VALIDITY_DAYS} days
+              from your start date; plans still open after that get re-checked against the
+              current price using the same up-or-down rules. See the full{" "}
               <LayawayTermsSheet triggerLabel="Layaway Policy" triggerClassName="text-[11px] font-medium text-blue-600 dark:text-blue-400 underline underline-offset-2 hover:text-blue-700 dark:hover:text-blue-300" />{" "}
-              for price-change, cancellation, and refund terms.
+              for details.
             </p>
 
             <a
