@@ -143,6 +143,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
         {/* Layaway Calculator */}
         <div className="mt-5">
           <LayawayCalculator
+            productId={product._id}
             price={basePrice}
             productName={product.name ?? "Unknown Product"}
             productUrl={productUrl}

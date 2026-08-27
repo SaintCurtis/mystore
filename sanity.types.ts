@@ -15,6 +15,55 @@
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
 // Source: schema.json
+export type ProductReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "product";
+};
+
+export type CustomerReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "customer";
+};
+
+export type OrderReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "order";
+};
+
+export type LayawayPlan = {
+  _id: string;
+  _type: "layawayPlan";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  planNumber?: string;
+  status?: "active" | "reserved" | "completed" | "cancelled";
+  product?: ProductReference;
+  productNameSnapshot?: string;
+  totalAmount?: number;
+  amountPaid?: number;
+  paceMonths?: number;
+  startedAt?: string;
+  priceLockExpiresAt?: string;
+  nextPaymentReminderAt?: string;
+  customer?: CustomerReference;
+  clerkUserId?: string;
+  payments?: Array<{
+    amount?: number;
+    paidAt?: string;
+    paystackReference?: string;
+    _type: "layawayPayment";
+    _key: string;
+  }>;
+  resultingOrder?: OrderReference;
+};
+
 export type NegotiationSession = {
   _id: string;
   _type: "negotiationSession";
@@ -74,13 +123,6 @@ export type Referral = {
   createdAt?: string;
 };
 
-export type ProductReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "product";
-};
-
 export type NotifyMe = {
   _id: string;
   _type: "notifyMe";
@@ -113,13 +155,6 @@ export type PendingCryptoOrder = {
     shippingAddress?: string;
   };
   createdAt?: string;
-};
-
-export type CustomerReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "customer";
 };
 
 export type Order = {
@@ -373,6 +408,21 @@ export type Customer = {
   phones?: Array<string>;
   clerkUserId?: string;
   createdAt?: string;
+  birthday?: string;
+  birthdayReminders?: "enabled" | "disabled";
+  birthdaySmsOptIn?: "enabled" | "disabled";
+  lastBirthdayGreetingSentYear?: number;
+  wishlist?: Array<
+    {
+      _key: string;
+    } & ProductReference
+  >;
+  searchHistory?: Array<{
+    searchTerm?: string;
+    searchedAt?: string;
+    _type: "searchLogEntry";
+    _key: string;
+  }>;
   savedAddresses?: Array<{
     label?: string;
     isDefault?: boolean;
@@ -489,13 +539,15 @@ export type Geopoint = {
 };
 
 export type AllSanitySchemaTypes =
+  | ProductReference
+  | CustomerReference
+  | OrderReference
+  | LayawayPlan
   | NegotiationSession
   | ReferralClick
   | Referral
-  | ProductReference
   | NotifyMe
   | PendingCryptoOrder
-  | CustomerReference
   | Order
   | CategoryReference
   | ConditionReference
@@ -1473,6 +1525,91 @@ export type AI_SEARCH_PRODUCTS_QUERY_RESULT = Array<{
   assemblyRequired: boolean | null;
 }>;
 
+// Source: lib/sanity/queries/products.ts
+// Variable: PRODUCT_FOR_LAYAWAY_QUERY
+// Query: *[  _type == "product" && _id == $id][0]{  _id,  name,  "slug": slug.current,  price,  stock,  "image": images[0].asset->url}
+export type PRODUCT_FOR_LAYAWAY_QUERY_RESULT = {
+  _id: string;
+  name: string | null;
+  slug: string | null;
+  price: number | null;
+  stock: number | null;
+  image: string | null;
+} | null;
+
+// Source: lib/sanity/queries/profile.ts
+// Variable: CUSTOMER_PROFILE_QUERY
+// Query: *[  _type == "customer" && clerkUserId == $clerkUserId][0]{  _id,  name,  email,  phones,  birthday,  birthdayReminders,  birthdaySmsOptIn,  "wishlist": wishlist[]->{    _id,    name,    "slug": slug.current,    price,    "image": images[0].asset->url,    "categoryTitle": category->title,    stock  },  "searchHistory": searchHistory[] | order(searchedAt desc) [0...40]{ searchTerm, searchedAt }}
+export type CUSTOMER_PROFILE_QUERY_RESULT = {
+  _id: string;
+  name: string | null;
+  email: string | null;
+  phones: Array<string> | null;
+  birthday: string | null;
+  birthdayReminders: "disabled" | "enabled" | null;
+  birthdaySmsOptIn: "disabled" | "enabled" | null;
+  wishlist: Array<{
+    _id: string;
+    name: string | null;
+    slug: string | null;
+    price: number | null;
+    image: string | null;
+    categoryTitle: string | null;
+    stock: number | null;
+  }> | null;
+  searchHistory: Array<{
+    searchTerm: string | null;
+    searchedAt: string | null;
+  }> | null;
+} | null;
+
+// Source: lib/sanity/queries/profile.ts
+// Variable: LAYAWAY_PLANS_BY_USER_QUERY
+// Query: *[  _type == "layawayPlan"  && clerkUserId == $clerkUserId  && status != "cancelled"] | order(startedAt desc) {  _id,  planNumber,  status,  totalAmount,  amountPaid,  paceMonths,  startedAt,  priceLockExpiresAt,  nextPaymentReminderAt,  "product": product->{ _id, name, "slug": slug.current, "image": images[0].asset->url },  "resultingOrderId": resultingOrder->_id,  "payments": payments[] | order(paidAt desc){ amount, paidAt, paystackReference }}
+export type LAYAWAY_PLANS_BY_USER_QUERY_RESULT = Array<{
+  _id: string;
+  planNumber: string | null;
+  status: "active" | "cancelled" | "completed" | "reserved" | null;
+  totalAmount: number | null;
+  amountPaid: number | null;
+  paceMonths: number | null;
+  startedAt: string | null;
+  priceLockExpiresAt: string | null;
+  nextPaymentReminderAt: string | null;
+  product: {
+    _id: string;
+    name: string | null;
+    slug: string | null;
+    image: string | null;
+  } | null;
+  resultingOrderId: string | null;
+  payments: Array<{
+    amount: number | null;
+    paidAt: string | null;
+    paystackReference: string | null;
+  }> | null;
+}>;
+
+// Source: lib/sanity/queries/profile.ts
+// Variable: LAYAWAY_PLAN_BY_PAYSTACK_REFERENCE_QUERY
+// Query: *[  _type == "layawayPlan" && $reference in payments[].paystackReference][0]{ _id }
+export type LAYAWAY_PLAN_BY_PAYSTACK_REFERENCE_QUERY_RESULT = {
+  _id: string;
+} | null;
+
+// Source: lib/sanity/queries/profile.ts
+// Variable: LAYAWAY_PLAN_BY_ID_QUERY
+// Query: *[  _type == "layawayPlan" && _id == $id && clerkUserId == $clerkUserId][0]{  _id,  status,  totalAmount,  amountPaid,  "productId": product->_id,  "productName": product->name,  "paystackReferences": payments[].paystackReference}
+export type LAYAWAY_PLAN_BY_ID_QUERY_RESULT = {
+  _id: string;
+  status: "active" | "cancelled" | "completed" | "reserved" | null;
+  totalAmount: number | null;
+  amountPaid: number | null;
+  productId: string | null;
+  productName: string | null;
+  paystackReferences: Array<string | null> | null;
+} | null;
+
 // Source: lib/sanity/queries/referral.ts
 // Variable: REFERRAL_BY_USER_QUERY
 // Query: *[  _type == "referral"  && clerkUserId == $clerkUserId][0] {  _id,  clerkUserId,  email,  name,  code,  clicks,  conversions,  totalEarned,  createdAt}
@@ -1638,6 +1775,11 @@ declare module "@sanity/client" {
     '*[\n  _type == "product"\n  && stock > 0\n  && stock <= 5\n] | order(stock asc) {\n  _id,\n  name,\n  "slug": slug.current,\n  stock,\n  "image": images[0]{ asset->{ _id, url } }\n}': LOW_STOCK_PRODUCTS_QUERY_RESULT;
     '*[\n  _type == "product"\n  && stock == 0\n] | order(name asc) {\n  _id,\n  name,\n  "slug": slug.current,\n  "image": images[0]{ asset->{ _id, url } }\n}': OUT_OF_STOCK_PRODUCTS_QUERY_RESULT;
     '*[\n  _type == "product"\n  && (\n    $searchQuery == ""\n    || name match $searchQuery + "*"\n    || description match $searchQuery + "*"\n    || category->title match $searchQuery + "*"\n    || brand->title match $searchQuery + "*"\n    || model->title match $searchQuery + "*"\n  )\n  && (\n    $categorySlug == ""\n    || category->slug.current == $categorySlug\n    || category->parentCategory->slug.current == $categorySlug\n    || category->parentCategory->parentCategory->slug.current ==$categorySlug\n    || category->parentCategory->parentCategory->parentCategory->slug.current == $categorySlug\n  )\n  && (\n    $condition == ""\n    || condition->slug.current == $condition\n    || category->condition == $condition\n    || category->parentCategory->condition == $condition\n  )\n  && ($brandSlug == "" || brand->slug.current == $brandSlug)\n  && ($material == "" || material == $material)\n  && ($color == "" || color == $color)\n  && ($minPrice == 0 || price >= $minPrice)\n  && ($maxPrice == 0 || price <= $maxPrice)\n] | order(name asc) [0...20] {\n  _id,\n  name,\n  "slug": slug.current,\n  description,\n  price,\n  "condition": condition->{ _id, title, "slug": slug.current },\n  "brand": brand->{ _id, title, "slug": slug.current },\n  "model": model->{ _id, title, "slug": slug.current },\n  "image": images[0]{ asset->{ _id, url } },\n  category->{ _id, title, "slug": slug.current },\n  material,\n  color,\n  dimensions,\n  stock,\n  featured,\n  assemblyRequired\n}': AI_SEARCH_PRODUCTS_QUERY_RESULT;
+    '*[\n  _type == "product" && _id == $id\n][0]{\n  _id,\n  name,\n  "slug": slug.current,\n  price,\n  stock,\n  "image": images[0].asset->url\n}': PRODUCT_FOR_LAYAWAY_QUERY_RESULT;
+    '*[\n  _type == "customer" && clerkUserId == $clerkUserId\n][0]{\n  _id,\n  name,\n  email,\n  phones,\n  birthday,\n  birthdayReminders,\n  birthdaySmsOptIn,\n  "wishlist": wishlist[]->{\n    _id,\n    name,\n    "slug": slug.current,\n    price,\n    "image": images[0].asset->url,\n    "categoryTitle": category->title,\n    stock\n  },\n  "searchHistory": searchHistory[] | order(searchedAt desc) [0...40]{ searchTerm, searchedAt }\n}': CUSTOMER_PROFILE_QUERY_RESULT;
+    '*[\n  _type == "layawayPlan"\n  && clerkUserId == $clerkUserId\n  && status != "cancelled"\n] | order(startedAt desc) {\n  _id,\n  planNumber,\n  status,\n  totalAmount,\n  amountPaid,\n  paceMonths,\n  startedAt,\n  priceLockExpiresAt,\n  nextPaymentReminderAt,\n  "product": product->{ _id, name, "slug": slug.current, "image": images[0].asset->url },\n  "resultingOrderId": resultingOrder->_id,\n  "payments": payments[] | order(paidAt desc){ amount, paidAt, paystackReference }\n}': LAYAWAY_PLANS_BY_USER_QUERY_RESULT;
+    '*[\n  _type == "layawayPlan" && $reference in payments[].paystackReference\n][0]{ _id }': LAYAWAY_PLAN_BY_PAYSTACK_REFERENCE_QUERY_RESULT;
+    '*[\n  _type == "layawayPlan" && _id == $id && clerkUserId == $clerkUserId\n][0]{\n  _id,\n  status,\n  totalAmount,\n  amountPaid,\n  "productId": product->_id,\n  "productName": product->name,\n  "paystackReferences": payments[].paystackReference\n}': LAYAWAY_PLAN_BY_ID_QUERY_RESULT;
     '*[\n  _type == "referral"\n  && clerkUserId == $clerkUserId\n][0] {\n  _id,\n  clerkUserId,\n  email,\n  name,\n  code,\n  clicks,\n  conversions,\n  totalEarned,\n  createdAt\n}': REFERRAL_BY_USER_QUERY_RESULT;
     '*[\n  _type == "referralClick"\n  && code == $code\n] | order(clickedAt desc) [0...20] {\n  _id,\n  code,\n  converted,\n  convertedOrderId,\n  clickedAt\n}': REFERRAL_CLICKS_BY_CODE_QUERY_RESULT;
     '*[\n  _type == "referral"\n  && conversions > 0\n] | order(conversions desc) [0...10] {\n  _id,\n  name,\n  code,\n  conversions,\n  totalEarned\n}': REFERRAL_LEADERBOARD_QUERY_RESULT;

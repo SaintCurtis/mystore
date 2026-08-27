@@ -18,6 +18,7 @@ import { Footer } from "@/components/app/Footer";
 import { MobileBottomBar } from "@/components/app/MobileBottomBar";
 import { BuildMySetupFAB } from "@/components/app/BuildMySetupFAB";
 import { ReferralTracker } from "@/components/app/ReferralTracker";
+import { WishlistSync } from "@/components/app/WishlistSync";
 import { Suspense } from "react";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -76,6 +77,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                 <Suspense fallback={null}>
                   <ReferralTracker />
                 </Suspense>
+                <WishlistSync />
               </ChatStoreProvider>
             </CurrencyProvider>
           </CompareStoreProvider>

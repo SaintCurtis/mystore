@@ -337,3 +337,17 @@ export const AI_SEARCH_PRODUCTS_QUERY = defineQuery(`*[
   featured,
   assemblyRequired
 }`);
+/**
+ * Lean single-product lookup for the Layaway deposit flow — just enough
+ * to validate stock and snapshot the locked-in price.
+ */
+export const PRODUCT_FOR_LAYAWAY_QUERY = defineQuery(`*[
+  _type == "product" && _id == $id
+][0]{
+  _id,
+  name,
+  "slug": slug.current,
+  price,
+  stock,
+  "image": images[0].asset->url
+}`);

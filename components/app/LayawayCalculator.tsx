@@ -4,8 +4,10 @@ import { useState } from "react";
 import { Calculator, ChevronDown, ChevronUp, MessageCircle, ShieldCheck } from "lucide-react";
 import { useCurrency } from "@/lib/store/currency-store-provider";
 import { LayawayTermsSheet } from "@/components/app/LayawayTermsSheet";
+import { LayawayPayButton } from "@/components/app/LayawayPayButton";
 
 interface LayawayCalculatorProps {
+  productId: string;
   price: number; // always NGN
   productName: string;
   productUrl: string;
@@ -22,7 +24,7 @@ const WHATSAPP_NUMBER = "2349060898951";
 const RESERVATION_THRESHOLD = 0.5; // 50% paid locks the unit
 const PRICE_LOCK_VALIDITY_DAYS = 90; // price re-checked if a plan runs longer than this
 
-export function LayawayCalculator({ price, productName, productUrl }: LayawayCalculatorProps) {
+export function LayawayCalculator({ productId, price, productName, productUrl }: LayawayCalculatorProps) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<number>(3);
   const { formatInCurrency } = useCurrency();
@@ -148,6 +150,15 @@ export function LayawayCalculator({ price, productName, productUrl }: LayawayCal
               for details.
             </p>
 
+            <LayawayPayButton
+              mode="new"
+              productId={productId}
+              paceMonths={pace.months}
+              suggestedAmount={reservationAmount}
+              maxAmount={price}
+              buttonLabel={`Pay ${formatInCurrency(reservationAmount)} now to start`}
+            />
+
             <a
               href={waLink}
               target="_blank"
@@ -155,7 +166,7 @@ export function LayawayCalculator({ price, productName, productUrl }: LayawayCal
               className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#25D366]/30 bg-[#25D366]/8 px-4 py-3 text-sm font-bold text-[#128C7E] dark:text-[#25D366] hover:bg-[#25D366]/15 transition-colors"
             >
               <MessageCircle className="h-4 w-4 shrink-0" />
-              Start a Layaway plan on WhatsApp
+              Or arrange it on WhatsApp instead
             </a>
           </div>
         </div>

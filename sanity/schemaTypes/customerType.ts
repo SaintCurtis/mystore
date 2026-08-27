@@ -8,9 +8,10 @@ export const customerType = defineType({
   type: "document",
   icon: UserIcon,
   groups: [
-    { name: "details",   title: "Customer Details",  default: true },
-    { name: "addresses", title: "Saved Addresses"                   },
-    { name: "payment",   title: "Payment"                           },
+    { name: "details",    title: "Customer Details",     default: true },
+    { name: "engagement", title: "Birthday & Engagement"                },
+    { name: "addresses",  title: "Saved Addresses"                      },
+    { name: "payment",    title: "Payment"                              },
   ],
   fields: [
     defineField({
@@ -53,6 +54,84 @@ export const customerType = defineType({
       group: "details",
       readOnly: true,
       initialValue: () => new Date().toISOString(),
+    }),
+
+    // ── Birthday & Engagement ────────────────────────────────────────────
+    defineField({
+      name: "birthday",
+      type: "date",
+      group: "engagement",
+      description:
+        "Collected from the customer's Profile page (Clerk does not provide this). Powers the birthday countdown and automated greeting.",
+      options: { dateFormat: "YYYY-MM-DD" },
+    }),
+    defineField({
+      name: "birthdayReminders",
+      title: "Birthday Email",
+      type: "string",
+      group: "engagement",
+      initialValue: "enabled",
+      options: {
+        list: [
+          { title: "Send birthday email", value: "enabled" },
+          { title: "Don't send",          value: "disabled" },
+        ],
+        layout: "radio",
+      },
+    }),
+    defineField({
+      name: "birthdaySmsOptIn",
+      title: "Birthday SMS",
+      type: "string",
+      group: "engagement",
+      initialValue: "disabled",
+      description: "Only takes effect if a phone number is on file.",
+      options: {
+        list: [
+          { title: "Send birthday SMS", value: "enabled" },
+          { title: "Don't send",        value: "disabled" },
+        ],
+        layout: "radio",
+      },
+    }),
+    defineField({
+      name: "lastBirthdayGreetingSentYear",
+      title: "Last Greeting Sent (Year)",
+      type: "number",
+      group: "engagement",
+      readOnly: true,
+      description: "Set automatically by the birthday cron job — prevents duplicate sends in the same year.",
+    }),
+    defineField({
+      name: "wishlist",
+      type: "array",
+      group: "engagement",
+      description:
+        "Synced automatically from the customer's on-site wishlist. Source of truth for the Profile page and the Gadget Goal recommendation — don't edit by hand.",
+      of: [{ type: "reference", to: [{ type: "product" }] }],
+    }),
+    defineField({
+      name: "searchHistory",
+      title: "Search History",
+      type: "array",
+      group: "engagement",
+      description: "Auto-logged from the site search bar (most recent 40). Powers the Gadget Goal recommendation — not shown to the customer verbatim.",
+      of: [
+        {
+          type: "object",
+          name: "searchLogEntry",
+          fields: [
+            defineField({ name: "searchTerm", type: "string", validation: (r) => r.required() }),
+            defineField({ name: "searchedAt", type: "datetime", validation: (r) => r.required() }),
+          ],
+          preview: {
+            select: { term: "searchTerm", at: "searchedAt" },
+            prepare({ term, at }) {
+              return { title: term ?? "Search", subtitle: at ? new Date(at).toLocaleString() : "" };
+            },
+          },
+        },
+      ],
     }),
 
     // ── Saved Addresses ───────────────────────────────────────────────────
