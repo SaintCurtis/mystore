@@ -45,14 +45,15 @@ export function deriveGadgetGoal({ wishlist, searchHistory }: GadgetGoalInput): 
   if (wishlist.length > 0) {
     let best: { item: GadgetGoalWishlistItem; score: number; index: number } | null = null;
 
-    wishlist.forEach((item, index) => {
+    for (let index = 0; index < wishlist.length; index++) {
+      const item = wishlist[index];
       const score = scoreWishlistItem(item, termCounts);
       // Prefer higher score; break ties by most-recently-added (lower index,
       // since the wishlist store prepends new items to the front).
       if (!best || score > best.score || (score === best.score && index < best.index)) {
         best = { item, score, index };
       }
-    });
+    }
 
     if (best) {
       return { kind: "wishlist", product: best.item, matchStrength: best.score };
