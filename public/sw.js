@@ -1,14 +1,12 @@
 // Saint's TechNet — Service Worker
 // Handles: PWA offline caching + Web Push notifications
 
-const CACHE_NAME = "saints-technet-v1";
+const CACHE_NAME = "saints-technet-v2";
 
 // ── Install ───────────────────────────────────────────────────────────────
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(["/", "/manifest.json"]);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.add("/manifest.json").catch(() => {}))
   );
   self.skipWaiting();
 });
@@ -23,14 +21,60 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// ── Fetch (basic cache-first for static assets) ───────────────────────────
+// ── Fetch ─────────────────────────────────────────────────────────────────
+// Two different strategies on purpose:
+//
+// 1. Navigation requests (the page HTML itself) go NETWORK-FIRST. This is
+//    the fix: the previous version cached "/" on install and served that
+//    cached HTML forever afterward, cache-first, on every visit — so every
+//    deploy after the first left visitors stuck on an old page that
+//    referenced JS/CSS chunk files which no longer exist on the server
+//    (Next.js content-hashes those filenames per build). That mismatch is
+//    what was throwing "Failed to load chunk" and crashing the app.
+//    Network-first means every visit gets the CURRENT deployment's HTML;
+//    the cache is only a fallback for when the network request fails
+//    (genuinely offline), which is the actual point of a PWA cache.
+//
+// 2. Everything else (JS/CSS chunks, images, fonts) is cache-first. This
+//    is safe specifically because those URLs are content-hashed by
+//    Next.js — a given URL never changes meaning across deploys, so
+//    serving a cached copy is never "stale," it's just fast. (The
+//    previous version claimed to do this but never actually called
+//    cache.put(), so nothing beyond "/" and manifest.json was ever
+//    really cached — fixed here too.)
 self.addEventListener("fetch", (event) => {
-  // Only cache GET requests
   if (event.request.method !== "GET") return;
+
+  const isNavigation =
+    event.request.mode === "navigate" ||
+    (event.request.destination === "document");
+
+  if (isNavigation) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          return response;
+        })
+        .catch(() =>
+          caches.match(event.request).then((cached) => cached ?? caches.match("/"))
+        )
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then((cached) => {
-      return cached ?? fetch(event.request);
+      if (cached) return cached;
+      return fetch(event.request).then((response) => {
+        if (!response || response.status !== 200 || response.type === "error") {
+          return response;
+        }
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+        return response;
+      });
     })
   );
 });

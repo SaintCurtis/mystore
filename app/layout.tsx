@@ -1,19 +1,34 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, DM_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { SITE_URL } from "@/lib/constants/site";
 
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+// Self-hosted (no longer fetched from Google Fonts at build time — that
+// fetch was failing intermittently and taking the whole build down with
+// it). Files are the exact same DM Sans / Plus Jakarta Sans releases,
+// copied from @fontsource into ./fonts so the build never needs network
+// access to render text.
+const jakarta = localFont({
+  src: [
+    { path: "./fonts/plus-jakarta-sans/plus-jakarta-sans-latin-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/plus-jakarta-sans/plus-jakarta-sans-latin-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/plus-jakarta-sans/plus-jakarta-sans-latin-600-normal.woff2", weight: "600", style: "normal" },
+    { path: "./fonts/plus-jakarta-sans/plus-jakarta-sans-latin-700-normal.woff2", weight: "700", style: "normal" },
+    { path: "./fonts/plus-jakarta-sans/plus-jakarta-sans-latin-800-normal.woff2", weight: "800", style: "normal" },
+  ],
   variable: "--font-display",
   display: "swap",
 });
 
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+const dmSans = localFont({
+  src: [
+    { path: "./fonts/dm-sans/dm-sans-latin-300-normal.woff2", weight: "300", style: "normal" },
+    { path: "./fonts/dm-sans/dm-sans-latin-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/dm-sans/dm-sans-latin-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/dm-sans/dm-sans-latin-600-normal.woff2", weight: "600", style: "normal" },
+    { path: "./fonts/dm-sans/dm-sans-latin-700-normal.woff2", weight: "700", style: "normal" },
+  ],
   variable: "--font-body",
   display: "swap",
 });
@@ -24,18 +39,30 @@ function ChunkErrorHandler() {
       dangerouslySetInnerHTML={{
         __html: `
           (function() {
-            window.addEventListener('error', function(e) {
-              var msg = e.message || '';
-              if (
+            function isChunkError(msg) {
+              msg = msg || '';
+              return (
                 msg.indexOf('Loading chunk') !== -1 ||
+                msg.indexOf('Failed to load chunk') !== -1 ||
                 msg.indexOf('Failed to fetch dynamically imported module') !== -1 ||
                 msg.indexOf('ChunkLoadError') !== -1
-              ) {
-                if (!sessionStorage.getItem('chunk_reload')) {
-                  sessionStorage.setItem('chunk_reload', '1');
-                  window.location.reload();
-                }
+              );
+            }
+            function reloadOnce() {
+              if (!sessionStorage.getItem('chunk_reload')) {
+                sessionStorage.setItem('chunk_reload', '1');
+                window.location.reload();
               }
+            }
+            window.addEventListener('error', function(e) {
+              if (isChunkError(e.message)) reloadOnce();
+            });
+            // Turbopack/webpack failed dynamic imports surface as a
+            // rejected promise, not a window 'error' event — this was
+            // previously unhandled entirely.
+            window.addEventListener('unhandledrejection', function(e) {
+              var msg = (e.reason && e.reason.message) || String(e.reason || '');
+              if (isChunkError(msg)) reloadOnce();
             });
             window.addEventListener('load', function() {
               sessionStorage.removeItem('chunk_reload');
