@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @keyframes trustMarquee {
-  0%   { transform: translateX(0); } 
+  0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
 .trust-track {
@@ -59,6 +59,26 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Brand — warm burnt-orange, not a neon/candy orange.
+     This was already the target color (see the #ba4b00 hardcoded in a
+     few spots, and colorPrimary in the Clerk config), and 85 files
+     already use brand-50 through brand-950 utility classes — but this
+     scale itself was never actually defined, so every one of those
+     classes was rendering with NO color at all. This is the missing
+     piece, built in OKLCH for even, non-muddy steps at a constant hue,
+     anchored on the existing #ba4b00. */
+  --color-brand-50:  oklch(0.975 0.020 44.67);
+  --color-brand-100: oklch(0.935 0.042 44.67);
+  --color-brand-200: oklch(0.875 0.072 44.67);
+  --color-brand-300: oklch(0.795 0.105 44.67);
+  --color-brand-400: oklch(0.700 0.140 44.67);
+  --color-brand-500: oklch(0.580 0.163 44.67); /* #c5520a */
+  --color-brand-600: oklch(0.553 0.159 44.67); /* #ba4b00 — the original anchor */
+  --color-brand-700: oklch(0.470 0.140 44.67);
+  --color-brand-800: oklch(0.390 0.112 44.67);
+  --color-brand-900: oklch(0.320 0.083 44.67);
+  --color-brand-950: oklch(0.220 0.052 44.67);
 }
 
 :root {
