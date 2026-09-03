@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { X, ShoppingBag, Heart } from "lucide-react";
 import { useWishlistActions } from "@/lib/store/wishlist-store-provider";
@@ -31,6 +31,7 @@ export function WelcomePopup() {
   const [visible, setVisible] = useState(false);
   const [animateIn, setAnimateIn] = useState(false);
   const { openWishlist } = useWishlistActions();
+  const popupRef = useRef<HTMLDivElement>(null);
 
   // ✅ Move random picks into state — only set client-side inside useEffect
   const [greeting, setGreeting] = useState(GREETINGS[0]);
@@ -66,6 +67,28 @@ export function WelcomePopup() {
     }, 300);
   }
 
+  // Backup dismiss paths — the X button alone isn't enough if the popup
+  // ever renders partially off-screen (e.g. very narrow window widths).
+  useEffect(() => {
+    if (!visible) return;
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") dismiss();
+    }
+    function handleClickOutside(e: MouseEvent) {
+      if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
+        dismiss();
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [visible]);
+
   function handleWishlistClick() {
     dismiss();
     setTimeout(() => openWishlist(), 350);
@@ -80,10 +103,11 @@ export function WelcomePopup() {
     <div className={`
       fixed bottom-6 left-4 right-4 z-50
       sm:left-auto sm:right-6 sm:w-80
+      max-w-[calc(100vw-2rem)]
       transition-all duration-300 ease-out
       ${animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}
     `}>
-      <div className="relative rounded-2xl border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] shadow-2xl dark:shadow-black/60 overflow-hidden">
+      <div ref={popupRef} className="relative rounded-2xl border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] shadow-2xl dark:shadow-black/60 overflow-hidden">
 
         <div className="h-1 w-full bg-linear-to-r from-brand-400 via-brand-500 to-brand-400" />
 
@@ -91,6 +115,7 @@ export function WelcomePopup() {
           <button
             type="button"
             onClick={dismiss}
+            aria-label="Dismiss"
             className="absolute right-3 top-4 flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-[#1a1a1a] hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
           >
             <X className="h-3.5 w-3.5" />
