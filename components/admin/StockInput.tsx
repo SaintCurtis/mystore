@@ -31,7 +31,7 @@ function StockInputContent(handle: StockInputProps) {
         isOutOfStock &&
           "border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-900/20",
         isLowStock &&
-          "border-blue-300 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20",
+          "border-brand-300 bg-brand-50 dark:border-brand-800 dark:bg-brand-900/20",
       )}
     />
   );

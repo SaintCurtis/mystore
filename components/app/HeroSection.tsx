@@ -52,12 +52,12 @@ export function HeroSection() {
           <div className="flex-1 pb-8 lg:pb-16">
 
             {/* CAC pill */}
-            <div className={`mb-4 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/8 px-3 py-1.5 transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
-              <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
-              <span className="text-xs font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-400 sm:hidden">
+            <div className={`mb-4 inline-flex items-center gap-2 rounded-full border border-brand-500/20 bg-brand-500/8 px-3 py-1.5 transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
+              <span className="h-1.5 w-1.5 rounded-full bg-brand-400 animate-pulse" />
+              <span className="text-xs font-semibold uppercase tracking-widest text-brand-600 dark:text-brand-400 sm:hidden">
                 BN: 9245886 · Est. 2019
               </span>
-              <span className="text-xs font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-400 hidden sm:inline">
+              <span className="text-xs font-semibold uppercase tracking-widest text-brand-600 dark:text-brand-400 hidden sm:inline">
                 BN: 9245886 · Est. 2019 · Computer Sales & Engineering
               </span>
             </div>
@@ -74,7 +74,7 @@ export function HeroSection() {
                   <br />
                   to Buy{" "}
                   <span
-                    className={`text-blue-500 dark:text-blue-400 transition-all duration-350 inline-block ${
+                    className={`text-brand-500 dark:text-brand-400 transition-all duration-350 inline-block ${
                       visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
                     }`}
                   >
@@ -98,7 +98,7 @@ export function HeroSection() {
                 <span className="font-extrabold">to Buy </span>
                 <span className="relative inline-block">
                   <span
-                    className={`font-bold text-blue-500 dark:text-blue-400 transition-all duration-350 inline-block ${
+                    className={`font-bold text-brand-500 dark:text-brand-400 transition-all duration-350 inline-block ${
                       visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3"
                     }`}
                   >
@@ -118,7 +118,7 @@ export function HeroSection() {
             </h1>
 
             {/* Tagline */}
-            <p className={`mt-4 text-sm font-semibold italic text-blue-600 dark:text-blue-400 sm:text-lg transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
+            <p className={`mt-4 text-sm font-semibold italic text-brand-600 dark:text-brand-400 sm:text-lg transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
               Engineer-verified. Warranty on everything. Since 2019.
             </p>
 
@@ -139,7 +139,7 @@ export function HeroSection() {
               {/* Row 1 — primary buttons */}
               <div className="flex flex-wrap items-center gap-3">
                 <Button asChild size="lg"
-                  className="group h-12 bg-blue-500 px-6 sm:px-8 font-display text-sm font-bold tracking-wide text-white shadow-lg shadow-blue-500/25 hover:bg-blue-400 transition-all duration-200">
+                  className="group h-12 bg-brand-500 px-6 sm:px-8 font-display text-sm font-bold tracking-wide text-white shadow-lg shadow-brand-500/25 hover:bg-brand-400 transition-all duration-200">
                   <Link href="/">
                     Shop All Products
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -162,16 +162,16 @@ export function HeroSection() {
               {/* ACASIS announcement strip — slim, clearly a "browse" nudge, not a feature */}
               <Link
                 href="/?category=acasis"
-                className="group flex items-center gap-2.5 rounded-xl border border-blue-200/70 dark:border-blue-500/15 bg-blue-50/60 dark:bg-blue-500/5 px-4 py-2.5 transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50 dark:hover:bg-blue-500/8 w-fit"
+                className="group flex items-center gap-2.5 rounded-xl border border-brand-200/70 dark:border-brand-500/15 bg-brand-50/60 dark:bg-brand-500/5 px-4 py-2.5 transition-all duration-200 hover:border-brand-300 dark:hover:border-brand-500/30 hover:bg-brand-50 dark:hover:bg-brand-500/8 w-fit"
               >
-                <Zap className="h-3.5 w-3.5 shrink-0 text-blue-500 dark:text-blue-400" />
-                <span className="text-xs font-semibold text-blue-700 dark:text-blue-400">
+                <Zap className="h-3.5 w-3.5 shrink-0 text-brand-500 dark:text-brand-400" />
+                <span className="text-xs font-semibold text-brand-700 dark:text-brand-400">
                   ACASIS docks & hubs now in stock
                 </span>
-                <span className="inline-flex items-center rounded-full bg-blue-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-blue-700 dark:text-blue-400">
+                <span className="inline-flex items-center rounded-full bg-brand-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-brand-700 dark:text-brand-400">
                   NEW
                 </span>
-                <ArrowRight className="h-3 w-3 shrink-0 text-blue-400 transition-transform group-hover:translate-x-0.5" />
+                <ArrowRight className="h-3 w-3 shrink-0 text-brand-400 transition-transform group-hover:translate-x-0.5" />
               </Link>
 
               {/* Row 2 — AI action cards */}
@@ -179,14 +179,14 @@ export function HeroSection() {
 
                 {/* Build My Setup */}
                 <Link href="/build-my-setup"
-                  className="group flex items-center gap-4 rounded-2xl border border-blue-200 dark:border-blue-500/20 bg-linear-to-r from-blue-50 to-blue-50 dark:from-blue-500/8 dark:to-blue-500/5 px-4 py-3.5 transition-all duration-200 hover:border-blue-400 dark:hover:border-blue-500/40 hover:shadow-md hover:shadow-blue-500/10 flex-1">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/15 dark:bg-blue-500/10 group-hover:bg-blue-500/25 transition-colors">
-                    <Wand2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  className="group flex items-center gap-4 rounded-2xl border border-brand-200 dark:border-brand-500/20 bg-linear-to-r from-brand-50 to-brand-50 dark:from-brand-500/8 dark:to-brand-500/5 px-4 py-3.5 transition-all duration-200 hover:border-brand-400 dark:hover:border-brand-500/40 hover:shadow-md hover:shadow-brand-500/10 flex-1">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-500/15 dark:bg-brand-500/10 group-hover:bg-brand-500/25 transition-colors">
+                    <Wand2 className="h-5 w-5 text-brand-600 dark:text-brand-400" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-zinc-900 dark:text-[#f1f1f1] flex items-center gap-1.5">
                       Build My Setup
-                      <span className="inline-flex items-center gap-0.5 rounded-full bg-blue-500/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-700 dark:text-blue-400">
+                      <span className="inline-flex items-center gap-0.5 rounded-full bg-brand-500/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-700 dark:text-brand-400">
                         <Sparkles className="h-2.5 w-2.5" /> AI
                       </span>
                     </p>
@@ -194,7 +194,7 @@ export function HeroSection() {
                       Tell our AI your budget & needs
                     </p>
                   </div>
-                  <ArrowRight className="h-4 w-4 shrink-0 text-blue-500 dark:text-blue-400 transition-transform group-hover:translate-x-1" />
+                  <ArrowRight className="h-4 w-4 shrink-0 text-brand-500 dark:text-brand-400 transition-transform group-hover:translate-x-1" />
                 </Link>
 
                 {/* Get a Quotation — mobile card */}
@@ -238,8 +238,8 @@ export function HeroSection() {
           <div className={`hidden lg:flex flex-col gap-3 pb-16 w-64 shrink-0 transition-all duration-700 delay-500 ${mounted ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"}`}>
             {TRUST_BADGES.map(({ icon: Icon, label, sub }) => (
               <div key={label} className="flex items-center gap-3 rounded-xl border border-zinc-200 dark:border-[#1f1f1f] bg-white dark:bg-[#111111] px-4 py-3.5 transition-colors">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/10">
-                  <Icon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-500/10">
+                  <Icon className="h-4 w-4 text-brand-600 dark:text-brand-400" />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-zinc-900 dark:text-[#f1f1f1]">{label}</p>

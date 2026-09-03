@@ -53,11 +53,11 @@ export function PaymentPlanCalculator({ price, productName, productUrl }: Paymen
         className="flex w-full items-center justify-between px-4 py-3 bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
       >
         <div className="flex items-center gap-2.5">
-          <Calculator className="h-4 w-4 text-blue-500 shrink-0" />
+          <Calculator className="h-4 w-4 text-brand-500 shrink-0" />
           <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
             Payment Plan Calculator
           </span>
-          <span className="hidden sm:inline-flex items-center rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-600 dark:text-blue-400">
+          <span className="hidden sm:inline-flex items-center rounded-full bg-brand-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-600 dark:text-brand-400">
             Instalment options
           </span>
         </div>
@@ -85,7 +85,7 @@ export function PaymentPlanCalculator({ price, productName, productUrl }: Paymen
                   onClick={() => setSelected(p.months)}
                   className={`flex flex-col items-center rounded-xl border py-2.5 px-1 text-center transition-all duration-150 ${
                     selected === p.months
-                      ? "border-blue-500 bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                      ? "border-brand-500 bg-brand-500/10 text-brand-600 dark:text-brand-400"
                       : "border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-600"
                   }`}
                 >
@@ -129,7 +129,7 @@ export function PaymentPlanCalculator({ price, productName, productUrl }: Paymen
               <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
                 Monthly payment
               </span>
-              <span className="text-lg font-extrabold text-blue-500 dark:text-blue-400">
+              <span className="text-lg font-extrabold text-brand-500 dark:text-brand-400">
                 {formatInCurrency(monthly)}
                 <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-500">
                   /mo

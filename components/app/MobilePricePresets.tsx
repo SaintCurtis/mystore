@@ -55,8 +55,8 @@ export function MobilePricePresets() {
                 flex shrink-0 items-center gap-1 rounded-full px-4 py-2
                 text-[13px] font-bold whitespace-nowrap transition-all duration-150 border
                 ${active
-                  ? "bg-blue-500 border-blue-500 text-white shadow-md shadow-blue-500/30 scale-105"
-                  : "bg-white dark:bg-[#111111] border-zinc-300 dark:border-[#2a2a2a] text-zinc-700 dark:text-zinc-200 hover:border-blue-400 dark:hover:border-blue-500/50 hover:text-blue-600 dark:hover:text-blue-400"
+                  ? "bg-brand-500 border-brand-500 text-white shadow-md shadow-brand-500/30 scale-105"
+                  : "bg-white dark:bg-[#111111] border-zinc-300 dark:border-[#2a2a2a] text-zinc-700 dark:text-zinc-200 hover:border-brand-400 dark:hover:border-brand-500/50 hover:text-brand-600 dark:hover:text-brand-400"
                 }
               `}
             >

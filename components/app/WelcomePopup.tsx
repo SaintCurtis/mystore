@@ -85,7 +85,7 @@ export function WelcomePopup() {
     `}>
       <div className="relative rounded-2xl border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] shadow-2xl dark:shadow-black/60 overflow-hidden">
 
-        <div className="h-1 w-full bg-linear-to-r from-blue-400 via-blue-500 to-blue-400" />
+        <div className="h-1 w-full bg-linear-to-r from-brand-400 via-brand-500 to-brand-400" />
 
         <div className="p-5">
           <button
@@ -101,7 +101,7 @@ export function WelcomePopup() {
             <div>
               <p className="font-display text-base font-bold text-zinc-900 dark:text-[#f1f1f1] leading-snug">
                 {greeting.text},{" "}
-                <span className="text-blue-600 dark:text-blue-400">
+                <span className="text-brand-600 dark:text-brand-400">
                   {isSignedIn && firstName ? firstName : "Chief"}
                 </span>
                 !
@@ -116,7 +116,7 @@ export function WelcomePopup() {
             <button
               type="button"
               onClick={handleWishlistClick}
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-500 px-4 py-2.5 text-sm font-bold text-white hover:bg-blue-400 transition-colors shadow-sm shadow-blue-500/20"
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand-500 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-400 transition-colors shadow-sm shadow-brand-500/20"
             >
               <Heart className="h-4 w-4" />
               View Wishlist

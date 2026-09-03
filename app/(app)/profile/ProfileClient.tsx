@@ -62,7 +62,7 @@ interface ProfileClientProps {
 // ── Styles ────────────────────────────────────────────────────────────────
 
 const inputClass =
-  "w-full rounded-lg border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] px-3 py-2.5 text-sm text-zinc-900 dark:text-[#f1f1f1] placeholder-zinc-400 dark:placeholder-[#555] focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-colors";
+  "w-full rounded-lg border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] px-3 py-2.5 text-sm text-zinc-900 dark:text-[#f1f1f1] placeholder-zinc-400 dark:placeholder-[#555] focus:border-brand-500 dark:focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500/30 transition-colors";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -259,7 +259,7 @@ export function ProfileClient({
           onClick={() => onSelect(v)}
           className={`rounded-lg border py-2 text-xs font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
             current === v
-              ? "border-blue-500 bg-blue-500/10 text-blue-600 dark:text-blue-400"
+              ? "border-brand-500 bg-brand-500/10 text-brand-600 dark:text-brand-400"
               : "border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-600"
           }`}
         >
@@ -283,7 +283,7 @@ export function ProfileClient({
 
         {/* Profile header */}
         <div className="mb-8 flex items-center gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-blue-500 shadow-lg shadow-blue-500/20">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-brand-500 shadow-lg shadow-brand-500/20">
             <span className="text-lg font-extrabold text-white">{initials || "?"}</span>
           </div>
           <div className="min-w-0">
@@ -311,7 +311,7 @@ export function ProfileClient({
               }}
               className={`flex shrink-0 items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${
                 tab === t.id
-                  ? "bg-blue-500 text-white"
+                  ? "bg-brand-500 text-white"
                   : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-[#1a1a1a]"
               }`}
             >
@@ -329,13 +329,13 @@ export function ProfileClient({
             <div className="rounded-xl border border-zinc-200 dark:border-[#1a1a1a] bg-white dark:bg-[#111111] p-5">
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-center gap-2">
-                  <Gift className="h-4 w-4 text-blue-500" />
+                  <Gift className="h-4 w-4 text-brand-500" />
                   <p className="text-xs font-bold uppercase tracking-widest text-zinc-400">Birthday</p>
                 </div>
                 {currentBirthday && !editingBirthday && (
                   <button
                     onClick={() => setEditingBirthday(true)}
-                    className="text-zinc-300 dark:text-zinc-600 hover:text-blue-500 transition-colors"
+                    className="text-zinc-300 dark:text-zinc-600 hover:text-brand-500 transition-colors"
                     title="Edit birthday"
                   >
                     <Pencil className="h-3.5 w-3.5" />
@@ -349,11 +349,11 @@ export function ProfileClient({
                 </p>
               ) : currentBirthday && !editingBirthday ? (
                 isBirthdayToday(currentBirthday) ? (
-                  <p className="text-lg font-extrabold text-blue-600 dark:text-blue-400">
+                  <p className="text-lg font-extrabold text-brand-600 dark:text-brand-400">
                     🎉 Happy Birthday, {firstName}! Turning {ageFromBirthday(currentBirthday)} today.
                   </p>
                 ) : daysUntilNextBirthday(currentBirthday) <= 14 ? (
-                  <p className="text-lg font-extrabold text-blue-600 dark:text-blue-400">
+                  <p className="text-lg font-extrabold text-brand-600 dark:text-brand-400">
                     🎉 {daysUntilNextBirthday(currentBirthday)} days until your birthday —
                     turning {ageFromBirthday(currentBirthday) + 1}!
                   </p>
@@ -409,7 +409,7 @@ export function ProfileClient({
               <Button
                 onClick={saveBirthdaySettings}
                 disabled={savingBirthday || (editingBirthday && !birthdayInput)}
-                className="mt-4 w-full bg-blue-500 hover:bg-blue-400 text-white font-bold"
+                className="mt-4 w-full bg-brand-500 hover:bg-brand-400 text-white font-bold"
               >
                 {savingBirthday ? "Saving..." : "Save"}
               </Button>
@@ -437,10 +437,10 @@ export function ProfileClient({
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-zinc-900 dark:text-[#f1f1f1] truncate group-hover:text-blue-500 transition-colors">
+                    <p className="text-sm font-bold text-zinc-900 dark:text-[#f1f1f1] truncate group-hover:text-brand-500 transition-colors">
                       {gadgetGoal.product.name}
                     </p>
-                    <p className="text-sm text-blue-500 font-semibold">{formatInCurrency(gadgetGoal.product.price ?? 0)}</p>
+                    <p className="text-sm text-brand-500 font-semibold">{formatInCurrency(gadgetGoal.product.price ?? 0)}</p>
                   </div>
                   <ExternalLink className="h-4 w-4 text-zinc-300 dark:text-zinc-600 shrink-0" />
                 </Link>
@@ -454,15 +454,15 @@ export function ProfileClient({
 
             {/* At a glance */}
             <div className="grid grid-cols-3 gap-3">
-              <button onClick={() => setTab("orders")} className="rounded-xl border border-zinc-200 dark:border-[#1a1a1a] bg-white dark:bg-[#111111] p-4 text-center hover:border-blue-500/30 transition-colors">
+              <button onClick={() => setTab("orders")} className="rounded-xl border border-zinc-200 dark:border-[#1a1a1a] bg-white dark:bg-[#111111] p-4 text-center hover:border-brand-500/30 transition-colors">
                 <p className="text-2xl font-extrabold text-zinc-900 dark:text-[#f1f1f1]">{orders.length}</p>
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400 mt-1">Orders</p>
               </button>
-              <button onClick={() => setTab("wishlist")} className="rounded-xl border border-zinc-200 dark:border-[#1a1a1a] bg-white dark:bg-[#111111] p-4 text-center hover:border-blue-500/30 transition-colors">
+              <button onClick={() => setTab("wishlist")} className="rounded-xl border border-zinc-200 dark:border-[#1a1a1a] bg-white dark:bg-[#111111] p-4 text-center hover:border-brand-500/30 transition-colors">
                 <p className="text-2xl font-extrabold text-zinc-900 dark:text-[#f1f1f1]">{wishlist.length}</p>
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400 mt-1">Wishlist</p>
               </button>
-              <button onClick={() => setTab("layaway")} className="rounded-xl border border-zinc-200 dark:border-[#1a1a1a] bg-white dark:bg-[#111111] p-4 text-center hover:border-blue-500/30 transition-colors">
+              <button onClick={() => setTab("layaway")} className="rounded-xl border border-zinc-200 dark:border-[#1a1a1a] bg-white dark:bg-[#111111] p-4 text-center hover:border-brand-500/30 transition-colors">
                 <p className="text-2xl font-extrabold text-zinc-900 dark:text-[#f1f1f1]">{activeLayawayPlans.length}</p>
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400 mt-1">Layaway</p>
               </button>
@@ -489,7 +489,7 @@ export function ProfileClient({
                 )}
                 <Link
                   href="/orders"
-                  className="flex items-center justify-center gap-1.5 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline py-2"
+                  className="flex items-center justify-center gap-1.5 text-sm font-semibold text-brand-600 dark:text-brand-400 hover:underline py-2"
                 >
                   View full order history
                 </Link>
@@ -531,12 +531,12 @@ export function ProfileClient({
                     </Link>
                     <div className="p-3">
                       <Link href={`/products/${item.slug}`}>
-                        <p className="text-xs font-semibold text-zinc-900 dark:text-[#f1f1f1] line-clamp-2 mb-1 hover:text-blue-500 transition-colors">
+                        <p className="text-xs font-semibold text-zinc-900 dark:text-[#f1f1f1] line-clamp-2 mb-1 hover:text-brand-500 transition-colors">
                           {item.name}
                         </p>
                       </Link>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-bold text-blue-500">{formatInCurrency(item.price ?? 0)}</span>
+                        <span className="text-sm font-bold text-brand-500">{formatInCurrency(item.price ?? 0)}</span>
                         <button
                           onClick={() => removeFromWishlist(item._id)}
                           className="p-1 text-zinc-300 dark:text-zinc-600 hover:text-red-500 transition-colors"
@@ -586,7 +586,7 @@ export function ProfileClient({
                           </p>
                           <p className="text-xs text-zinc-400">{plan.planNumber}</p>
                         </div>
-                        <Badge className={plan.status === "completed" ? "bg-emerald-100 text-emerald-800" : "bg-blue-100 text-blue-800"}>
+                        <Badge className={plan.status === "completed" ? "bg-emerald-100 text-emerald-800" : "bg-brand-100 text-brand-800"}>
                           {plan.status === "completed" ? "Fully Paid" : plan.status === "reserved" ? "Reserved" : "Active"}
                         </Badge>
                       </div>
@@ -600,7 +600,7 @@ export function ProfileClient({
                           <span className="font-bold text-zinc-800 dark:text-zinc-200">{formatInCurrency(plan.amountPaid)}</span> of {formatInCurrency(plan.totalAmount)} ({pct}%)
                         </span>
                         {plan.status !== "completed" && (
-                          <span className="font-semibold text-blue-500">{formatInCurrency(remaining)} left</span>
+                          <span className="font-semibold text-brand-500">{formatInCurrency(remaining)} left</span>
                         )}
                       </div>
 
@@ -686,10 +686,10 @@ export function ProfileClient({
                       key={i}
                       className="flex items-center gap-3 rounded-lg border border-zinc-100 dark:border-[#1a1a1a] bg-zinc-50 dark:bg-[#0d0d0d] px-3 py-2.5"
                     >
-                      <Phone className="h-4 w-4 text-blue-500 shrink-0" />
+                      <Phone className="h-4 w-4 text-brand-500 shrink-0" />
                       <span className="text-sm text-zinc-900 dark:text-[#f1f1f1] flex-1">{phone}</span>
                       {i === 0 && (
-                        <span className="flex items-center gap-1 text-[9px] font-bold bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded-full uppercase tracking-wide">
+                        <span className="flex items-center gap-1 text-[9px] font-bold bg-brand-100 dark:bg-brand-950/40 text-brand-700 dark:text-brand-400 px-2 py-0.5 rounded-full uppercase tracking-wide">
                           <CheckCircle className="h-2.5 w-2.5" /> Primary
                         </span>
                       )}
@@ -710,7 +710,7 @@ export function ProfileClient({
                 <Button
                   onClick={addPhone}
                   disabled={saving || !newPhone.trim()}
-                  className="shrink-0 bg-blue-500 hover:bg-blue-400 text-white font-bold"
+                  className="shrink-0 bg-brand-500 hover:bg-brand-400 text-white font-bold"
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
@@ -734,7 +734,7 @@ export function ProfileClient({
                 </p>
                 <Link
                   href="/"
-                  className="inline-flex mt-4 rounded-lg bg-blue-500 hover:bg-blue-400 px-5 py-2 text-sm font-bold text-white transition-colors"
+                  className="inline-flex mt-4 rounded-lg bg-brand-500 hover:bg-brand-400 px-5 py-2 text-sm font-bold text-white transition-colors"
                 >
                   Start Shopping
                 </Link>
@@ -745,7 +745,7 @@ export function ProfileClient({
                   key={addr._key}
                   className={`rounded-xl border bg-white dark:bg-[#111111] p-4 transition-colors ${
                     addr.isDefault
-                      ? "border-blue-200 dark:border-blue-500/20"
+                      ? "border-brand-200 dark:border-brand-500/20"
                       : "border-zinc-200 dark:border-[#1a1a1a]"
                   }`}
                 >
@@ -754,7 +754,7 @@ export function ProfileClient({
                       {addr.isDefault && <Star className="h-3.5 w-3.5 shrink-0 fill-amber-500 text-amber-500" />}
                       <span className="text-sm font-semibold text-zinc-900 dark:text-[#f1f1f1]">{addr.label}</span>
                       {addr.isDefault && (
-                        <span className="text-[9px] font-bold bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded-full uppercase tracking-wide">
+                        <span className="text-[9px] font-bold bg-brand-100 dark:bg-brand-950/40 text-brand-700 dark:text-brand-400 px-2 py-0.5 rounded-full uppercase tracking-wide">
                           Default
                         </span>
                       )}
@@ -810,7 +810,7 @@ function OrderSection({
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
-        <Icon className="h-4 w-4 text-blue-500" />
+        <Icon className="h-4 w-4 text-brand-500" />
         <p className="text-xs font-bold uppercase tracking-widest text-zinc-400">{title}</p>
         <span className="text-xs text-zinc-400">({orders.length})</span>
       </div>
@@ -828,7 +828,7 @@ function OrderSection({
               <Link
                 key={order._id}
                 href={`/orders/${order._id}`}
-                className="group block rounded-xl border border-zinc-200 dark:border-[#1a1a1a] bg-white dark:bg-[#111111] transition-all hover:border-zinc-300 dark:hover:border-blue-500/20"
+                className="group block rounded-xl border border-zinc-200 dark:border-[#1a1a1a] bg-white dark:bg-[#111111] transition-all hover:border-zinc-300 dark:hover:border-brand-500/20"
               >
                 <div className="flex gap-4 p-4">
                   <StackedProductImages images={images} totalCount={order.itemCount ?? 0} size="md" />
@@ -845,7 +845,7 @@ function OrderSection({
                         {status.label}
                       </Badge>
                     </div>
-                    <p className="mt-1 text-sm font-semibold text-zinc-900 dark:text-blue-400">
+                    <p className="mt-1 text-sm font-semibold text-zinc-900 dark:text-brand-400">
                       {formatPrice(order.total)}
                     </p>
                   </div>

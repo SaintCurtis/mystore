@@ -294,7 +294,7 @@ export function ProductFilters({
       >
         {children}
         {isActive && (
-          <Badge className="ml-2 h-5 bg-blue-500 px-1.5 text-xs text-white hover:bg-blue-500">
+          <Badge className="ml-2 h-5 bg-brand-500 px-1.5 text-xs text-white hover:bg-brand-500">
             Active
           </Badge>
         )}
@@ -314,9 +314,9 @@ export function ProductFilters({
   return (
     <div className="space-y-6 rounded-xl border border-zinc-800 bg-zinc-900 p-6">
       {hasActiveFilters && (
-        <div className="rounded-lg border border-blue-700/50 bg-blue-500/10 p-3">
+        <div className="rounded-lg border border-brand-700/50 bg-brand-500/10 p-3">
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-sm font-medium text-blue-300">
+            <span className="text-sm font-medium text-brand-300">
               {activeFilters.length}{" "}
               {activeFilters.length === 1 ? "filter" : "filters"} applied
             </span>
@@ -324,7 +324,7 @@ export function ProductFilters({
           <Button
             size="sm"
             onClick={handleClearFilters}
-            className="w-full bg-blue-500 text-white font-semibold hover:bg-blue-400"
+            className="w-full bg-brand-500 text-white font-semibold hover:bg-brand-400"
           >
             <X className="mr-2 h-4 w-4" />
             Clear All Filters
@@ -343,13 +343,13 @@ export function ProductFilters({
             placeholder="Search products..."
             defaultValue={currentSearch}
             className={`flex-1 bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 ${
-              isSearchActive ? "border-blue-500 ring-1 ring-blue-500" : ""
+              isSearchActive ? "border-brand-500 ring-1 ring-brand-500" : ""
             }`}
           />
           <Button
             type="submit"
             size="sm"
-            className="bg-blue-500 text-white hover:bg-blue-400"
+            className="bg-brand-500 text-white hover:bg-brand-400"
           >
             Go
           </Button>
@@ -374,7 +374,7 @@ export function ProductFilters({
         >
           <SelectTrigger
             className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${
-              isCategoryActive ? "border-blue-500 ring-1 ring-blue-500" : ""
+              isCategoryActive ? "border-brand-500 ring-1 ring-brand-500" : ""
             }`}
           >
             <SelectValue placeholder="All Categories" />
@@ -419,7 +419,7 @@ export function ProductFilters({
               >
                 <SelectTrigger
                   className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${
-                    isActive ? "border-blue-500 ring-1 ring-blue-500" : ""
+                    isActive ? "border-brand-500 ring-1 ring-brand-500" : ""
                   }`}
                 >
                   <SelectValue placeholder={`All ${pluralize(level.label)}`} />
@@ -460,7 +460,7 @@ export function ProductFilters({
           >
             <SelectTrigger
               className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${
-                isConditionActive ? "border-blue-500 ring-1 ring-blue-500" : ""
+                isConditionActive ? "border-brand-500 ring-1 ring-brand-500" : ""
               }`}
             >
               <SelectValue placeholder="Any Condition" />
@@ -497,7 +497,7 @@ export function ProductFilters({
           >
             <SelectTrigger
               className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${
-                isBrandActive ? "border-blue-500 ring-1 ring-blue-500" : ""
+                isBrandActive ? "border-brand-500 ring-1 ring-brand-500" : ""
               }`}
             >
               <SelectValue placeholder="All Brands" />
@@ -534,7 +534,7 @@ export function ProductFilters({
           >
             <SelectTrigger
               className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${
-                isModelActive ? "border-blue-500 ring-1 ring-blue-500" : ""
+                isModelActive ? "border-brand-500 ring-1 ring-brand-500" : ""
               }`}
             >
               <SelectValue placeholder="All Models" />
@@ -588,7 +588,7 @@ export function ProductFilters({
             onChange={(e) =>
               updateParams({ inStock: e.target.checked ? "true" : null })
             }
-            className="h-5 w-5 rounded border-zinc-600 bg-zinc-800 text-blue-500 focus:ring-blue-500"
+            className="h-5 w-5 rounded border-zinc-600 bg-zinc-800 text-brand-500 focus:ring-brand-500"
           />
           <span
             className={`text-sm font-medium ${
@@ -597,7 +597,7 @@ export function ProductFilters({
           >
             In stock only
             {isInStockActive && (
-              <Badge className="ml-2 h-5 bg-blue-500 px-1.5 text-xs text-white hover:bg-blue-500">
+              <Badge className="ml-2 h-5 bg-brand-500 px-1.5 text-xs text-white hover:bg-brand-500">
                 Active
               </Badge>
             )}
@@ -641,7 +641,7 @@ export function ProductFilters({
           <span className="flex items-center gap-2">
             More Filters
             {(isColorActive || isMaterialActive) && (
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[9px] font-bold text-white">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-brand-500 text-[9px] font-bold text-white">
                 {[isColorActive, isMaterialActive].filter(Boolean).length}
               </span>
             )}
@@ -667,7 +667,7 @@ export function ProductFilters({
               >
                 <SelectTrigger
                   className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${
-                    isColorActive ? "border-blue-500 ring-1 ring-blue-500" : ""
+                    isColorActive ? "border-brand-500 ring-1 ring-brand-500" : ""
                   }`}
                 >
                   <SelectValue placeholder="All Colors" />
@@ -702,7 +702,7 @@ export function ProductFilters({
               >
                 <SelectTrigger
                   className={`bg-zinc-800 border-zinc-700 text-zinc-100 ${
-                    isMaterialActive ? "border-blue-500 ring-1 ring-blue-500" : ""
+                    isMaterialActive ? "border-brand-500 ring-1 ring-brand-500" : ""
                   }`}
                 >
                   <SelectValue placeholder="All Materials" />

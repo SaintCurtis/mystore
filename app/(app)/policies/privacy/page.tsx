@@ -20,8 +20,8 @@ export default function PrivacyPolicyPage() {
         </Link>
 
         <div className="flex items-center gap-4 mb-10">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 border border-blue-500/20">
-            <Lock className="h-6 w-6 text-blue-500" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-500/10 border border-brand-500/20">
+            <Lock className="h-6 w-6 text-brand-500" />
           </div>
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
@@ -146,7 +146,7 @@ export default function PrivacyPolicyPage() {
             </ul>
             <p>
               To exercise any of these rights, contact us at{" "}
-              <a href="mailto:iamsaintcurtis@gmail.com" className="text-blue-600 dark:text-blue-400 underline underline-offset-2">
+              <a href="mailto:iamsaintcurtis@gmail.com" className="text-brand-600 dark:text-brand-400 underline underline-offset-2">
                 iamsaintcurtis@gmail.com
               </a>.
             </p>
@@ -169,13 +169,13 @@ export default function PrivacyPolicyPage() {
             </p>
           </Section>
 
-          <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-5">
-            <p className="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-1">
+          <div className="rounded-xl border border-brand-500/20 bg-brand-500/5 p-5">
+            <p className="text-sm font-semibold text-brand-600 dark:text-brand-400 mb-1">
               Privacy concerns?
             </p>
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
               Email us at{" "}
-              <a href="mailto:iamsaintcurtis@gmail.com" className="text-blue-600 dark:text-blue-400 underline underline-offset-2">
+              <a href="mailto:iamsaintcurtis@gmail.com" className="text-brand-600 dark:text-brand-400 underline underline-offset-2">
                 iamsaintcurtis@gmail.com
               </a>{" "}
               and we will respond within 48 hours.

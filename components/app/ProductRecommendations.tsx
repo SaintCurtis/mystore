@@ -56,8 +56,8 @@ export function ProductRecommendations({
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
-              <Sparkles className="h-4 w-4 text-blue-500 dark:text-blue-400" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500/10">
+              <Sparkles className="h-4 w-4 text-brand-500 dark:text-brand-400" />
             </div>
             <div>
               <h2 className="font-display text-lg font-bold text-zinc-900 dark:text-[#f1f1f1]">
@@ -89,7 +89,7 @@ export function ProductRecommendations({
               <Link
                 key={product._id}
                 href={`/products/${product.slug}`}
-                className="group flex flex-col overflow-hidden rounded-2xl border border-zinc-200 dark:border-[#1f1f1f] bg-white dark:bg-[#111111] transition-all duration-300 hover:-translate-y-1 hover:border-zinc-300 dark:hover:border-blue-500/20 hover:shadow-lg dark:hover:shadow-[0_8px_32px_rgba(0,0,0,0.6)]"
+                className="group flex flex-col overflow-hidden rounded-2xl border border-zinc-200 dark:border-[#1f1f1f] bg-white dark:bg-[#111111] transition-all duration-300 hover:-translate-y-1 hover:border-zinc-300 dark:hover:border-brand-500/20 hover:shadow-lg dark:hover:shadow-[0_8px_32px_rgba(0,0,0,0.6)]"
               >
                 {/* Image */}
                 <div className="relative aspect-square overflow-hidden bg-zinc-100 dark:bg-[#0d0d0d]">
@@ -111,14 +111,14 @@ export function ProductRecommendations({
                 {/* Info */}
                 <div className="flex flex-col gap-1 p-4">
                   {product.categoryTitle && (
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400 truncate">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-brand-600 dark:text-brand-400 truncate">
                       {product.categoryTitle}
                     </span>
                   )}
                   <p className="text-sm font-semibold text-zinc-900 dark:text-[#f1f1f1] line-clamp-2 leading-snug">
                     {product.name}
                   </p>
-                  <p className="mt-1 text-base font-bold text-zinc-900 dark:text-blue-400">
+                  <p className="mt-1 text-base font-bold text-zinc-900 dark:text-brand-400">
                     {formatPrice(product.price)}
                   </p>
                 </div>

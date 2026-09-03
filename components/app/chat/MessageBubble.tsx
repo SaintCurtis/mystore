@@ -21,13 +21,13 @@ export function MessageBubble({
         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
           isUser
             ? "bg-zinc-900 dark:bg-zinc-100"
-            : "bg-blue-100 dark:bg-blue-900/30"
+            : "bg-brand-100 dark:bg-brand-900/30"
         }`}
       >
         {isUser ? (
           <User className="h-4 w-4 text-white dark:text-zinc-900" />
         ) : (
-          <Bot className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+          <Bot className="h-4 w-4 text-brand-600 dark:text-brand-400" />
         )}
       </div>
 

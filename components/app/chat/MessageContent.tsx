@@ -28,7 +28,7 @@ export function MessageContent({
               <Link
                 href={href}
                 onClick={handleCloseChat}
-                className="text-blue-600 hover:text-blue-700 underline underline-offset-2 transition-colors dark:text-blue-400 dark:hover:text-blue-300"
+                className="text-brand-600 hover:text-brand-700 underline underline-offset-2 transition-colors dark:text-brand-400 dark:hover:text-brand-300"
               >
                 {children}
               </Link>
@@ -39,7 +39,7 @@ export function MessageContent({
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-700 underline underline-offset-2 transition-colors dark:text-blue-400 dark:hover:text-blue-300"
+              className="text-brand-600 hover:text-brand-700 underline underline-offset-2 transition-colors dark:text-brand-400 dark:hover:text-brand-300"
             >
               {children}
             </a>

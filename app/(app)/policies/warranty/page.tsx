@@ -22,8 +22,8 @@ export default function WarrantyPolicyPage() {
 
         {/* Header */}
         <div className="flex items-center gap-4 mb-10">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 border border-blue-500/20">
-            <ShieldCheck className="h-6 w-6 text-blue-500" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-500/10 border border-brand-500/20">
+            <ShieldCheck className="h-6 w-6 text-brand-500" />
           </div>
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
@@ -184,21 +184,21 @@ function Table({ headers, rows }: { headers: string[]; rows: string[][] }) {
 
 function ContactBlock() {
   return (
-    <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-5 mt-8">
-      <p className="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-1">
+    <div className="rounded-xl border border-brand-500/20 bg-brand-500/5 p-5 mt-8">
+      <p className="text-sm font-semibold text-brand-600 dark:text-brand-400 mb-1">
         Questions about your warranty?
       </p>
       <p className="text-sm text-zinc-600 dark:text-zinc-400">
         Contact us on{" "}
-        <a href="https://wa.me/2349060898951" className="text-blue-600 dark:text-blue-400 underline underline-offset-2">
+        <a href="https://wa.me/2349060898951" className="text-brand-600 dark:text-brand-400 underline underline-offset-2">
           WhatsApp
         </a>
         ,{" "}
-        <a href="mailto:iamsaintcurtis@gmail.com" className="text-blue-600 dark:text-blue-400 underline underline-offset-2">
+        <a href="mailto:iamsaintcurtis@gmail.com" className="text-brand-600 dark:text-brand-400 underline underline-offset-2">
           email
         </a>
         , or{" "}
-        <a href="https://t.me/oluwasaintcurtis" className="text-blue-600 dark:text-blue-400 underline underline-offset-2">
+        <a href="https://t.me/oluwasaintcurtis" className="text-brand-600 dark:text-brand-400 underline underline-offset-2">
           Telegram
         </a>
         . We respond within 24 hours.

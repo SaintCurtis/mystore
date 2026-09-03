@@ -15,12 +15,12 @@ export function AboutSection() {
 
           {/* Left */}
           <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-400">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-brand-600 dark:text-brand-400">
               About The Saint's TechNet
             </p>
             <h2 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-[#f1f1f1] sm:text-4xl">
               Engineering Expertise.{" "}
-              <span className="text-blue-600 dark:text-blue-400">Not Just</span>{" "}
+              <span className="text-brand-600 dark:text-brand-400">Not Just</span>{" "}
               Sales.
             </h2>
 
@@ -46,7 +46,7 @@ export function AboutSection() {
                 { value: "100%", label: "Verified products" },
               ].map(({ value, label }) => (
                 <div key={label}>
-                  <p className="text-3xl font-extrabold text-blue-600 dark:text-blue-400">{value}</p>
+                  <p className="text-3xl font-extrabold text-brand-600 dark:text-brand-400">{value}</p>
                   <p className="mt-1 text-xs text-zinc-500 dark:text-[#a3a3a3]">{label}</p>
                 </div>
               ))}
@@ -59,11 +59,11 @@ export function AboutSection() {
             <div className="space-y-10">
               {MILESTONES.map(({ icon: Icon, year, title, desc }) => (
                 <div key={year} className="relative flex gap-6 pl-14">
-                  <div className="absolute left-0 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-blue-500/30 bg-blue-500/8 dark:bg-blue-500/6">
-                    <Icon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <div className="absolute left-0 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-brand-500/30 bg-brand-500/8 dark:bg-brand-500/6">
+                    <Icon className="h-4 w-4 text-brand-600 dark:text-brand-400" />
                   </div>
                   <div>
-                    <span className="mb-1 inline-block rounded-full bg-zinc-200 dark:bg-[#1a1a1a] px-3 py-0.5 text-xs font-semibold text-blue-600 dark:text-blue-400">
+                    <span className="mb-1 inline-block rounded-full bg-zinc-200 dark:bg-[#1a1a1a] px-3 py-0.5 text-xs font-semibold text-brand-600 dark:text-brand-400">
                       {year}
                     </span>
                     <h3 className="mt-1 text-base font-bold text-zinc-900 dark:text-[#f1f1f1]">{title}</h3>

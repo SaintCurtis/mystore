@@ -100,7 +100,7 @@ export function WishlistSheet() {
               </div>
               <Button
                 onClick={closeWishlist}
-                className="mt-2 bg-blue-500 text-white hover:bg-blue-400 font-semibold"
+                className="mt-2 bg-brand-500 text-white hover:bg-brand-400 font-semibold"
               >
                 Browse Products
               </Button>
@@ -138,7 +138,7 @@ export function WishlistSheet() {
                     <Link
                       href={`/products/${item.slug}`}
                       onClick={closeWishlist}
-                      className="line-clamp-2 text-sm font-semibold text-zinc-900 dark:text-[#f1f1f1] hover:text-blue-600 dark:hover:text-blue-400 transition-colors leading-snug"
+                      className="line-clamp-2 text-sm font-semibold text-zinc-900 dark:text-[#f1f1f1] hover:text-brand-600 dark:hover:text-brand-400 transition-colors leading-snug"
                     >
                       {item.name}
                     </Link>
@@ -147,7 +147,7 @@ export function WishlistSheet() {
                         {item.categoryTitle}
                       </span>
                     )}
-                    <p className="text-base font-bold text-zinc-900 dark:text-blue-400">
+                    <p className="text-base font-bold text-zinc-900 dark:text-brand-400">
                       {formatPrice(item.price)}
                     </p>
 
@@ -156,7 +156,7 @@ export function WishlistSheet() {
                       <button
                         type="button"
                         onClick={() => handleMoveToCart(item)}
-                        className="flex items-center gap-1.5 rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-400 transition-colors"
+                        className="flex items-center gap-1.5 rounded-lg bg-brand-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-400 transition-colors"
                       >
                         <ShoppingCart className="h-3 w-3" />
                         Add to Cart
@@ -180,7 +180,7 @@ export function WishlistSheet() {
         {items.length > 0 && (
           <div className="border-t border-zinc-100 dark:border-[#1a1a1a] px-5 py-4 space-y-2">
             <Button
-              className="w-full bg-blue-500 text-white font-bold hover:bg-blue-400 h-11"
+              className="w-full bg-brand-500 text-white font-bold hover:bg-brand-400 h-11"
               onClick={() => {
                 items.forEach((item) =>
                   addToCart({

@@ -22,7 +22,7 @@ export function StockBadge({ productId, stock, className }: StockBadgeProps) {
     return (
       <Badge
         variant="secondary"
-        className={cn("w-fit shrink-0 bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-400", className)}
+        className={cn("w-fit shrink-0 bg-brand-100 text-brand-800 dark:bg-brand-500/15 dark:text-brand-400", className)}
       >
         Max in cart
       </Badge>
@@ -34,7 +34,7 @@ export function StockBadge({ productId, stock, className }: StockBadgeProps) {
       <Badge
         variant="secondary"
         className={cn(
-          "w-fit shrink-0 bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-400",
+          "w-fit shrink-0 bg-brand-100 text-brand-800 dark:bg-brand-500/15 dark:text-brand-400",
           className
         )}
       >

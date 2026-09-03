@@ -128,7 +128,7 @@ export function PushPermissionButton() {
     <button
       onClick={enablePush}
       disabled={status === "loading"}
-      className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-blue-800 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 disabled:opacity-50 transition-colors"
+      className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-brand-800 dark:text-brand-300 bg-brand-100 dark:bg-brand-900/30 hover:bg-brand-200 dark:hover:bg-brand-900/50 disabled:opacity-50 transition-colors"
       title="Get notified when a customer bids close to floor"
     >
       {status === "loading" ? (

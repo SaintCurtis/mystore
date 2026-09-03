@@ -128,28 +128,28 @@ export function AddToCartButton({
   return (
     <div
       className={cn(
-        "flex min-h-11 h-11 w-full items-stretch overflow-hidden rounded-lg border border-blue-500/50 bg-blue-500/8 dark:border-blue-500/40 dark:bg-blue-500/5",
+        "flex min-h-11 h-11 w-full items-stretch overflow-hidden rounded-lg border border-brand-500/50 bg-brand-500/8 dark:border-brand-500/40 dark:bg-brand-500/5",
         className,
       )}
     >
       <button
         type="button"
-        className="flex flex-1 items-center justify-center text-zinc-600 dark:text-zinc-300 font-bold text-lg transition-colors hover:bg-blue-500/15 hover:text-blue-600 dark:hover:text-blue-400 active:bg-blue-500/25"
+        className="flex flex-1 items-center justify-center text-zinc-600 dark:text-zinc-300 font-bold text-lg transition-colors hover:bg-brand-500/15 hover:text-brand-600 dark:hover:text-brand-400 active:bg-brand-500/25"
         onClick={handleDecrement}
         aria-label="Decrease quantity"
       >
         <Minus className="h-4 w-4" />
       </button>
 
-      <div className="flex flex-1 items-center justify-center border-x border-blue-500/25 bg-blue-500/5">
-        <span className="font-display text-base font-extrabold text-blue-600 dark:text-blue-400 tabular-nums">
+      <div className="flex flex-1 items-center justify-center border-x border-brand-500/25 bg-brand-500/5">
+        <span className="font-display text-base font-extrabold text-brand-600 dark:text-brand-400 tabular-nums">
           {quantityInCart}
         </span>
       </div>
 
       <button
         type="button"
-        className="flex flex-1 items-center justify-center text-zinc-600 dark:text-zinc-300 font-bold text-lg transition-colors hover:bg-blue-500/15 hover:text-blue-600 dark:hover:text-blue-400 active:bg-blue-500/25 disabled:opacity-30 disabled:cursor-not-allowed"
+        className="flex flex-1 items-center justify-center text-zinc-600 dark:text-zinc-300 font-bold text-lg transition-colors hover:bg-brand-500/15 hover:text-brand-600 dark:hover:text-brand-400 active:bg-brand-500/25 disabled:opacity-30 disabled:cursor-not-allowed"
         onClick={handleAdd}
         disabled={isAtMax}
         aria-label="Increase quantity"

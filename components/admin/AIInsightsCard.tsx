@@ -268,7 +268,7 @@ export function AIInsightsCard() {
             className={cn(
               "mt-1 text-lg font-bold",
               rawMetrics.unfulfilledCount > 0
-                ? "text-blue-600"
+                ? "text-brand-600"
                 : "text-emerald-600",
             )}
           >
@@ -307,7 +307,7 @@ export function AIInsightsCard() {
         {/* Inventory */}
         <div className="space-y-4">
           <div className="flex items-center gap-2">
-            <Package className="h-4 w-4 text-blue-500" />
+            <Package className="h-4 w-4 text-brand-500" />
             <h3 className="font-medium text-zinc-900 dark:text-zinc-100">
               Inventory
             </h3>
@@ -320,7 +320,7 @@ export function AIInsightsCard() {
               {insights.inventory.alerts.map((alert, i) => (
                 <div
                   key={i}
-                  className="flex items-start gap-2 rounded-lg bg-blue-50 p-2 text-sm text-blue-800 dark:bg-blue-950/30 dark:text-blue-200"
+                  className="flex items-start gap-2 rounded-lg bg-brand-50 p-2 text-sm text-brand-800 dark:bg-brand-950/30 dark:text-brand-200"
                 >
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                   <span>{alert}</span>
@@ -334,7 +334,7 @@ export function AIInsightsCard() {
                 key={i}
                 className="flex items-start gap-2 text-sm text-zinc-700 dark:text-zinc-300"
               >
-                <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
+                <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" />
                 <span>{rec}</span>
               </li>
             ))}
@@ -378,7 +378,7 @@ export function AIInsightsCard() {
                     key={i}
                     className="flex items-start gap-2 text-sm text-zinc-700 dark:text-zinc-300"
                   >
-                    <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
+                    <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" />
                     <span>{item}</span>
                   </li>
                 ))}

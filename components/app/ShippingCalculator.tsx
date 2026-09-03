@@ -302,9 +302,9 @@ export function ShippingCalculator({
   return (
     <div className="space-y-3">
       {/* Zone detected */}
-      <div className="flex items-center gap-2 rounded-lg bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 px-3 py-2">
-        <MapPin className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
-        <p className="text-xs text-blue-700 dark:text-blue-300">
+      <div className="flex items-center gap-2 rounded-lg bg-brand-50 dark:bg-brand-500/10 border border-brand-200 dark:border-brand-500/20 px-3 py-2">
+        <MapPin className="h-3.5 w-3.5 text-brand-600 dark:text-brand-400 shrink-0" />
+        <p className="text-xs text-brand-700 dark:text-brand-300">
           <span className="font-semibold">Shipping zone detected:</span> {zoneLabel}
         </p>
       </div>
@@ -320,7 +320,7 @@ export function ShippingCalculator({
               onClick={() => onSelect(option)}
               className={`w-full text-left rounded-xl border p-3 transition-all duration-200 ${
                 isSelected
-                  ? "border-blue-500/60 bg-blue-500/8 dark:bg-blue-500/10"
+                  ? "border-brand-500/60 bg-brand-500/8 dark:bg-brand-500/10"
                   : "border-zinc-200 dark:border-[#2a2a2a] hover:border-zinc-300 dark:hover:border-[#3a3a3a] bg-white dark:bg-[#111111]"
               }`}
             >
@@ -328,7 +328,7 @@ export function ShippingCalculator({
                 <div className="flex items-start gap-2.5">
                   <span className="text-lg leading-none mt-0.5">{option.icon}</span>
                   <div>
-                    <p className={`text-sm font-semibold ${isSelected ? "text-blue-600 dark:text-blue-400" : "text-zinc-900 dark:text-[#f1f1f1]"}`}>
+                    <p className={`text-sm font-semibold ${isSelected ? "text-brand-600 dark:text-brand-400" : "text-zinc-900 dark:text-[#f1f1f1]"}`}>
                       {option.method}
                     </p>
                     <p className="text-[11px] text-zinc-500 dark:text-[#888] mt-0.5">
@@ -343,13 +343,13 @@ export function ShippingCalculator({
                   {option.price === 0 ? (
                     <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">Free</span>
                   ) : (
-                    <span className={`text-sm font-bold ${isSelected ? "text-blue-600 dark:text-blue-400" : "text-zinc-900 dark:text-[#f1f1f1]"}`}>
+                    <span className={`text-sm font-bold ${isSelected ? "text-brand-600 dark:text-brand-400" : "text-zinc-900 dark:text-[#f1f1f1]"}`}>
                       ₦{option.price.toLocaleString()}
                     </span>
                   )}
                   {isSelected && (
                     <div className="mt-1 flex justify-end">
-                      <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[8px] text-white font-bold">✓</span>
+                      <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-brand-500 text-[8px] text-white font-bold">✓</span>
                     </div>
                   )}
                 </div>

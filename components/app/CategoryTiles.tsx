@@ -83,7 +83,7 @@ function SubcategoryDropdown({
         return (
           <Link key={child._id} href={`/?category=${child.slug}`}
             className={`flex items-center justify-between px-4 py-3 text-sm transition-colors ${
-              isActive ? "bg-blue-500/15 text-blue-400" : "text-zinc-300 hover:bg-zinc-800 hover:text-white"
+              isActive ? "bg-brand-500/15 text-brand-400" : "text-zinc-300 hover:bg-zinc-800 hover:text-white"
             }`}>
             <span className="font-medium">{child.title}</span>
             {categoryHasConditions(child.slug ?? "") && <ChevronRight className="h-3.5 w-3.5 text-zinc-600" />}
@@ -115,7 +115,7 @@ function ConditionDropdown({
             onMouseLeave={() => setHoveredCondition(null)}>
             <Link href={buildHref({ category: categorySlug, condition: cond.value })}
               className={`flex items-center justify-between px-4 py-3 text-sm transition-colors ${
-                isActive ? "bg-blue-500/15 text-blue-400" : "text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                isActive ? "bg-brand-500/15 text-brand-400" : "text-zinc-300 hover:bg-zinc-800 hover:text-white"
               }`}>
               <span className="font-medium">{cond.label}</span>
               {hasBrands && brands.length > 0 && <ChevronRight className="h-3.5 w-3.5 text-zinc-500" />}
@@ -149,7 +149,7 @@ export function CategoryTiles({
         <Link href="/"
           className={`group relative shrink-0 overflow-hidden rounded-xl transition-all duration-300 ${
             !activeCategory
-              ? "ring-2 ring-blue-500 ring-offset-2 ring-offset-zinc-950"
+              ? "ring-2 ring-brand-500 ring-offset-2 ring-offset-zinc-950"
               : "hover:ring-2 hover:ring-zinc-600 hover:ring-offset-2 hover:ring-offset-zinc-950"
           }`}>
           <div className="relative h-32 w-44 sm:h-48 sm:w-64">
@@ -224,7 +224,7 @@ function CategoryTileWithPortal({
       <Link href={`/?category=${slug}`}
         className={`group relative block overflow-hidden rounded-xl transition-all duration-300 ${
           isActive
-            ? "ring-2 ring-blue-500 ring-offset-2 ring-offset-zinc-950"
+            ? "ring-2 ring-brand-500 ring-offset-2 ring-offset-zinc-950"
             : "hover:ring-2 hover:ring-zinc-600 hover:ring-offset-2 hover:ring-offset-zinc-950"
         }`}>
         <div className="relative h-32 w-44 sm:h-48 sm:w-64">
@@ -232,7 +232,7 @@ function CategoryTileWithPortal({
             <Image src={imageUrl} alt={category.title ?? "Category"} fill
               className="object-cover transition-transform duration-500 group-hover:scale-110" />
           ) : (
-            <div className="absolute inset-0 bg-linear-to-br from-blue-500 to-blue-600" />
+            <div className="absolute inset-0 bg-linear-to-br from-brand-500 to-brand-600" />
           )}
           <div className="absolute inset-0 bg-linear-to-t from-black/75 via-black/20 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 p-3">
@@ -255,8 +255,8 @@ function CategoryTileWithPortal({
           {isActive && (
             <div className="absolute top-2 right-2">
               <span className="flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-500" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-500" />
               </span>
             </div>
           )}

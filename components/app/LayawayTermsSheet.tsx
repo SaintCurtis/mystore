@@ -41,7 +41,7 @@ export function LayawayTermsSheet({
         onClick={handleTriggerClick}
         className={
           triggerClassName ??
-          "text-xs font-semibold text-blue-600 dark:text-blue-400 underline underline-offset-2 hover:text-blue-700 dark:hover:text-blue-300"
+          "text-xs font-semibold text-brand-600 dark:text-brand-400 underline underline-offset-2 hover:text-brand-700 dark:hover:text-brand-300"
         }
       >
         {triggerLabel}
@@ -58,8 +58,8 @@ export function LayawayTermsSheet({
 
         {/* Header */}
         <div className="flex items-start gap-2.5 px-5 pt-2 pb-4 shrink-0 border-b border-zinc-200 dark:border-zinc-800">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/15 shrink-0">
-            <ShieldCheck className="h-4 w-4 text-blue-500" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500/15 shrink-0">
+            <ShieldCheck className="h-4 w-4 text-brand-500" />
           </div>
           <div>
             <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
@@ -75,28 +75,28 @@ export function LayawayTermsSheet({
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
           <ul className="space-y-3">
             <li className="flex gap-3">
-              <Wallet className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+              <Wallet className="h-4 w-4 text-brand-500 shrink-0 mt-0.5" />
               <span className="text-sm text-zinc-700 dark:text-zinc-300">
                 <strong className="font-semibold">Zero interest, always.</strong>{" "}
                 You pay only the item&apos;s price — never more, no matter how long it takes.
               </span>
             </li>
             <li className="flex gap-3">
-              <Boxes className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+              <Boxes className="h-4 w-4 text-brand-500 shrink-0 mt-0.5" />
               <span className="text-sm text-zinc-700 dark:text-zinc-300">
                 <strong className="font-semibold">Pay any amount, any time.</strong>{" "}
                 No fixed schedule. The item ships only once you&apos;ve paid in full.
               </span>
             </li>
             <li className="flex gap-3">
-              <ShieldCheck className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+              <ShieldCheck className="h-4 w-4 text-brand-500 shrink-0 mt-0.5" />
               <span className="text-sm text-zinc-700 dark:text-zinc-300">
                 <strong className="font-semibold">Your unit is reserved at 50% paid.</strong>{" "}
                 Before that, we hold your spot on a best-effort basis.
               </span>
             </li>
             <li className="flex gap-3">
-              <Undo2 className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+              <Undo2 className="h-4 w-4 text-brand-500 shrink-0 mt-0.5" />
               <span className="text-sm text-zinc-700 dark:text-zinc-300">
                 <strong className="font-semibold">Price moves, you&apos;re protected.</strong>{" "}
                 Price drops — you get the lower price automatically. Price rises — we notify
@@ -106,7 +106,7 @@ export function LayawayTermsSheet({
               </span>
             </li>
             <li className="flex gap-3">
-              <Wallet className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+              <Wallet className="h-4 w-4 text-brand-500 shrink-0 mt-0.5" />
               <span className="text-sm text-zinc-700 dark:text-zinc-300">
                 <strong className="font-semibold">Change your mind anytime.</strong>{" "}
                 Cancel and get a refund minus a small 0.85% processing fee (covers what our
@@ -128,7 +128,7 @@ export function LayawayTermsSheet({
           <a
             href={POLICY_PDF_URL}
             download={POLICY_FILENAME}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-500 px-4 py-3 text-sm font-bold text-white hover:bg-blue-600 transition-colors"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-500 px-4 py-3 text-sm font-bold text-white hover:bg-brand-600 transition-colors"
           >
             <Download className="h-4 w-4 shrink-0" />
             Download full policy (PDF)

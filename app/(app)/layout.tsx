@@ -39,14 +39,14 @@ function AppLayout({ children }: { children: React.ReactNode }) {
           headerTitle: "font-extrabold tracking-tight text-zinc-900",
           headerSubtitle: "text-zinc-500",
           formButtonPrimary:
-            "bg-blue-500 hover:bg-blue-400 active:bg-blue-600 text-white font-bold shadow-sm shadow-blue-500/20 transition-all",
+            "bg-brand-500 hover:bg-brand-400 active:bg-brand-600 text-white font-bold shadow-sm shadow-brand-500/20 transition-all",
           formFieldInput:
-            "border-zinc-200 focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 rounded-xl",
+            "border-zinc-200 focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 rounded-xl",
           socialButtonsBlockButton:
             "border-zinc-200 hover:bg-zinc-50 text-zinc-700 font-medium rounded-xl",
           dividerLine: "bg-zinc-100",
           identityPreviewText: "text-zinc-700",
-          formResendCodeLink: "text-blue-600 hover:text-blue-500",
+          formResendCodeLink: "text-brand-600 hover:text-brand-500",
         },
       }}
     >

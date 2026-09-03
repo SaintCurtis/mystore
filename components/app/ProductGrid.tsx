@@ -89,9 +89,9 @@ export function ProductGrid({
               border-zinc-300 dark:border-[#2a2a2a]
               bg-white dark:bg-[#111111]
               text-zinc-700 dark:text-[#a3a3a3]
-              hover:border-blue-500/50 dark:hover:border-blue-500/40
-              hover:bg-blue-50 dark:hover:bg-[#1a1a1a]
-              hover:text-blue-700 dark:hover:text-blue-400
+              hover:border-brand-500/50 dark:hover:border-brand-500/40
+              hover:bg-brand-50 dark:hover:bg-[#1a1a1a]
+              hover:text-brand-700 dark:hover:text-brand-400
             "
           >
             <ChevronDown className="h-4 w-4 transition-transform group-hover:translate-y-0.5" />

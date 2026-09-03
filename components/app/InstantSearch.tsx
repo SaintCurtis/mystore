@@ -120,7 +120,7 @@ export function InstantSearch() {
           onKeyDown={handleKeyDown}
           onFocus={() => { if (results.length > 0) setIsOpen(true); }}
           placeholder="Search products..."
-          className="h-9 w-full rounded-lg border border-zinc-200 dark:border-[#2a2a2a] bg-zinc-50 dark:bg-[#111111] pl-9 pr-8 text-sm text-zinc-900 dark:text-[#f1f1f1] placeholder-zinc-400 dark:placeholder-[#555] focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-colors"
+          className="h-9 w-full rounded-lg border border-zinc-200 dark:border-[#2a2a2a] bg-zinc-50 dark:bg-[#111111] pl-9 pr-8 text-sm text-zinc-900 dark:text-[#f1f1f1] placeholder-zinc-400 dark:placeholder-[#555] focus:border-brand-500 dark:focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500/30 transition-colors"
         />
         <div className="absolute right-2.5 flex items-center">
           {isLoading ? (
@@ -153,7 +153,7 @@ export function InstantSearch() {
                   <button key={item._id} type="button"
                     onMouseDown={(e) => { e.preventDefault(); navigate(item.slug); }}
                     className={`flex w-full items-center gap-3 px-3 py-3 text-left transition-colors ${
-                      activeIndex === index ? "bg-blue-50 dark:bg-blue-500/8" : "hover:bg-zinc-50 dark:hover:bg-[#1a1a1a]"
+                      activeIndex === index ? "bg-brand-50 dark:bg-brand-500/8" : "hover:bg-zinc-50 dark:hover:bg-[#1a1a1a]"
                     }`}
                   >
                     <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-zinc-100 dark:bg-[#0d0d0d]">
@@ -167,17 +167,17 @@ export function InstantSearch() {
                     </div>
                     <div className="flex-1 min-w-0">
                       {item.categoryTitle && (
-                        <p className="text-[10px] font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400 truncate">{item.categoryTitle}</p>
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-brand-600 dark:text-brand-400 truncate">{item.categoryTitle}</p>
                       )}
                       <p className="text-sm font-medium text-zinc-900 dark:text-[#f1f1f1] line-clamp-1">{item.name}</p>
-                      <p className="text-sm font-bold text-zinc-900 dark:text-blue-400">{formatPrice(item.price)}</p>
+                      <p className="text-sm font-bold text-zinc-900 dark:text-brand-400">{formatPrice(item.price)}</p>
                     </div>
                     <ArrowRight className="h-3.5 w-3.5 shrink-0 text-zinc-300 dark:text-[#555]" />
                   </button>
                 ))}
               </div>
               <button type="button" onMouseDown={(e) => { e.preventDefault(); navigateSearch(); }}
-                className="flex w-full items-center justify-between border-t border-zinc-100 dark:border-[#1a1a1a] px-4 py-3 text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-colors">
+                className="flex w-full items-center justify-between border-t border-zinc-100 dark:border-[#1a1a1a] px-4 py-3 text-sm font-medium text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-500/5 transition-colors">
                 <span>See all results for &quot;{query}&quot;</span>
                 <ArrowRight className="h-4 w-4" />
               </button>

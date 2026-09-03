@@ -16,11 +16,11 @@ export default async function NotFound() {
     <div className="bg-white dark:bg-[#0a0a0a] transition-colors duration-300">
       <div className="flex min-h-[60vh] items-center justify-center px-4 py-16">
         <div className="w-full max-w-md text-center">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-500/10 border border-blue-500/20 animate-bounce">
-            <SearchX className="h-8 w-8 text-blue-500" />
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-500/10 border border-brand-500/20 animate-bounce">
+            <SearchX className="h-8 w-8 text-brand-500" />
           </div>
 
-          <p className="mb-2 font-display text-sm font-bold uppercase tracking-widest text-blue-500 dark:text-blue-400">
+          <p className="mb-2 font-display text-sm font-bold uppercase tracking-widest text-brand-500 dark:text-brand-400">
             404 — Component Not Found
           </p>
           <h1 className="mb-3 font-display text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-white sm:text-3xl">
@@ -39,7 +39,7 @@ export default async function NotFound() {
                 type="text"
                 name="q"
                 placeholder="Search for a product…"
-                className="h-11 w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500"
+                className="h-11 w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-10 pr-4 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500"
               />
             </div>
           </form>
@@ -47,7 +47,7 @@ export default async function NotFound() {
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Link
               href="/"
-              className="inline-flex h-11 items-center justify-center gap-1.5 rounded-lg bg-blue-500 px-6 font-display text-sm font-bold text-white shadow-md shadow-blue-500/25 transition-all hover:bg-blue-400 active:scale-[0.98]"
+              className="inline-flex h-11 items-center justify-center gap-1.5 rounded-lg bg-brand-500 px-6 font-display text-sm font-bold text-white shadow-md shadow-brand-500/25 transition-all hover:bg-brand-400 active:scale-[0.98]"
             >
               <ChevronLeft className="h-4 w-4" />
               Back to Shop

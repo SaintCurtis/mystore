@@ -223,7 +223,7 @@ function ImageThumbnail({
       className={cn(
         "group relative aspect-square overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800",
         isFirst &&
-          "ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-zinc-900",
+          "ring-2 ring-brand-500 ring-offset-2 dark:ring-offset-zinc-900",
       )}
     >
       {imageUrl ? (
@@ -242,7 +242,7 @@ function ImageThumbnail({
 
       {/* First image badge */}
       {isFirst && (
-        <div className="absolute left-2 top-2 rounded bg-blue-500 px-1.5 py-0.5 text-xs font-medium text-white">
+        <div className="absolute left-2 top-2 rounded bg-brand-500 px-1.5 py-0.5 text-xs font-medium text-white">
           Main
         </div>
       )}

@@ -97,12 +97,12 @@ export function NegotiateButton({
       <button
         type="button"
         onClick={handleOpen}
-        className="w-full h-11 flex items-center justify-center gap-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 text-sm font-semibold hover:border-blue-400 hover:text-blue-600 dark:hover:border-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-all duration-200 active:scale-[0.98] relative"
+        className="w-full h-11 flex items-center justify-center gap-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 text-sm font-semibold hover:border-brand-400 hover:text-brand-600 dark:hover:border-brand-500 dark:hover:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-500/5 transition-all duration-200 active:scale-[0.98] relative"
       >
         <CheckBadgeIcon className="w-4 h-4 shrink-0" />
         {hasSession ? "Resume Negotiation" : "Negotiate Price"}
         {hasSession && (
-          <span className="absolute -top-1.5 -right-1.5 w-3 h-3 rounded-full bg-blue-500 ring-2 ring-white dark:ring-zinc-900" />
+          <span className="absolute -top-1.5 -right-1.5 w-3 h-3 rounded-full bg-brand-500 ring-2 ring-white dark:ring-zinc-900" />
         )}
       </button>
 
@@ -141,7 +141,7 @@ export function NegotiateButton({
                 className="flex items-center gap-2.5 h-12 pl-3 pr-4 rounded-full bg-zinc-900 dark:bg-white shadow-2xl shadow-black/30 hover:shadow-black/50 transition-all duration-200 hover:scale-105 active:scale-95 group"
                 aria-label="Open negotiation chat"
               >
-                <div className="w-7 h-7 rounded-full bg-blue-500 flex items-center justify-center shrink-0">
+                <div className="w-7 h-7 rounded-full bg-brand-500 flex items-center justify-center shrink-0">
                   <ChatBubbleLeftRightIcon className="w-3.5 h-3.5 text-white" />
                 </div>
                 <div className="text-left">
@@ -152,7 +152,7 @@ export function NegotiateButton({
                     Chat is paused — tap to resume
                   </p>
                 </div>
-                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse ml-1 shrink-0" />
+                <div className="w-2 h-2 rounded-full bg-brand-500 animate-pulse ml-1 shrink-0" />
               </button>
             ) : (
               /* Full chat widget */
@@ -172,8 +172,8 @@ export function NegotiateButton({
                 {/* Custom header with minimise + close */}
                 <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 shrink-0 bg-white dark:bg-zinc-950">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-blue-500/15 flex items-center justify-center">
-                      <ChatBubbleLeftRightIcon className="w-4 h-4 text-blue-500" />
+                    <div className="w-8 h-8 rounded-full bg-brand-500/15 flex items-center justify-center">
+                      <ChatBubbleLeftRightIcon className="w-4 h-4 text-brand-500" />
                     </div>
                     <div>
                       <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100 leading-tight">

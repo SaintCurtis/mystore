@@ -192,7 +192,7 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
               className={cn(
                 "relative h-10 sm:h-12 flex-1 overflow-hidden rounded-md sm:rounded-lg transition-all duration-200",
                 hoveredImageIndex === index
-                  ? "ring-2 ring-blue-500 ring-offset-1 ring-offset-white dark:ring-offset-[#111111]"
+                  ? "ring-2 ring-brand-500 ring-offset-1 ring-offset-white dark:ring-offset-[#111111]"
                   : "opacity-40 hover:opacity-75",
               )}
               onMouseEnter={() => setHoveredImageIndex(index)}
@@ -218,7 +218,7 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
         </Link>
 
         <div className="flex items-baseline justify-between gap-1 mb-3">
-          <p className="font-display text-base sm:text-xl font-extrabold tracking-tight leading-none text-zinc-900 dark:text-blue-400">
+          <p className="font-display text-base sm:text-xl font-extrabold tracking-tight leading-none text-zinc-900 dark:text-brand-400">
             {formatInCurrency(product.price)}
           </p>
           <StockBadge productId={product._id} stock={stock} />
@@ -241,25 +241,25 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
                 href={`/products/${product.slug}`}
                 className={cn(
                   "flex w-full h-11 items-center justify-center gap-1.5 rounded-lg",
-                  "bg-blue-500 text-white font-display text-xs sm:text-sm font-bold tracking-wide",
-                  "shadow-md shadow-blue-500/25 hover:bg-blue-400 transition-all duration-200 active:scale-[0.98]",
+                  "bg-brand-500 text-white font-display text-xs sm:text-sm font-bold tracking-wide",
+                  "shadow-md shadow-brand-500/25 hover:bg-brand-400 transition-all duration-200 active:scale-[0.98]",
                 )}
               >
                 <Zap className="h-3.5 w-3.5 shrink-0" />
                 Buy Now
               </Link>
 
-              <div className="flex h-8 w-full items-stretch overflow-hidden rounded-lg border border-blue-500/40 dark:border-blue-500/30 bg-blue-50 dark:bg-blue-500/8">
+              <div className="flex h-8 w-full items-stretch overflow-hidden rounded-lg border border-brand-500/40 dark:border-brand-500/30 bg-brand-50 dark:bg-brand-500/8">
                 <button
                   type="button"
                   onClick={handleDecrement}
-                  className="flex flex-1 items-center justify-center text-blue-700 dark:text-blue-400 font-black transition-colors hover:bg-blue-100 dark:hover:bg-blue-500/15 active:bg-blue-200 dark:active:bg-blue-500/25"
+                  className="flex flex-1 items-center justify-center text-brand-700 dark:text-brand-400 font-black transition-colors hover:bg-brand-100 dark:hover:bg-brand-500/15 active:bg-brand-200 dark:active:bg-brand-500/25"
                   aria-label="Remove one"
                 >
                   <Minus className="h-3.5 w-3.5" />
                 </button>
-                <div className="flex flex-1 items-center justify-center border-x border-blue-500/25 bg-white dark:bg-[#111]">
-                  <span className="font-display text-xs font-black text-blue-600 dark:text-blue-400 tabular-nums">
+                <div className="flex flex-1 items-center justify-center border-x border-brand-500/25 bg-white dark:bg-[#111]">
+                  <span className="font-display text-xs font-black text-brand-600 dark:text-brand-400 tabular-nums">
                     {quantityInCart}
                   </span>
                 </div>
@@ -267,7 +267,7 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
                   type="button"
                   onClick={handleIncrement}
                   disabled={isAtMax}
-                  className="flex flex-1 items-center justify-center text-blue-700 dark:text-blue-400 font-black transition-colors hover:bg-blue-100 dark:hover:bg-blue-500/15 active:bg-blue-200 dark:active:bg-blue-500/25 disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="flex flex-1 items-center justify-center text-brand-700 dark:text-brand-400 font-black transition-colors hover:bg-brand-100 dark:hover:bg-brand-500/15 active:bg-brand-200 dark:active:bg-brand-500/25 disabled:opacity-30 disabled:cursor-not-allowed"
                   aria-label="Add one more"
                 >
                   <Plus className="h-3.5 w-3.5" />
@@ -282,8 +282,8 @@ export function ProductCard({ product, activeCategory }: ProductCardProps) {
                   href={`/products/${product.slug}`}
                   className={cn(
                     "flex w-full h-11 items-center justify-center gap-1.5 rounded-lg",
-                    "bg-blue-500 text-white font-display text-xs sm:text-sm font-bold tracking-wide",
-                    "shadow-md shadow-blue-500/25 hover:bg-blue-400 transition-all duration-200 active:scale-[0.98]",
+                    "bg-brand-500 text-white font-display text-xs sm:text-sm font-bold tracking-wide",
+                    "shadow-md shadow-brand-500/25 hover:bg-brand-400 transition-all duration-200 active:scale-[0.98]",
                     "pr-11",
                   )}
                 >

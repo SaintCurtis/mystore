@@ -55,8 +55,8 @@ export function GuestCheckoutModal({
 
         <div className="p-6">
           {/* Icon */}
-          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-500/10 border border-blue-500/20 mx-auto">
-            <ShoppingBag className="h-7 w-7 text-blue-500" />
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-500/10 border border-brand-500/20 mx-auto">
+            <ShoppingBag className="h-7 w-7 text-brand-500" />
           </div>
 
           {/* Heading */}
@@ -92,7 +92,7 @@ export function GuestCheckoutModal({
             <SignInButton mode="modal">
               <button
                 type="button"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-500 h-11 text-sm font-bold text-white hover:bg-blue-400 transition-all duration-200 shadow-lg shadow-blue-500/20"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-500 h-11 text-sm font-bold text-white hover:bg-brand-400 transition-all duration-200 shadow-lg shadow-brand-500/20"
               >
                 <LogIn className="h-4 w-4" />
                 Sign In to Continue

@@ -89,7 +89,7 @@ export function MobileNav() {
         <div className="flex items-center justify-between px-5 py-4 shrink-0 border-b border-zinc-100 dark:border-[#1c1c1c]">
           <div>
             <p className="text-sm font-extrabold text-zinc-900 dark:text-white tracking-tight">The Saint's TechNet</p>
-            <p className="text-[10px] font-semibold text-blue-500 uppercase tracking-widest mt-0.5">Built by an Engineer</p>
+            <p className="text-[10px] font-semibold text-brand-500 uppercase tracking-widest mt-0.5">Built by an Engineer</p>
           </div>
           <button type="button" onClick={close}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 dark:bg-[#1c1c1c] text-zinc-500 dark:text-[#a3a3a3] hover:bg-zinc-200 dark:hover:bg-[#2a2a2a] transition-colors active:scale-95"
@@ -119,11 +119,11 @@ export function MobileNav() {
           {/* Main nav items */}
           {NAV_ITEMS.map(({ label, href, icon: Icon, highlight, highlightColor }) => {
             const colorMap: Record<string, string> = {
-              amber:  "border-blue-500 bg-blue-50/70 dark:bg-blue-500/8 text-blue-700 dark:text-blue-400",
+              amber:  "border-brand-500 bg-brand-50/70 dark:bg-brand-500/8 text-brand-700 dark:text-brand-400",
               violet: "border-violet-500 bg-violet-50/70 dark:bg-violet-500/8 text-violet-700 dark:text-violet-400",
             };
             const iconColorMap: Record<string, string> = {
-              amber:  "text-blue-500",
+              amber:  "text-brand-500",
               violet: "text-violet-500",
             };
             const hlClass = highlight && highlightColor
@@ -176,7 +176,7 @@ export function MobileNav() {
             <ShoppingBag className="h-4 w-4 text-zinc-400 dark:text-zinc-500" />
             Cart
             {totalItems > 0 && (
-              <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold text-white">{totalItems}</span>
+              <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-brand-500 text-[10px] font-bold text-white">{totalItems}</span>
             )}
           </button>
         </nav>
@@ -194,7 +194,7 @@ export function MobileNav() {
             </Show>
             <Show when="signed-out">
               <SignInButton mode="modal">
-                <button className="rounded-lg bg-blue-500 px-4 py-1.5 text-xs font-bold text-white hover:bg-blue-400 active:scale-95 transition-all">
+                <button className="rounded-lg bg-brand-500 px-4 py-1.5 text-xs font-bold text-white hover:bg-brand-400 active:scale-95 transition-all">
                   Sign In
                 </button>
               </SignInButton>

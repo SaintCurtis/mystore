@@ -30,7 +30,7 @@ export function PaymentMethodSelector({
           className={cn(
             "flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all duration-200",
             selected === "paystack"
-              ? "border-blue-500 bg-blue-50 dark:bg-blue-500/8"
+              ? "border-brand-500 bg-brand-50 dark:bg-brand-500/8"
               : "border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] hover:border-zinc-300 dark:hover:border-[#3a3a3a]"
           )}
         >
@@ -38,7 +38,7 @@ export function PaymentMethodSelector({
             className={cn(
               "flex h-10 w-10 items-center justify-center rounded-lg",
               selected === "paystack"
-                ? "bg-blue-500/15"
+                ? "bg-brand-500/15"
                 : "bg-zinc-100 dark:bg-[#1a1a1a]"
             )}
           >
@@ -46,7 +46,7 @@ export function PaymentMethodSelector({
               className={cn(
                 "h-5 w-5",
                 selected === "paystack"
-                  ? "text-blue-600 dark:text-blue-400"
+                  ? "text-brand-600 dark:text-brand-400"
                   : "text-zinc-500 dark:text-[#a3a3a3]"
               )}
             />
@@ -56,7 +56,7 @@ export function PaymentMethodSelector({
               className={cn(
                 "text-sm font-semibold",
                 selected === "paystack"
-                  ? "text-blue-700 dark:text-blue-400"
+                  ? "text-brand-700 dark:text-brand-400"
                   : "text-zinc-700 dark:text-[#f1f1f1]"
               )}
             >
@@ -67,7 +67,7 @@ export function PaymentMethodSelector({
             </p>
           </div>
           {selected === "paystack" && (
-            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-blue-500" />
+            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-brand-500" />
           )}
         </button>
 
@@ -78,7 +78,7 @@ export function PaymentMethodSelector({
           className={cn(
             "relative flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all duration-200",
             selected === "crypto"
-              ? "border-blue-500 bg-blue-50 dark:bg-blue-500/8"
+              ? "border-brand-500 bg-brand-50 dark:bg-brand-500/8"
               : "border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] hover:border-zinc-300 dark:hover:border-[#3a3a3a]"
           )}
         >
@@ -86,7 +86,7 @@ export function PaymentMethodSelector({
             className={cn(
               "flex h-10 w-10 items-center justify-center rounded-lg",
               selected === "crypto"
-                ? "bg-blue-500/15"
+                ? "bg-brand-500/15"
                 : "bg-zinc-100 dark:bg-[#1a1a1a]"
             )}
           >
@@ -94,7 +94,7 @@ export function PaymentMethodSelector({
               className={cn(
                 "h-5 w-5",
                 selected === "crypto"
-                  ? "text-blue-600 dark:text-blue-400"
+                  ? "text-brand-600 dark:text-brand-400"
                   : "text-zinc-500 dark:text-[#a3a3a3]"
               )}
             />
@@ -104,7 +104,7 @@ export function PaymentMethodSelector({
               className={cn(
                 "text-sm font-semibold",
                 selected === "crypto"
-                  ? "text-blue-700 dark:text-blue-400"
+                  ? "text-brand-700 dark:text-brand-400"
                   : "text-zinc-700 dark:text-[#f1f1f1]"
               )}
             >
@@ -115,19 +115,19 @@ export function PaymentMethodSelector({
             </p>
           </div>
           {selected === "crypto" && (
-            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-blue-500" />
+            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-brand-500" />
           )}
         </button>
       </div>
 
       {/* Crypto coin badges */}
       {selected === "crypto" && (
-        <div className="rounded-xl border border-blue-200 dark:border-blue-500/20 bg-blue-50 dark:bg-blue-500/5 p-4 space-y-3">
+        <div className="rounded-xl border border-brand-200 dark:border-brand-500/20 bg-brand-50 dark:bg-brand-500/5 p-4 space-y-3">
           <div className="flex flex-wrap gap-2">
             {CRYPTO_COINS.map((coin) => (
               <span
                 key={coin}
-                className="rounded-full bg-white dark:bg-[#1a1a1a] border border-blue-200 dark:border-blue-500/20 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:text-blue-400"
+                className="rounded-full bg-white dark:bg-[#1a1a1a] border border-brand-200 dark:border-brand-500/20 px-2.5 py-1 text-xs font-semibold text-brand-700 dark:text-brand-400"
               >
                 {coin}
               </span>
@@ -137,7 +137,7 @@ export function PaymentMethodSelector({
             </span>
           </div>
           <div className="space-y-1.5">
-            <p className="text-xs text-blue-700 dark:text-blue-400 font-medium">
+            <p className="text-xs text-brand-700 dark:text-brand-400 font-medium">
               ✓ Price locked in USD — pay in any supported crypto
             </p>
             <p className="text-xs text-zinc-500 dark:text-[#a3a3a3]">
@@ -148,8 +148,8 @@ export function PaymentMethodSelector({
       )}
 
       {selected === "paystack" && (
-        <div className="rounded-xl border border-blue-200 dark:border-blue-500/20 bg-blue-50 dark:bg-blue-500/5 p-3">
-          <p className="text-xs text-blue-700 dark:text-blue-400 font-medium">
+        <div className="rounded-xl border border-brand-200 dark:border-brand-500/20 bg-brand-50 dark:bg-brand-500/5 p-3">
+          <p className="text-xs text-brand-700 dark:text-brand-400 font-medium">
             ✓ Cards, bank transfer, USSD & mobile money
           </p>
           <p className="text-xs text-zinc-500 dark:text-[#a3a3a3] mt-1">

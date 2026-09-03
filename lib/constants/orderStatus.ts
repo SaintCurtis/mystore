@@ -39,11 +39,11 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatusValue, OrderStatusConfig> =
     shipped: {
       value: "shipped",
       label: "Shipped",
-      color: "bg-blue-100 text-blue-800",
+      color: "bg-brand-100 text-brand-800",
       icon: Truck,
       emoji: "📦",
-      iconColor: "text-blue-600 dark:text-blue-400",
-      iconBgColor: "bg-blue-100 dark:bg-blue-900/30",
+      iconColor: "text-brand-600 dark:text-brand-400",
+      iconBgColor: "bg-brand-100 dark:bg-brand-900/30",
     },
     delivered: {
       value: "delivered",

@@ -82,7 +82,7 @@ export function LayawayPayButton({
         onClick={() => setOpen(true)}
         className={
           className ??
-          "flex w-full items-center justify-center gap-2 rounded-xl bg-blue-500 hover:bg-blue-400 px-4 py-3 text-sm font-bold text-white transition-colors"
+          "flex w-full items-center justify-center gap-2 rounded-xl bg-brand-500 hover:bg-brand-400 px-4 py-3 text-sm font-bold text-white transition-colors"
         }
       >
         <CreditCard className="h-4 w-4 shrink-0" />
@@ -104,7 +104,7 @@ export function LayawayPayButton({
           max={maxAmount}
           value={amount}
           onChange={(e) => setAmount(Number(e.target.value))}
-          className="w-full rounded-lg border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#0d0d0d] px-3 py-2.5 text-sm font-semibold text-zinc-900 dark:text-[#f1f1f1] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-colors"
+          className="w-full rounded-lg border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#0d0d0d] px-3 py-2.5 text-sm font-semibold text-zinc-900 dark:text-[#f1f1f1] focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500/30 transition-colors"
         />
       </div>
       <p className="text-[11px] text-zinc-400 dark:text-zinc-500">
@@ -123,7 +123,7 @@ export function LayawayPayButton({
           type="button"
           onClick={pay}
           disabled={loading}
-          className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-blue-500 hover:bg-blue-400 px-4 py-2.5 text-sm font-bold text-white transition-colors disabled:opacity-60"
+          className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-brand-500 hover:bg-brand-400 px-4 py-2.5 text-sm font-bold text-white transition-colors disabled:opacity-60"
         >
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
           {loading ? "Starting..." : "Continue to Paystack"}

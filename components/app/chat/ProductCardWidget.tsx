@@ -40,7 +40,7 @@ export function ProductCardWidget({
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <span className="block truncate text-sm font-medium text-zinc-900 transition-colors duration-200 group-hover:text-blue-600 dark:text-zinc-100 dark:group-hover:text-blue-400">
+            <span className="block truncate text-sm font-medium text-zinc-900 transition-colors duration-200 group-hover:text-brand-600 dark:text-zinc-100 dark:group-hover:text-brand-400">
               {product.name}
             </span>
             {product.category && (
@@ -60,7 +60,7 @@ export function ProductCardWidget({
             className={`mt-1 inline-block text-xs font-medium ${
               isOutOfStock
                 ? "text-red-600 dark:text-red-400"
-                : "text-blue-600 dark:text-blue-400"
+                : "text-brand-600 dark:text-brand-400"
             }`}
           >
             {isOutOfStock ? "Out of stock" : "Low stock"}
@@ -71,7 +71,7 @@ export function ProductCardWidget({
   );
 
   const cardClasses =
-    "group flex items-center gap-3 rounded-lg border border-zinc-200 bg-white p-3 transition-all duration-200 hover:border-blue-300 hover:shadow-md hover:shadow-blue-100/50 dark:border-zinc-700 dark:bg-zinc-800/50 dark:hover:border-blue-600/50 dark:hover:shadow-blue-900/20";
+    "group flex items-center gap-3 rounded-lg border border-zinc-200 bg-white p-3 transition-all duration-200 hover:border-brand-300 hover:shadow-md hover:shadow-brand-100/50 dark:border-zinc-700 dark:bg-zinc-800/50 dark:hover:border-brand-600/50 dark:hover:shadow-brand-900/20";
 
   if (product.productUrl) {
     return (

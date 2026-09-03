@@ -43,7 +43,7 @@ function Slider({
         {/* Range — brand blue accent, always visible */}
         <SliderPrimitive.Range
           data-slot="slider-range"
-          className="absolute bg-blue-500 dark:bg-blue-400 data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full"
+          className="absolute bg-brand-500 dark:bg-brand-400 data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full"
         />
       </SliderPrimitive.Track>
 
@@ -52,7 +52,7 @@ function Slider({
         <SliderPrimitive.Thumb
           data-slot="slider-thumb"
           key={index}
-          className="block size-4 shrink-0 rounded-full border-2 border-blue-500 dark:border-blue-400 bg-white dark:bg-[#111111] shadow-md shadow-blue-500/20 transition-[color,box-shadow] hover:ring-4 hover:ring-blue-500/20 focus-visible:ring-4 focus-visible:ring-blue-500/30 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
+          className="block size-4 shrink-0 rounded-full border-2 border-brand-500 dark:border-brand-400 bg-white dark:bg-[#111111] shadow-md shadow-brand-500/20 transition-[color,box-shadow] hover:ring-4 hover:ring-brand-500/20 focus-visible:ring-4 focus-visible:ring-brand-500/30 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
         />
       ))}
     </SliderPrimitive.Root>

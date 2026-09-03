@@ -56,7 +56,7 @@ interface GeneratedQuote {
 // ── Styles ────────────────────────────────────────────────────────────────
 
 const inputClass =
-  "w-full rounded-lg border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] px-3 py-2.5 text-sm text-zinc-900 dark:text-[#f1f1f1] placeholder-zinc-400 dark:placeholder-[#555] focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-colors";
+  "w-full rounded-lg border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] px-3 py-2.5 text-sm text-zinc-900 dark:text-[#f1f1f1] placeholder-zinc-400 dark:placeholder-[#555] focus:border-brand-500 dark:focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500/30 transition-colors";
 
 const labelClass = "mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300";
 
@@ -196,7 +196,7 @@ function ProductSearchInput({
                       <p className="text-xs text-zinc-400 truncate capitalize">{product.category}</p>
                     )}
                   </div>
-                  <span className="text-sm font-bold text-blue-600 dark:text-blue-400 shrink-0">
+                  <span className="text-sm font-bold text-brand-600 dark:text-brand-400 shrink-0">
                     {formatPrice(product.price)}
                   </span>
                 </button>
@@ -648,14 +648,14 @@ export function QuotationClient() {
                             updateItem(item.id, "fromCatalogue", false);
                           }}
                           placeholder="0"
-                          className={inputClass + " pl-7 text-right " + (item.fromCatalogue ? "bg-blue-50 dark:bg-blue-950/20 border-blue-300 dark:border-blue-700/50" : "")}
+                          className={inputClass + " pl-7 text-right " + (item.fromCatalogue ? "bg-brand-50 dark:bg-brand-950/20 border-brand-300 dark:border-brand-700/50" : "")}
                         />
                       </div>
                       {item.unitPrice > 0 && item.quantity > 1 && (
                         <p className="text-right text-[10px] text-zinc-400 mt-0.5">= {formatPrice(item.unitPrice * item.quantity)}</p>
                       )}
                       {item.fromCatalogue && (
-                        <p className="text-right text-[10px] text-blue-600 dark:text-blue-400 mt-0.5">✦ catalogue price</p>
+                        <p className="text-right text-[10px] text-brand-600 dark:text-brand-400 mt-0.5">✦ catalogue price</p>
                       )}
                     </div>
                     <div className="col-span-1 flex justify-center items-center pt-2.5">
@@ -676,7 +676,7 @@ export function QuotationClient() {
                       Estimated total
                       {filledItems.length > 0 && <span className="ml-1.5 text-xs text-zinc-400">({filledItems.length} {filledItems.length === 1 ? "item" : "items"})</span>}
                     </span>
-                    <span className="text-base font-bold text-zinc-900 dark:text-blue-400">{formatPrice(estimatedTotal)}</span>
+                    <span className="text-base font-bold text-zinc-900 dark:text-brand-400">{formatPrice(estimatedTotal)}</span>
                   </div>
                   {filledItems.length > 1 && (
                     <div className="mt-2 space-y-1">

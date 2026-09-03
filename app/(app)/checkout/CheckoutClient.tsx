@@ -77,10 +77,10 @@ interface NegotiatedDeal {
 // ── Styles ────────────────────────────────────────────────────────────────
 
 const inputClass =
-  "w-full rounded-lg border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] px-3 py-2.5 text-sm text-zinc-900 dark:text-[#f1f1f1] placeholder-zinc-400 dark:placeholder-[#555] focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-colors";
+  "w-full rounded-lg border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] px-3 py-2.5 text-sm text-zinc-900 dark:text-[#f1f1f1] placeholder-zinc-400 dark:placeholder-[#555] focus:border-brand-500 dark:focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500/30 transition-colors";
 
 const selectClass =
-  "w-full appearance-none rounded-lg border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] px-3 py-2.5 pr-9 text-sm text-zinc-900 dark:text-[#f1f1f1] focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-colors cursor-pointer";
+  "w-full appearance-none rounded-lg border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] px-3 py-2.5 pr-9 text-sm text-zinc-900 dark:text-[#f1f1f1] focus:border-brand-500 dark:focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500/30 transition-colors cursor-pointer";
 
 const labelClass = "mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300";
 
@@ -325,7 +325,7 @@ export function CheckoutClient() {
           <ShoppingBagIcon className="mx-auto h-16 w-16 text-zinc-300 dark:text-zinc-600" />
           <h1 className="mt-6 text-2xl font-bold text-zinc-900 dark:text-[#f1f1f1]">Your cart is empty</h1>
           <p className="mt-2 text-zinc-500 dark:text-[#a3a3a3]">Add some items before checking out.</p>
-          <Button asChild className="mt-8 bg-blue-500 text-white hover:bg-blue-400 font-bold">
+          <Button asChild className="mt-8 bg-brand-500 text-white hover:bg-brand-400 font-bold">
             <Link href="/">Continue Shopping</Link>
           </Button>
         </div>
@@ -358,13 +358,13 @@ export function CheckoutClient() {
           <h1 className="mt-3 text-2xl font-bold text-zinc-900 dark:text-[#f1f1f1]">Checkout</h1>
 
           {negotiated && deal && (
-            <div className="mt-3 flex items-center gap-3 rounded-xl border border-blue-400/40 bg-blue-500/8 px-4 py-3">
-              <CheckBadgeIcon className="h-5 w-5 text-blue-500 shrink-0" />
+            <div className="mt-3 flex items-center gap-3 rounded-xl border border-brand-400/40 bg-brand-500/8 px-4 py-3">
+              <CheckBadgeIcon className="h-5 w-5 text-brand-500 shrink-0" />
               <div>
-                <p className="text-sm font-bold text-blue-700 dark:text-blue-400">
+                <p className="text-sm font-bold text-brand-700 dark:text-brand-400">
                   🤝 Negotiated Deal — {formatInCurrency(deal.agreedPrice)}
                 </p>
-                <p className="text-xs text-blue-600/80 dark:text-blue-500/80">
+                <p className="text-xs text-brand-600/80 dark:text-brand-500/80">
                   You saved {formatInCurrency(deal.originalPrice - deal.agreedPrice)} off the listed price of {formatInCurrency(deal.originalPrice)}
                 </p>
               </div>
@@ -372,12 +372,12 @@ export function CheckoutClient() {
           )}
 
           {isLoaded && !isSignedIn && (
-            <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-blue-500/30 bg-blue-500/8 px-4 py-3">
-              <p className="text-sm text-blue-700 dark:text-blue-300">
+            <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-brand-500/30 bg-brand-500/8 px-4 py-3">
+              <p className="text-sm text-brand-700 dark:text-brand-300">
                 <span className="font-semibold">Sign in required</span> — you need an account to complete your purchase.
               </p>
               <Button size="sm" onClick={() => setGuestModalOpen(true)}
-                className="shrink-0 bg-blue-500 text-white hover:bg-blue-400 font-bold h-8 px-3 text-xs">
+                className="shrink-0 bg-brand-500 text-white hover:bg-brand-400 font-bold h-8 px-3 text-xs">
                 Sign In
               </Button>
             </div>
@@ -426,7 +426,7 @@ export function CheckoutClient() {
               {!negotiated && (
                 <>
                   {hasStockIssues && !isLoading && (
-                    <div className="mx-5 mt-4 flex items-center gap-2 rounded-lg border border-blue-200 dark:border-blue-800/50 bg-blue-50 dark:bg-blue-950/30 px-4 py-3 text-sm text-blue-800 dark:text-blue-300">
+                    <div className="mx-5 mt-4 flex items-center gap-2 rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-950/30 px-4 py-3 text-sm text-brand-800 dark:text-brand-300">
                       <ExclamationTriangleIcon className="h-5 w-5 shrink-0" />
                       <span>Some items have stock issues. Please update your cart.</span>
                     </div>
@@ -454,11 +454,11 @@ export function CheckoutClient() {
                             <p className="text-xs text-zinc-500 dark:text-[#a3a3a3]">Qty: {item.quantity}</p>
                             {stockInfo?.isOutOfStock && <p className="text-xs font-medium text-red-600 dark:text-red-400">Out of stock</p>}
                             {stockInfo?.exceedsStock && !stockInfo.isOutOfStock && (
-                              <p className="text-xs font-medium text-blue-600 dark:text-blue-400">Only {stockInfo.currentStock} available</p>
+                              <p className="text-xs font-medium text-brand-600 dark:text-brand-400">Only {stockInfo.currentStock} available</p>
                             )}
                           </div>
                           <div className="text-right shrink-0">
-                            <p className="font-semibold text-sm text-zinc-900 dark:text-blue-400">{formatInCurrency(item.price * item.quantity)}</p>
+                            <p className="font-semibold text-sm text-zinc-900 dark:text-brand-400">{formatInCurrency(item.price * item.quantity)}</p>
                             {item.quantity > 1 && <p className="text-xs text-zinc-500 dark:text-[#a3a3a3]">{formatInCurrency(item.price)} each</p>}
                           </div>
                         </div>
@@ -487,16 +487,16 @@ export function CheckoutClient() {
                         <button key={addr._key} type="button" onClick={() => applyAddress(addr)}
                           className={`w-full text-left rounded-xl border px-4 py-3 text-sm transition-all duration-150 ${
                             selectedSavedAddr === addr._key
-                              ? "border-blue-500 bg-blue-50 dark:bg-blue-950/20 ring-1 ring-blue-500/30"
-                              : "border-zinc-200 dark:border-zinc-700 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                              ? "border-brand-500 bg-brand-50 dark:bg-brand-950/20 ring-1 ring-brand-500/30"
+                              : "border-zinc-200 dark:border-zinc-700 hover:border-brand-300 dark:hover:border-brand-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
                           }`}>
                           <div className="flex items-center justify-between gap-2">
                             <span className="font-semibold text-zinc-900 dark:text-zinc-100 truncate">
-                              {addr.isDefault && <span className="text-blue-500 mr-1">⭐</span>}
+                              {addr.isDefault && <span className="text-brand-500 mr-1">⭐</span>}
                               {addr.label}
                             </span>
                             {selectedSavedAddr === addr._key && (
-                              <CheckBadgeIcon className="h-4 w-4 text-blue-500 shrink-0" />
+                              <CheckBadgeIcon className="h-4 w-4 text-brand-500 shrink-0" />
                             )}
                           </div>
                           <p className="text-zinc-500 dark:text-zinc-400 mt-0.5 text-xs truncate">
@@ -509,7 +509,7 @@ export function CheckoutClient() {
                           setSelectedSavedAddr(null);
                           setAddress({ name: "", phone: "", line1: "", line2: "", city: "", state: "", lga: "", postcode: "", country: "Nigeria", countryCode: "NG" });
                         }}
-                        className="w-full text-left rounded-xl border border-dashed border-zinc-200 dark:border-zinc-700 px-4 py-3 text-sm text-zinc-400 hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all">
+                        className="w-full text-left rounded-xl border border-dashed border-zinc-200 dark:border-zinc-700 px-4 py-3 text-sm text-zinc-400 hover:border-brand-400 hover:text-brand-600 dark:hover:text-brand-400 transition-all">
                         + Use a different address
                       </button>
                     </div>
@@ -543,7 +543,7 @@ export function CheckoutClient() {
                 <div>
                   <label htmlFor="checkout-address-line1" className={labelClass}>
                     Street Address <span className="text-red-500">*</span>
-                    <span className="ml-2 text-[10px] font-normal text-blue-500">✦ smart suggestions enabled</span>
+                    <span className="ml-2 text-[10px] font-normal text-brand-500">✦ smart suggestions enabled</span>
                   </label>
                   <input
                     id="checkout-address-line1"
@@ -667,7 +667,7 @@ export function CheckoutClient() {
                 )}
                 <div className="border-t border-zinc-100 dark:border-[#1a1a1a] pt-2 flex justify-between font-bold text-base">
                   <span className="text-zinc-900 dark:text-[#f1f1f1]">Total</span>
-                  <span className="text-zinc-900 dark:text-blue-400">{formatInCurrency(grandTotal)}</span>
+                  <span className="text-zinc-900 dark:text-brand-400">{formatInCurrency(grandTotal)}</span>
                 </div>
               </div>
 
@@ -681,13 +681,13 @@ export function CheckoutClient() {
                 {negotiated ? (
                   !isSignedIn ? (
                     <Button onClick={() => setGuestModalOpen(true)}
-                      className="w-full h-12 bg-blue-500 text-white hover:bg-blue-400 font-bold shadow-lg shadow-blue-500/20">
+                      className="w-full h-12 bg-brand-500 text-white hover:bg-brand-400 font-bold shadow-lg shadow-brand-500/20">
                       Sign In to Pay
                     </Button>
                   ) : (
                     <Button onClick={handleNegotiatedPayment}
                       disabled={!isAddressComplete || isPayingNegotiated}
-                      className="w-full h-12 bg-blue-500 text-white hover:bg-blue-400 font-bold shadow-lg shadow-blue-500/20 disabled:opacity-50">
+                      className="w-full h-12 bg-brand-500 text-white hover:bg-brand-400 font-bold shadow-lg shadow-brand-500/20 disabled:opacity-50">
                       {isPayingNegotiated
                         ? <><Spinner className="h-4 w-4 text-white mr-2" /> Setting up payment…</>
                         : `Pay ${formatInCurrency(grandTotal)}`
@@ -697,7 +697,7 @@ export function CheckoutClient() {
                 ) : paymentMethod === "paystack" ? (
                   !isSignedIn ? (
                     <Button onClick={() => setGuestModalOpen(true)}
-                      className="w-full h-12 bg-blue-500 text-white hover:bg-blue-400 font-bold shadow-lg shadow-blue-500/20">
+                      className="w-full h-12 bg-brand-500 text-white hover:bg-brand-400 font-bold shadow-lg shadow-brand-500/20">
                       Sign In to Pay
                     </Button>
                   ) : (
@@ -710,7 +710,7 @@ export function CheckoutClient() {
                   )
                 ) : (
                   <Button
-                    className="w-full h-12 gap-2 bg-linear-to-r from-blue-500 to-blue-500 text-white font-bold disabled:opacity-50"
+                    className="w-full h-12 gap-2 bg-linear-to-r from-brand-500 to-brand-500 text-white font-bold disabled:opacity-50"
                     disabled={hasStockIssues || isLoading || !isAddressComplete || isCryptoLoading}
                     onClick={handleCryptoCheckout}>
                     {isCryptoLoading ? <><Spinner className="h-4 w-4" /> Preparing...</> : "Pay with Crypto"}
@@ -719,7 +719,7 @@ export function CheckoutClient() {
               </div>
 
               {!isAddressComplete && isSignedIn && (
-                <p className="text-center text-xs text-blue-600 dark:text-blue-400">
+                <p className="text-center text-xs text-brand-600 dark:text-brand-400">
                   {!selectedShipping ? "↓ Select a shipping method to continue" : "↓ Fill in your shipping address to continue"}
                 </p>
               )}

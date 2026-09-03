@@ -53,7 +53,7 @@ export function CartSheet() {
             <>
               {/* Stock Issues Banner */}
               {hasStockIssues && !isLoading && (
-                <div className="flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-950/50 dark:text-blue-200">
+                <div className="flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-800 dark:border-brand-800 dark:bg-brand-950/50 dark:text-brand-200">
                   <AlertTriangle className="h-4 w-4 shrink-0" />
                   <span>
                     Some items have stock issues. Please review before checkout.
