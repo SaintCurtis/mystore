@@ -47,11 +47,19 @@ export function SuccessClient({ session }: SuccessClientProps) {
       const raw = sessionStorage.getItem("lastCheckoutAddress");
       if (!raw) return;
       sessionStorage.removeItem("lastCheckoutAddress");
-      // Fire-and-forget — never block or affect the success page
+      const checkoutAddress = JSON.parse(raw) as { phone?: string } & Record<string, unknown>;
+      // Fire-and-forget — never block or affect the success page.
+      // The API expects { address, phone, saveAddress }, not the flat
+      // checkout address shape, so it has to be wrapped here.
       fetch("/api/customer/addresses", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: raw,
+        body: JSON.stringify({
+          address: checkoutAddress,
+          phone: checkoutAddress.phone,
+          saveAddress: true,
+          source: "checkout",
+        }),
       }).catch(() => {});
     } catch {
       // sessionStorage unavailable (private mode, SSR quirk) — safe to ignore

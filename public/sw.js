@@ -1,7 +1,12 @@
 // Saint's TechNet — Service Worker
 // Handles: PWA offline caching + Web Push notifications
 
-const CACHE_NAME = "saints-technet-v2";
+// Bumped to v3 to force-purge anything poisoned under v2 by the bug fixed
+// below — bumping the name is what actually evicts old entries; without it
+// a bad cached response for an existing user just sits there forever even
+// after this file changes, since only entries under a NEW cache name get a
+// fresh start (see the `activate` handler).
+const CACHE_NAME = "saints-technet-v3";
 
 // ── Install ───────────────────────────────────────────────────────────────
 self.addEventListener("install", (event) => {
@@ -42,24 +47,58 @@ self.addEventListener("activate", (event) => {
 //    previous version claimed to do this but never actually called
 //    cache.put(), so nothing beyond "/" and manifest.json was ever
 //    really cached — fixed here too.)
+//
+// 3. Next.js App Router client-side transitions — tapping a <Link>, a
+//    router.push(), or Next's own background prefetching (this is how
+//    Clerk's UserButton.Link navigates too) — are a THIRD category that
+//    the original two-way split above missed entirely. These never look
+//    like a `navigate` request (the browser's address bar never actually
+//    navigates; Next intercepts the click and fetches the target route's
+//    RSC payload in the background), so they fell into the cache-first
+//    bucket meant for hashed static assets. That's the same trap as #1,
+//    just in a shape that's easy to miss: if a route's RSC fetch was ever
+//    cached while something was wrong (mid-deploy, a route that didn't
+//    exist yet, a redirect), every future tap on that link replays the
+//    same broken response forever — indistinguishable, from the outside,
+//    from "the link doesn't go anywhere." Treating these as network-first
+//    like real navigations closes that hole.
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+
+  const url = new URL(event.request.url);
 
   const isNavigation =
     event.request.mode === "navigate" ||
     (event.request.destination === "document");
 
-  if (isNavigation) {
+  const isNextRouterFetch =
+    event.request.headers.has("RSC") ||
+    event.request.headers.has("Next-Router-State-Tree") ||
+    event.request.headers.has("Next-Router-Prefetch") ||
+    url.searchParams.has("_rsc");
+
+  if (isNavigation || isNextRouterFetch) {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          // Only ever cache a real, successful full-page navigation for
+          // offline fallback — never an RSC fetch/prefetch payload, and
+          // never a redirect or error response either.
+          if (isNavigation && response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          }
           return response;
         })
-        .catch(() =>
-          caches.match(event.request).then((cached) => cached ?? caches.match("/"))
-        )
+        .catch(() => {
+          // An offline fallback only makes sense for a real page load —
+          // an RSC fetch failing offline should just fail, not resolve to
+          // some other route's cached HTML.
+          if (isNavigation) {
+            return caches.match(event.request).then((cached) => cached ?? caches.match("/"));
+          }
+          return Response.error();
+        })
     );
     return;
   }

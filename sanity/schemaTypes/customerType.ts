@@ -140,7 +140,8 @@ export const customerType = defineType({
       title: "Saved Addresses",
       type: "array",
       group: "addresses",
-      description: "Addresses saved from past orders — pre-fill checkout on return visits",
+      description: "Addresses saved from past orders or added on the Profile page — pre-fill checkout on return visits. Capped at 2 per customer.",
+      validation: (rule) => rule.max(2).warning("Customers are limited to 2 saved addresses — the app enforces this too, but keep it in mind when editing here."),
       of: [
         {
           type: "object",

@@ -2,13 +2,13 @@
 
 // app/(app)/profile/ProfileClient.tsx
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
   Phone, MapPin, Plus, Trash2, Star, Home, ArrowLeft,
   Package, CheckCircle, Truck, Gift, Sparkles, Heart,
-  Wallet, Pencil, X, Bell, BellOff, ExternalLink,
+  Wallet, Pencil, X, Bell, BellOff, ExternalLink, ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,7 @@ import { StackedProductImages } from "@/components/app/StackedProductImages";
 import { getOrderStatus } from "@/lib/constants/orderStatus";
 import { formatDate, formatOrderNumber, formatPrice } from "@/lib/utils";
 import { daysUntilNextBirthday, isBirthdayToday } from "@/lib/birthday";
+import { NIGERIA_LGAS } from "@/lib/constants/nigeria-lgas";
 import type { GadgetGoal } from "@/lib/gadget-goal";
 import type { ORDERS_BY_USER_QUERY_RESULT } from "@/sanity.types";
 import type { ProfileWishlistItem, LayawayPlanResult } from "./page";
@@ -63,6 +64,11 @@ interface ProfileClientProps {
 
 const inputClass =
   "w-full rounded-lg border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] px-3 py-2.5 text-sm text-zinc-900 dark:text-[#f1f1f1] placeholder-zinc-400 dark:placeholder-[#555] focus:border-brand-500 dark:focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500/30 transition-colors";
+
+const selectClass =
+  "w-full appearance-none rounded-lg border border-zinc-200 dark:border-[#2a2a2a] bg-white dark:bg-[#111111] px-3 py-2.5 pr-9 text-sm text-zinc-900 dark:text-[#f1f1f1] focus:border-brand-500 dark:focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500/30 transition-colors cursor-pointer";
+
+const fieldLabelClass = "mb-1 block text-[10px] font-bold uppercase tracking-widest text-zinc-400";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -156,6 +162,141 @@ export function ProfileClient({
       toast.success("Address removed");
     } catch {
       toast.error("Failed to remove address");
+    }
+  }
+
+  // ── Add / edit address form ──────────────────────────────────────────────
+  // A customer may keep at most this many saved addresses. Mirrors
+  // MAX_SAVED_ADDRESSES in app/api/customer/addresses/route.ts — the API
+  // enforces the real limit, this just keeps the UI from ever bothering to
+  // ask.
+  const MAX_ADDRESSES = 2;
+
+  type AddressFormFields = Omit<SavedAddress, "_key" | "label" | "isDefault">;
+  const emptyAddressForm: AddressFormFields = {
+    name: "", line1: "", line2: "", city: "", state: "", lga: "",
+    postcode: "", country: "Nigeria", countryCode: "NG",
+  };
+
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [editingAddressKey, setEditingAddressKey] = useState<string | null>(null);
+  const [addressForm, setAddressForm] = useState<AddressFormFields>(emptyAddressForm);
+  const [savingAddress, setSavingAddress] = useState(false);
+  const [updatingDefaultKey, setUpdatingDefaultKey] = useState<string | null>(null);
+
+  const [countries, setCountries] = useState<{ code: string; name: string }[]>([]);
+  const [countriesLoading, setCountriesLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("https://restcountries.com/v3.1/all?fields=name,cca2")
+      .then((r) => r.json())
+      .then((data: { name: { common: string }; cca2: string }[]) => {
+        const list = data
+          .map((c) => ({ code: c.cca2, name: c.name.common }))
+          .sort((a, b) => a.name.localeCompare(b.name));
+        setCountries(list);
+      })
+      .catch(() => setCountries([{ code: "NG", name: "Nigeria" }]))
+      .finally(() => setCountriesLoading(false));
+  }, []);
+
+  const addressLgaOptions =
+    addressForm.countryCode === "NG" && addressForm.state ? NIGERIA_LGAS[addressForm.state] ?? [] : [];
+
+  const addressFormValid =
+    addressForm.name.trim() && addressForm.line1.trim() && addressForm.city.trim() && addressForm.state.trim();
+
+  function openAddAddress() {
+    setEditingAddressKey(null);
+    setAddressForm(emptyAddressForm);
+    setShowAddressForm(true);
+  }
+
+  function openEditAddress(addr: SavedAddress) {
+    setEditingAddressKey(addr._key);
+    setAddressForm({
+      name: addr.name, line1: addr.line1, line2: addr.line2, city: addr.city,
+      state: addr.state, lga: addr.lga, postcode: addr.postcode,
+      country: addr.country, countryCode: addr.countryCode,
+    });
+    setShowAddressForm(true);
+  }
+
+  function closeAddressForm() {
+    setShowAddressForm(false);
+    setEditingAddressKey(null);
+    setAddressForm(emptyAddressForm);
+  }
+
+  function handleAddressCountryChange(code: string) {
+    const country = countries.find((c) => c.code === code);
+    setAddressForm((a) => ({ ...a, countryCode: code, country: country?.name ?? a.country, state: "", lga: "" }));
+  }
+
+  async function submitAddressForm() {
+    if (!addressFormValid || savingAddress) return;
+    setSavingAddress(true);
+    try {
+      if (editingAddressKey) {
+        const res = await fetch("/api/customer/addresses", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key: editingAddressKey, address: addressForm }),
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error();
+        setAddresses((prev) => prev.map((a) => (a._key === editingAddressKey ? data.address : a)));
+        toast.success("Address updated");
+        closeAddressForm();
+      } else {
+        if (addresses.length >= MAX_ADDRESSES) {
+          toast.error(`You can only save up to ${MAX_ADDRESSES} addresses — remove one first.`);
+          return;
+        }
+        const res = await fetch("/api/customer/addresses", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ address: addressForm, saveAddress: true, source: "profile" }),
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error();
+        if (data.skipped) {
+          toast.error(
+            data.reason === "cap_reached"
+              ? `You can only save up to ${MAX_ADDRESSES} addresses — remove one first.`
+              : "That address is already saved."
+          );
+          return;
+        }
+        // Re-fetch rather than guessing the server-generated _key/label/isDefault client-side.
+        const refreshed = await fetch("/api/customer/addresses").then((r) => r.json());
+        setAddresses(refreshed.addresses ?? []);
+        toast.success("Address saved");
+        closeAddressForm();
+      }
+    } catch {
+      toast.error("Couldn't save that address — try again");
+    } finally {
+      setSavingAddress(false);
+    }
+  }
+
+  async function setDefaultAddress(key: string) {
+    setUpdatingDefaultKey(key);
+    try {
+      const res = await fetch("/api/customer/addresses", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key, setDefault: true }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error();
+      setAddresses((prev) => prev.map((a) => ({ ...a, isDefault: a._key === key })));
+      toast.success("Default address updated");
+    } catch {
+      toast.error("Couldn't update your default address");
+    } finally {
+      setUpdatingDefaultKey(null);
     }
   }
 
@@ -725,66 +866,239 @@ export function ProfileClient({
         {/* ══════════════════════ Addresses ══════════════════════ */}
         {tab === "addresses" && (
           <div className="space-y-3">
-            {addresses.length === 0 ? (
+            {addresses.length === 0 && !showAddressForm && (
               <div className="rounded-xl border border-dashed border-zinc-300 dark:border-zinc-700 p-10 text-center">
                 <MapPin className="mx-auto h-10 w-10 text-zinc-300 dark:text-zinc-600 mb-3" />
                 <p className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">No saved addresses yet</p>
                 <p className="text-xs text-zinc-400 dark:text-zinc-600 mt-1 max-w-xs mx-auto">
-                  Your delivery address is saved automatically after your first order — it will appear here.
+                  Add one now, or it'll be saved automatically the first time you check out.
                 </p>
-                <Link
-                  href="/"
-                  className="inline-flex mt-4 rounded-lg bg-brand-500 hover:bg-brand-400 px-5 py-2 text-sm font-bold text-white transition-colors"
+                <Button
+                  onClick={openAddAddress}
+                  className="mt-4 bg-brand-500 hover:bg-brand-400 text-white font-bold"
                 >
-                  Start Shopping
-                </Link>
+                  <Plus className="h-4 w-4" /> Add Address
+                </Button>
               </div>
-            ) : (
-              addresses.map((addr) => (
-                <div
-                  key={addr._key}
-                  className={`rounded-xl border bg-white dark:bg-[#111111] p-4 transition-colors ${
-                    addr.isDefault
-                      ? "border-brand-200 dark:border-brand-500/20"
-                      : "border-zinc-200 dark:border-[#1a1a1a]"
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <div className="flex items-center gap-2">
-                      {addr.isDefault && <Star className="h-3.5 w-3.5 shrink-0 fill-amber-500 text-amber-500" />}
-                      <span className="text-sm font-semibold text-zinc-900 dark:text-[#f1f1f1]">{addr.label}</span>
-                      {addr.isDefault && (
-                        <span className="text-[9px] font-bold bg-brand-100 dark:bg-brand-950/40 text-brand-700 dark:text-brand-400 px-2 py-0.5 rounded-full uppercase tracking-wide">
-                          Default
-                        </span>
-                      )}
-                    </div>
+            )}
+
+            {addresses.map((addr) => (
+              <div
+                key={addr._key}
+                className={`rounded-xl border bg-white dark:bg-[#111111] p-4 transition-colors ${
+                  addr.isDefault
+                    ? "border-brand-200 dark:border-brand-500/20"
+                    : "border-zinc-200 dark:border-[#1a1a1a]"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <div className="flex items-center gap-2">
+                    {addr.isDefault && <Star className="h-3.5 w-3.5 shrink-0 fill-amber-500 text-amber-500" />}
+                    <span className="text-sm font-semibold text-zinc-900 dark:text-[#f1f1f1]">{addr.label}</span>
+                    {addr.isDefault && (
+                      <span className="text-[9px] font-bold bg-brand-100 dark:bg-brand-950/40 text-brand-700 dark:text-brand-400 px-2 py-0.5 rounded-full uppercase tracking-wide">
+                        Default
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      onClick={() => openEditAddress(addr)}
+                      className="p-1 rounded text-zinc-300 dark:text-zinc-600 hover:text-brand-500 transition-colors"
+                      title="Edit address"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
                     <button
                       onClick={() => deleteAddress(addr._key)}
-                      className="p-1 rounded text-zinc-300 dark:text-zinc-600 hover:text-red-500 dark:hover:text-red-400 transition-colors shrink-0"
+                      className="p-1 rounded text-zinc-300 dark:text-zinc-600 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                       title="Remove address"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
+                </div>
 
-                  <div className="text-sm text-zinc-600 dark:text-zinc-400 space-y-0.5">
-                    <p className="font-medium text-zinc-800 dark:text-zinc-300">{addr.name}</p>
-                    <p>
-                      {addr.line1}
-                      {addr.line2 ? `, ${addr.line2}` : ""}
-                    </p>
-                    {addr.lga && <p>{addr.lga} LGA</p>}
-                    <p>
-                      {addr.city}
-                      {addr.state ? `, ${addr.state}` : ""}
-                      {addr.postcode ? ` ${addr.postcode}` : ""}
-                    </p>
-                    <p className="text-zinc-400 dark:text-zinc-500 text-xs">{addr.country}</p>
+                <div className="text-sm text-zinc-600 dark:text-zinc-400 space-y-0.5">
+                  <p className="font-medium text-zinc-800 dark:text-zinc-300">{addr.name}</p>
+                  <p>
+                    {addr.line1}
+                    {addr.line2 ? `, ${addr.line2}` : ""}
+                  </p>
+                  {addr.lga && <p>{addr.lga} LGA</p>}
+                  <p>
+                    {addr.city}
+                    {addr.state ? `, ${addr.state}` : ""}
+                    {addr.postcode ? ` ${addr.postcode}` : ""}
+                  </p>
+                  <p className="text-zinc-400 dark:text-zinc-500 text-xs">{addr.country}</p>
+                </div>
+
+                {!addr.isDefault && (
+                  <button
+                    onClick={() => setDefaultAddress(addr._key)}
+                    disabled={updatingDefaultKey === addr._key}
+                    className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-500 disabled:opacity-50 transition-colors"
+                  >
+                    <Star className="h-3 w-3" />
+                    {updatingDefaultKey === addr._key ? "Setting as default…" : "Set as default"}
+                  </button>
+                )}
+              </div>
+            ))}
+
+            {/* Add / edit address form */}
+            {showAddressForm ? (
+              <div className="rounded-xl border border-zinc-200 dark:border-[#1a1a1a] bg-white dark:bg-[#111111] p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-zinc-900 dark:text-[#f1f1f1]">
+                    {editingAddressKey ? "Edit address" : "Add a new address"}
+                  </p>
+                  <button
+                    onClick={closeAddressForm}
+                    className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <div>
+                  <label className={fieldLabelClass}>Full Name</label>
+                  <input
+                    type="text"
+                    value={addressForm.name}
+                    onChange={(e) => setAddressForm((a) => ({ ...a, name: e.target.value }))}
+                    placeholder="John Doe"
+                    className={inputClass}
+                  />
+                </div>
+
+                <div>
+                  <label className={fieldLabelClass}>Street Address</label>
+                  <input
+                    type="text"
+                    value={addressForm.line1}
+                    onChange={(e) => setAddressForm((a) => ({ ...a, line1: e.target.value }))}
+                    placeholder="12 Admiralty Way"
+                    className={inputClass}
+                  />
+                </div>
+
+                <div>
+                  <label className={fieldLabelClass}>Address Line 2 (optional)</label>
+                  <input
+                    type="text"
+                    value={addressForm.line2}
+                    onChange={(e) => setAddressForm((a) => ({ ...a, line2: e.target.value }))}
+                    placeholder="Apartment, floor, landmark"
+                    className={inputClass}
+                  />
+                </div>
+
+                <div>
+                  <label className={fieldLabelClass}>Country</label>
+                  <div className="relative">
+                    <select
+                      value={addressForm.countryCode}
+                      onChange={(e) => handleAddressCountryChange(e.target.value)}
+                      className={selectClass}
+                    >
+                      {countriesLoading ? (
+                        <option>Loading countries…</option>
+                      ) : (
+                        countries.map((c) => (
+                          <option key={c.code} value={c.code}>{c.name}</option>
+                        ))
+                      )}
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                   </div>
                 </div>
-              ))
-            )}
+
+                <div>
+                  <label className={fieldLabelClass}>State / Region</label>
+                  <input
+                    type="text"
+                    value={addressForm.state}
+                    onChange={(e) => setAddressForm((a) => ({ ...a, state: e.target.value, lga: "" }))}
+                    placeholder="Lagos"
+                    className={inputClass}
+                  />
+                </div>
+
+                {addressForm.countryCode === "NG" && addressLgaOptions.length > 0 && (
+                  <div>
+                    <label className={fieldLabelClass}>LGA (Local Government Area)</label>
+                    <div className="relative">
+                      <select
+                        value={addressForm.lga}
+                        onChange={(e) => setAddressForm((a) => ({ ...a, lga: e.target.value }))}
+                        className={selectClass}
+                      >
+                        <option value="">Select LGA…</option>
+                        {addressLgaOptions.map((l) => (
+                          <option key={l} value={l}>{l}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className={fieldLabelClass}>City</label>
+                    <input
+                      type="text"
+                      value={addressForm.city}
+                      onChange={(e) => setAddressForm((a) => ({ ...a, city: e.target.value }))}
+                      placeholder="Lagos"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={fieldLabelClass}>Postcode</label>
+                    <input
+                      type="text"
+                      value={addressForm.postcode}
+                      onChange={(e) => setAddressForm((a) => ({ ...a, postcode: e.target.value }))}
+                      placeholder="100001"
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-1">
+                  <Button
+                    onClick={submitAddressForm}
+                    disabled={!addressFormValid || savingAddress}
+                    className="flex-1 bg-brand-500 hover:bg-brand-400 text-white font-bold"
+                  >
+                    {savingAddress ? "Saving…" : editingAddressKey ? "Save Changes" : "Save Address"}
+                  </Button>
+                  <Button
+                    onClick={closeAddressForm}
+                    variant="outline"
+                    className="shrink-0"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : addresses.length > 0 ? (
+              addresses.length >= MAX_ADDRESSES ? (
+                <p className="text-xs text-zinc-400 dark:text-zinc-600 text-center py-2">
+                  You've saved {MAX_ADDRESSES} of {MAX_ADDRESSES} addresses — remove one to add another.
+                </p>
+              ) : (
+                <button
+                  onClick={openAddAddress}
+                  className="w-full flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-zinc-300 dark:border-zinc-700 py-3 text-sm font-semibold text-zinc-500 dark:text-zinc-400 hover:border-brand-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
+                >
+                  <Plus className="h-4 w-4" /> Add Another Address
+                </button>
+              )
+            ) : null}
           </div>
         )}
       </div>
