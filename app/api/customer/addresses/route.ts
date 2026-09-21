@@ -1,5 +1,6 @@
 // app/api/customer/addresses/route.ts
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
 import { createClient } from "next-sanity";
 
@@ -159,6 +160,11 @@ export async function POST(req: NextRequest) {
 
     if (Object.keys(patchData).length > 0) {
       await writeClient.patch(existing._id).set(patchData).commit();
+      // Same reasoning as the profile route: the Server Component at
+      // /profile reads this customer doc through a cached live fetch, so a
+      // write here needs an explicit nudge or a reload can still show the
+      // pre-write state.
+      revalidatePath("/profile");
     }
 
     return NextResponse.json({
@@ -209,6 +215,7 @@ export async function PATCH(req: NextRequest) {
     });
 
     await writeClient.patch(existing._id).set({ savedAddresses: updated }).commit();
+    revalidatePath("/profile");
 
     return NextResponse.json({ success: true, address: updated[targetIndex] });
   } catch (err) {
@@ -233,6 +240,7 @@ export async function DELETE(req: NextRequest) {
     await writeClient.patch(existing._id)
       .unset([`savedAddresses[_key == "${key}"]`])
       .commit();
+    revalidatePath("/profile");
 
     return NextResponse.json({ success: true });
   } catch (err) {

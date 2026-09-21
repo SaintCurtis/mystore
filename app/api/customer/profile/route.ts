@@ -1,5 +1,6 @@
 // app/api/customer/profile/route.ts
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { client, writeClient } from "@/sanity/lib/client";
 import { getOrCreatePaystackCustomer } from "@/lib/actions/customer";
@@ -71,6 +72,13 @@ export async function PATCH(req: NextRequest) {
     const { sanityCustomerId } = await getOrCreatePaystackCustomer(email, name, userId);
 
     await writeClient.patch(sanityCustomerId).set(patch).commit();
+
+    // The profile page is a Server Component that reads this same customer
+    // doc through next-sanity's live/cached fetch. Without this, a write
+    // here can succeed in Sanity while the next full page load of /profile
+    // still serves a pre-write cached snapshot — looking exactly like the
+    // save silently failed.
+    revalidatePath("/profile");
 
     return NextResponse.json({ success: true });
   } catch (err) {

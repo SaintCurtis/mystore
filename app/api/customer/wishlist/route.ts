@@ -7,6 +7,7 @@
 // whenever the local store changes.
 
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { client, writeClient } from "@/sanity/lib/client";
 import { getOrCreatePaystackCustomer } from "@/lib/actions/customer";
@@ -52,6 +53,10 @@ export async function POST(req: NextRequest) {
     }));
 
     await writeClient.patch(sanityCustomerId).set({ wishlist: refs }).commit();
+
+    // Keeps the Overview stat, Gadget Goal, and Addresses/Wishlist tabs on
+    // /profile from showing a stale pre-sync snapshot on the next load.
+    revalidatePath("/profile");
 
     return NextResponse.json({ success: true });
   } catch (err) {
