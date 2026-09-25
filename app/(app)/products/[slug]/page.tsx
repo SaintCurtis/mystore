@@ -26,12 +26,32 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   const p = product as any;
   const imageUrl = p.images?.[0]?.asset?.url;
   const title = `${p.name} | The Saint's TechNet`;
-  const description =
-    p.description?.slice(0, 160) ??
-    `Buy ${p.name} at The Saint's TechNet — CAC registered. Warranty included. Ships worldwide.`;
+
+  // Every product page gets the trust-keyword suffix, not just the ones
+  // with no description of their own — previously a product with a real
+  // description got NONE of these terms in its meta description, which
+  // was most of the catalog.
+  const TRUST_SUFFIX = "Engineer-verified. Warranty included. Ships same day. After-sales support.";
+  const rawDescription = (p.description ?? "").trim();
+  const maxRawLength = 155 - TRUST_SUFFIX.length - 1;
+  const truncatedRaw =
+    rawDescription.length > maxRawLength
+      ? `${rawDescription.slice(0, maxRawLength).trim()}…`
+      : rawDescription;
+  const description = truncatedRaw
+    ? `${truncatedRaw} ${TRUST_SUFFIX}`
+    : `Buy ${p.name} in Nigeria — the smartest way to buy gadgets. ${TRUST_SUFFIX} Ships worldwide.`;
+
   return {
     title,
     description,
+    // Every product page previously had no canonical of its own, so it
+    // silently inherited the root layout's `alternates.canonical: SITE_URL`
+    // — meaning every single product page was telling Google its
+    // canonical version was the homepage. That's about as bad as SEO bugs
+    // get for a catalog site: it actively discourages indexing individual
+    // product pages.
+    alternates: { canonical: `${SITE_URL}/products/${slug}` },
     openGraph: {
       title, description, type: "website", siteName: "The Saint's TechNet",
       ...(imageUrl && { images: [{ url: imageUrl, width: 1200, height: 630, alt: p.name ?? "" }] }),

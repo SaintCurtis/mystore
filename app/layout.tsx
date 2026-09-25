@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { AnalyticsScripts } from "@/components/analytics/AnalyticsScripts";
 import { SITE_URL } from "@/lib/constants/site";
 
 // Self-hosted (no longer fetched from Google Fonts at build time — that
@@ -81,12 +82,14 @@ export const metadata: Metadata = {
     template: "%s | The Saint's TechNet",
   },
   description:
-    "The smartest way to buy premium brand-new and foreign-used tech — engineer-verified, warranted, and shipped worldwide. Registered and recognized, serving thousands since 2019.",
+    "The smartest way to buy gadgets in Nigeria — engineer-verified tech with warranty on every item, same-day shipping, and real after-sales support. Brand-new and foreign-used laptops, MacBooks, gaming PCs & accessories, shipped worldwide. CAC-registered since 2019.",
   keywords: [
     "laptops Nigeria", "MacBook Nigeria", "gaming laptops Lagos",
     "foreign used laptops", "brand new laptops Nigeria", "The Saint's TechNet",
     "tech store Lagos", "buy laptop Lagos", "ACASIS Nigeria",
     "monitors Lagos", "gaming PC Nigeria", "EcoFlow Nigeria", "Starlink Nigeria",
+    "engineer-verified gadgets", "smartest way to buy gadgets in Nigeria",
+    "warranty on all items", "after sales support Nigeria", "same-day shipping Nigeria",
   ],
   authors: [{ name: "The Saint's TechNet", url: SITE_URL }],
   creator: "The Saint's TechNet",
@@ -109,13 +112,13 @@ export const metadata: Metadata = {
     siteName: "The Saint's TechNet",
     title: "The Saint's TechNet — Engineer-Verified. Community-Trusted.",
     description:
-      "Premium brand-new and foreign-used tech — engineer-verified, warranted, and shipped worldwide. CAC-registered since 2019.",
+      "The smartest way to buy gadgets in Nigeria. Engineer-verified, brand-new and foreign-used tech with warranty on every item, same-day shipping, and real after-sales support — shipped worldwide. CAC-registered since 2019.",
     images: [{ url: `${SITE_URL}/og-image.jpg`, width: 1200, height: 630, alt: "The Saint's TechNet" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "The Saint's TechNet — Engineer-Verified. Community-Trusted.",
-    description: "Premium brand-new and foreign-used tech — engineer-verified, warranted, and shipped worldwide.",
+    description: "The smartest way to buy gadgets in Nigeria — engineer-verified, warranty on every item, same-day shipping, after-sales support included.",
     images: [`${SITE_URL}/og-image.jpg`],
     creator: "@Saint_Curtis_",
     site: "@Saint_Curtis_",
@@ -147,6 +150,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${jakarta.variable} ${dmSans.variable} font-body antialiased transition-colors duration-300`}>
+        <AnalyticsScripts />
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

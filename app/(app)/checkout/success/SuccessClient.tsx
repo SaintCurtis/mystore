@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils";
 import { useCartActions } from "@/lib/store/cart-store-provider";
 import { useAuth } from "@clerk/nextjs";
+import { trackPurchase } from "@/lib/analytics/track";
 
 interface SuccessClientProps {
   session: {
@@ -39,6 +40,28 @@ export function SuccessClient({ session }: SuccessClientProps) {
   useEffect(() => {
     clearCart();
   }, [clearCart]);
+
+  // ── Track purchase — exactly once per order, ever. Guarded by session
+  //    id (the Paystack reference) so refreshing or revisiting this
+  //    success page never double-counts revenue in GA4/Meta. This same
+  //    id is what the Paystack webhook sends to Meta's Conversions API
+  //    server-side — matching ids is how Meta dedupes the two into one
+  //    verified conversion instead of counting it twice. ───────────────
+  useEffect(() => {
+    const dedupeKey = `purchase_tracked_${session.id}`;
+    if (typeof window === "undefined" || sessionStorage.getItem(dedupeKey)) return;
+    sessionStorage.setItem(dedupeKey, "1");
+    trackPurchase({
+      id: session.id,
+      value: (session.amountTotal ?? 0) / 100,
+      items: (session.lineItems ?? []).map((item) => ({
+        id: item.name ?? "unknown",
+        name: item.name ?? "Item",
+        price: (item.amount ?? 0) / 100 / (item.quantity ?? 1),
+        quantity: item.quantity ?? 1,
+      })),
+    });
+  }, [session.id, session.amountTotal, session.lineItems]);
 
   // ── Save address + phone from checkout to customer profile ────────────
   useEffect(() => {

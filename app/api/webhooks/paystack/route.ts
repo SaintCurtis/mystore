@@ -23,6 +23,8 @@ import {
   LAYAWAY_PLAN_BY_PAYSTACK_REFERENCE_QUERY,
 } from "@/lib/sanity/queries/profile";
 import { PRODUCTS_BY_IDS_QUERY } from "@/lib/sanity/queries/products";
+import { sendMetaPurchaseEvent } from "@/lib/analytics/meta-capi";
+import { SITE_URL } from "@/lib/constants/site";
 
 export const dynamic = "force-dynamic";
 
@@ -173,6 +175,21 @@ async function handleChargeSuccess(data: PaystackChargeData) {
     });
 
     console.log(`✅ Order created: ${order._id} (${orderNumber})`);
+
+    // ── Meta Conversions API — the verified half of the pixel/CAPI pair.
+    //    This is the one moment in the whole flow that's cryptographically
+    //    confirmed (Paystack's HMAC signature, checked above) rather than
+    //    just "a browser said so" — exactly what should be telling Meta a
+    //    purchase happened. Same event id (paystackReference) as the
+    //    client-side pixel fires with, so Meta dedupes rather than
+    //    double-counting. Fire-and-forget: never let an ad-tracking call
+    //    hold up or fail order processing.
+    sendMetaPurchaseEvent({
+      eventId: paystackReference,
+      value: totalNaira,
+      email: userEmail || undefined,
+      sourceUrl: `${SITE_URL}/checkout/success`,
+    }).catch(() => {});
 
     // ── Decrease stock ────────────────────────────────────────────────────
     await productIds

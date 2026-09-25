@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { formatPrice } from "@/lib/utils";
 import { useUser } from "@clerk/nextjs";
+import { trackLead } from "@/lib/analytics/track";
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
@@ -369,6 +370,7 @@ export function QuotationClient() {
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
+      trackLead({ value: quote.grandTotal, source: "quotation" });
       toast.success(`Quotation sent to ${email}`);
       setEmailModalOpen(false);
     } catch {

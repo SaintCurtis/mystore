@@ -1,6 +1,7 @@
 import { createStore } from "zustand/vanilla";
 import { persist } from "zustand/middleware";
 import type { SelectedVariant } from "@/types/variants";
+import { trackAddToCart } from "@/lib/analytics/track";
 
 // Types
 export interface CartItem {
@@ -61,7 +62,14 @@ export const createCartStore = (initState: CartState = defaultInitState) => {
       (set) => ({
         ...initState,
 
-        addItem: (item, quantity = 1, meta) =>
+        addItem: (item, quantity = 1, meta) => {
+          trackAddToCart({
+            id: item.productId,
+            name: item.name,
+            price: item.price,
+            category: meta?.categorySlug,
+            quantity,
+          });
           set((state) => {
             const existing = state.items.find(
               (i) => i.productId === item.productId
@@ -93,7 +101,8 @@ export const createCartStore = (initState: CartState = defaultInitState) => {
               items: [...state.items, { ...item, quantity }],
               bundleTrigger,
             };
-          }),
+          });
+        },
 
         removeItem: (productId) =>
           set((state) => ({

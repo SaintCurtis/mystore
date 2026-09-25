@@ -27,6 +27,7 @@ import {
 import { useCartStock } from "@/lib/hooks/useCartStock";
 import { createCryptoCheckoutSession } from "@/lib/actions/crypto-checkout";
 import { NIGERIA_LGAS } from "@/lib/constants/nigeria-lgas";
+import { trackBeginCheckout } from "@/lib/analytics/track";
 import { toast } from "sonner";
 
 function Spinner({ className }: { className?: string }) {
@@ -122,6 +123,20 @@ export function CheckoutClient() {
 
   const subtotal = negotiated && deal ? deal.agreedPrice : totalPrice;
   const itemCount = negotiated && deal ? 1 : totalItems;
+
+  // ── Track begin_checkout once, on the items the shopper actually reached
+  //    checkout with (fires exactly once per visit, not on every re-render
+  //    as address fields are filled in). ────────────────────────────────
+  const trackedCheckoutRef = useRef(false);
+  useEffect(() => {
+    if (trackedCheckoutRef.current || items.length === 0) return;
+    trackedCheckoutRef.current = true;
+    trackBeginCheckout(
+      items.map((i) => ({ id: i.productId, name: i.name, price: i.price, quantity: i.quantity })),
+      subtotal,
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items.length]);
 
   const { stockMap, isLoading, hasStockIssues } = useCartStock(negotiated ? [] : cartItems);
 

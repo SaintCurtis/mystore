@@ -14,6 +14,7 @@ import { StickyAddToCart } from "@/components/app/StickyAddToCart";
 import { NegotiateButton } from "@/components/app/NegotiateButton";
 import { LayawayCalculator } from "@/components/app/LayawayCalculator";
 import { recordView } from "@/lib/hooks/useRecentlyViewed";
+import { trackViewProduct } from "@/lib/analytics/track";
 import { useCurrency } from "@/lib/store/currency-store-provider";
 import { useCartActions } from "@/lib/store/cart-store-provider";
 import { useRouter } from "next/navigation";
@@ -69,6 +70,12 @@ export function ProductInfo({ product }: ProductInfoProps) {
       price:         basePrice,
       image:         imageUrl ?? undefined,
       categoryTitle: product.category?.title ?? undefined,
+    });
+    trackViewProduct({
+      id: product._id,
+      name: product.name ?? "",
+      price: basePrice,
+      category: categorySlug || undefined,
     });
   }, [product._id, product.name, product.slug, basePrice, imageUrl, product.category?.title]);
 
