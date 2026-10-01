@@ -80,14 +80,32 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
   const result = await getCheckoutSession(reference);
 
   if (!result.success || !result.session) {
+    // Paystack confirmed the charge, we just couldn't match/display the
+    // order yet — this is NOT the same situation as a genuinely declined
+    // payment, and telling a charged customer their payment "failed" is
+    // exactly the kind of thing that erodes trust for no reason.
+    const paymentConfirmed = "paymentConfirmed" in result && result.paymentConfirmed;
+
     return (
       <div className="min-h-screen bg-zinc-50 dark:bg-[#0a0a0a] flex items-center justify-center px-4">
-        <div className="text-center space-y-4">
-          <h1 className="text-xl font-bold text-zinc-900 dark:text-[#f1f1f1]">Payment Verification Failed</h1>
-          <p className="text-zinc-500 dark:text-[#a3a3a3]">We couldn't verify your payment. If money was deducted, please contact us on WhatsApp.</p>
+        <div className="text-center space-y-4 max-w-md">
+          <h1 className="text-xl font-bold text-zinc-900 dark:text-[#f1f1f1]">
+            {paymentConfirmed ? "Payment Received!" : "Payment Verification Failed"}
+          </h1>
+          <p className="text-zinc-500 dark:text-[#a3a3a3]">
+            {paymentConfirmed
+              ? "Your payment went through successfully. We're still finalizing your order details — it'll appear in My Orders shortly. No action needed, but message us if you'd like confirmation now."
+              : "We couldn't verify your payment. If money was deducted, please contact us on WhatsApp."}
+          </p>
+          {reference && (
+            <p className="font-mono text-xs text-zinc-400 dark:text-zinc-600 break-all">
+              Reference: {reference}
+            </p>
+          )}
           <div className="flex gap-3 justify-center">
             <Button asChild variant="outline"><Link href="/">Go Home</Link></Button>
-            <a href="https://wa.me/2349060898951" target="_blank" rel="noopener noreferrer"
+            <a href={`https://wa.me/2349060898951?text=${encodeURIComponent(`Hi! Reference ${reference ?? ""} — ${paymentConfirmed ? "my payment went through, please confirm my order" : "my payment may have failed but money may have been deducted"}.`)}`}
+              target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-2 rounded-lg bg-[#25D366] px-4 py-2 text-sm font-bold text-white hover:bg-[#20b858] transition-colors">
               <MessageCircle className="h-4 w-4" /> WhatsApp Support
             </a>
