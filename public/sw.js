@@ -1,12 +1,12 @@
 // Saint's TechNet — Service Worker
 // Handles: PWA offline caching + Web Push notifications
 
-// Bumped to v3 to force-purge anything poisoned under v2 by the bug fixed
+// Bumped to v4 to force-purge anything poisoned under v3 by the bug fixed
 // below — bumping the name is what actually evicts old entries; without it
 // a bad cached response for an existing user just sits there forever even
 // after this file changes, since only entries under a NEW cache name get a
 // fresh start (see the `activate` handler).
-const CACHE_NAME = "saints-technet-v3";
+const CACHE_NAME = "saints-technet-v4";
 
 // ── Install ───────────────────────────────────────────────────────────────
 self.addEventListener("install", (event) => {
@@ -100,6 +100,31 @@ self.addEventListener("fetch", (event) => {
           return Response.error();
         })
     );
+    return;
+  }
+
+  // 4. Cache-first below is only ever safe for THIS origin's genuinely
+  //    static, content-hashed assets (_next/static chunks, icons, fonts).
+  //    As written until now, nothing stopped it from also catching
+  //    cross-origin requests — Clerk's own session/auth check calls,
+  //    analytics scripts, Paystack, Sanity — or same-origin /api/ routes,
+  //    which are never content-hashed and change on every request by
+  //    design. That's the same trap as #1 and #3 above, just one layer
+  //    deeper: any GET that returns 200 gets cached and replayed forever
+  //    regardless of whether the thing behind it changes. For a static
+  //    asset that's harmless. For Clerk checking whether the session is
+  //    still valid, it means the browser can get stuck looking at a
+  //    frozen snapshot of auth state indefinitely — most visible right
+  //    after returning from an external redirect (like Paystack's
+  //    checkout), which is exactly when Clerk's JS re-initializes and
+  //    asks again. Same for /api/customer/* routes: the server-side fixes
+  //    elsewhere in this codebase that make sure THOSE stay fresh are
+  //    wasted if the browser never actually asks again to find out.
+  const isCacheableStaticAsset =
+    url.origin === self.location.origin && !url.pathname.startsWith("/api/");
+
+  if (!isCacheableStaticAsset) {
+    event.respondWith(fetch(event.request));
     return;
   }
 
