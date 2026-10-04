@@ -1,7 +1,7 @@
 "use server";
 
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { client } from "@/sanity/lib/client";
+import { client, writeClient } from "@/sanity/lib/client";
 import { PRODUCTS_BY_IDS_QUERY } from "@/lib/sanity/queries/products";
 import { ORDER_BY_PAYSTACK_REFERENCE_DETAIL_QUERY } from "@/lib/sanity/queries/orders";
 import { getOrCreatePaystackCustomer } from "@/lib/actions/customer";
@@ -31,6 +31,7 @@ interface CheckoutResult {
 
 interface ShippingAddress {
   name: string;
+  phone?: string;
   line1: string;
   line2: string;
   city: string;
@@ -149,6 +150,13 @@ export async function createCheckoutSession(
         amount: totalKobo,
         currency: "NGN",
         callback_url: `${baseUrl}/checkout/success`,
+        // Previously only email was sent — Paystack had nothing to
+        // populate name/phone on its own Customer record with, which is
+        // exactly why it showed "Customer Name Unavailable" with no
+        // phone even though the checkout form collects both.
+        first_name: user.firstName || undefined,
+        last_name: user.lastName || undefined,
+        phone: shippingAddress.phone || undefined,
         metadata,
       }),
     });
@@ -189,12 +197,18 @@ export async function getCheckoutSession(reference: string) {
     //    landed the moment the browser reaches this page after redirect,
     //    so retry briefly (webhooks here have never taken more than a
     //    couple of seconds in testing) before falling back.
-    let order = await client.fetch(ORDER_BY_PAYSTACK_REFERENCE_DETAIL_QUERY, {
+    // writeClient (useCdn: false) — not the cached `client` — because this
+    // runs moments after the webhook writes the order, and Sanity's CDN
+    // isn't guaranteed to have caught up yet. Using the cached client here
+    // was the actual bug: the order was really there, this lookup just
+    // couldn't see it yet, no matter how many times it retried the same
+    // stale cache.
+    let order = await writeClient.fetch(ORDER_BY_PAYSTACK_REFERENCE_DETAIL_QUERY, {
       paystackReference: reference,
     });
     for (let attempt = 0; !order && attempt < 3; attempt++) {
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      order = await client.fetch(ORDER_BY_PAYSTACK_REFERENCE_DETAIL_QUERY, {
+      order = await writeClient.fetch(ORDER_BY_PAYSTACK_REFERENCE_DETAIL_QUERY, {
         paystackReference: reference,
       });
     }
