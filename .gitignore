@@ -42,4 +42,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-.vercel
+# build output and generated runtime files (don't commit these)
+/dist
+/.sanity
