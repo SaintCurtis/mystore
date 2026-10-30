@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "next-sanity";
+import { requireAdmin } from "@/lib/admin-auth";
 
 const serverClient = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
@@ -9,7 +10,10 @@ const serverClient = createClient({
   token: process.env.SANITY_API_READ_TOKEN,
 });
 
-export async function GET() {
+export async function GET(req: Request) {
+  const denied = requireAdmin(req);
+  if (denied) return denied;
+
   try {
     const sessions = await serverClient.fetch(`
       *[_type == "negotiationSession"]

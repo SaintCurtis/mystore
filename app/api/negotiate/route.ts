@@ -67,7 +67,11 @@ async function sendFloorAlert(params: {
   try {
     await fetch(`${BASE_URL}/push/send`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        // /push/send now requires this (see lib/admin-auth.ts)
+        Authorization: `Bearer ${process.env.CRON_SECRET ?? ""}`,
+      },
       body: JSON.stringify({
         title: `🔔 Close bid — ${productName}`,
         body: `Customer offered ₦${customerBid.toLocaleString()} (floor: ₦${floorPrice.toLocaleString()})`,

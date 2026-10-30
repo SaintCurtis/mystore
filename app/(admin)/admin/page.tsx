@@ -7,6 +7,7 @@ export const revalidate = 0;
 
 
 import { client } from "@/sanity/lib/client";
+import { isAdminSession } from "@/lib/admin-auth";
 import { groq } from "next-sanity";
 import Link from "next/link";
 import {
@@ -65,6 +66,9 @@ function StatusBadge({ status }: { status: string }) {
 // ── Page ──────────────────────────────────────────────────────────────────
 
 export default async function AdminDashboardPage() {
+  // Don't query or send anything until the PIN session is verified on the server.
+  if (!(await isAdminSession())) return null;
+
   const [stats, recentOrders, lowStock] = await Promise.all([
     client.fetch(ADMIN_STATS_QUERY),
     client.fetch(ADMIN_RECENT_ORDERS_QUERY),

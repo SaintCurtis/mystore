@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Package,
@@ -13,6 +13,8 @@ import {
   HandshakeIcon,
   Lock,
   Loader2,
+  Receipt,
+  LogOut,
 } from "lucide-react";
 import { Providers } from "@/components/providers/Providers";
 import { WishlistStoreProvider } from "@/lib/store/wishlist-store-provider";
@@ -21,6 +23,7 @@ import { CartStoreProvider } from "@/lib/store/cart-store-provider";
 import { CurrencyProvider } from "@/lib/store/currency-store-provider";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Toaster } from "@/components/ui/sonner";
 
 // ── Nav items ────────────────────────────────────────────────────────────
 const navItems = [
@@ -28,11 +31,14 @@ const navItems = [
   { label: "Inventory",    href: "/admin/inventory",     icon: Package         },
   { label: "Orders",       href: "/admin/orders",        icon: ShoppingCart    },
   { label: "Negotiations", href: "/admin/negotiations",  icon: HandshakeIcon   },
+  { label: "Receipts",     href: "/admin/receipt_issuance", icon: Receipt      },
 ];
 
 // ── PIN Gate ─────────────────────────────────────────────────────────────
-const SESSION_KEY = "admin_authed";
-const SESSION_TTL = 1000 * 60 * 60 * 8; // 8 hours
+// The session now lives in a signed httpOnly cookie that the server checks
+// (see lib/admin-auth.ts). This old browser-side flag is only removed, never
+// trusted, so a leftover value from before can't be used to skip the PIN.
+const LEGACY_SESSION_KEY = "admin_authed";
 
 function PinGate({ onAuth }: { onAuth: () => void }) {
   const [digits, setDigits] = useState<string[]>(["", "", "", "", "", ""]);
@@ -83,10 +89,18 @@ function PinGate({ onAuth }: { onAuth: () => void }) {
         body: JSON.stringify({ pin }),
       });
       if (res.ok) {
-        sessionStorage.setItem(SESSION_KEY, Date.now().toString());
         onAuth();
       } else {
-        setError("Incorrect PIN. Try again.");
+        let message = "Incorrect PIN. Try again.";
+        if (res.status === 429) {
+          try {
+            const data = await res.json();
+            if (typeof data?.error === "string") message = data.error;
+          } catch {
+            message = "Too many attempts. Please wait a few minutes.";
+          }
+        }
+        setError(message);
         setDigits(["", "", "", "", "", ""]);
         setTimeout(() => inputRefs.current[0]?.focus(), 50);
       }
@@ -164,9 +178,11 @@ function PinGate({ onAuth }: { onAuth: () => void }) {
 function AdminSidebar({
   sidebarOpen,
   setSidebarOpen,
+  onSignOut,
 }: {
   sidebarOpen: boolean;
   setSidebarOpen: (v: boolean) => void;
+  onSignOut: () => void;
 }) {
   const pathname = usePathname();
 
@@ -226,6 +242,14 @@ function AdminSidebar({
           >
             ← Back to Store
           </Link>
+          <button
+            type="button"
+            onClick={onSignOut}
+            className="flex w-full items-center gap-2 px-3 text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+          >
+            <LogOut className="h-4 w-4" />
+            Sign out
+          </button>
         </div>
       </div>
     </aside>
@@ -234,18 +258,48 @@ function AdminSidebar({
 
 // ── Root layout ───────────────────────────────────────────────────────────
 function AdminLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Ask the server whether this browser holds a valid admin session cookie.
   useEffect(() => {
-    const ts = sessionStorage.getItem(SESSION_KEY);
-    if (ts && Date.now() - parseInt(ts) < SESSION_TTL) {
-      setAuthed(true);
-    } else {
-      sessionStorage.removeItem(SESSION_KEY);
-      setAuthed(false);
+    try {
+      sessionStorage.removeItem(LEGACY_SESSION_KEY);
+    } catch {
+      /* storage unavailable: nothing to clean up */
     }
+
+    let cancelled = false;
+    fetch("/api/admin/session", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : { authed: false }))
+      .then((data) => {
+        if (!cancelled) setAuthed(Boolean(data?.authed));
+      })
+      .catch(() => {
+        if (!cancelled) setAuthed(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  // Any admin API call that comes back 401 (for example the 8-hour session
+  // ran out while a page was open) fires this event and we show the PIN gate.
+  useEffect(() => {
+    const onUnauthorized = () => setAuthed(false);
+    window.addEventListener("admin:unauthorized", onUnauthorized);
+    return () => window.removeEventListener("admin:unauthorized", onUnauthorized);
+  }, []);
+
+  async function signOut() {
+    try {
+      await fetch("/api/admin/session", { method: "DELETE" });
+    } catch {
+      /* the cookie expires on its own either way */
+    }
+    setAuthed(false);
+  }
 
   // Still checking session
   if (authed === null) {
@@ -258,7 +312,16 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
 
   // ── Not authed — show PIN gate with NO providers (prevents Sanity auth redirect)
   if (!authed) {
-    return <PinGate onAuth={() => setAuthed(true)} />;
+    return (
+      <PinGate
+        onAuth={() => {
+          setAuthed(true);
+          // Server-rendered pages hold back their data until the PIN session
+          // exists, so fetch them again now that it does.
+          router.refresh();
+        }}
+      />
+    );
   }
 
   // ── Authed — wrap with Providers so Sanity SDK hooks work
@@ -296,11 +359,13 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
                 <AdminSidebar
                   sidebarOpen={sidebarOpen}
                   setSidebarOpen={setSidebarOpen}
+                  onSignOut={signOut}
                 />
 
                 <main className="flex-1 pt-14 lg:ml-64 lg:pt-0">
                   <div className="p-4 lg:p-8">{children}</div>
                 </main>
+                <Toaster position="bottom-center" />
               </div>
             </CurrencyProvider>
           </CompareStoreProvider>

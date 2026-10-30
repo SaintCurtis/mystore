@@ -15,7 +15,7 @@
  *   - in development, falls back to localhost, so callback URLs (Paystack,
  *     negotiate, referral) round-trip correctly on your own machine
  */
-const PRODUCTION_FALLBACK = "https://mystore-drab-nine.vercel.app";
+const PRODUCTION_FALLBACK = "https://www.buyfromsaint.com";
 
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ??

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "next-sanity";
 import webpush from "web-push";
+import { requireAdminOrInternal } from "@/lib/admin-auth";
 
 const serverClient = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
@@ -17,6 +18,11 @@ webpush.setVapidDetails(
 );
 
 export async function POST(req: NextRequest) {
+  // Only you (admin cookie) or our own server code (Bearer CRON_SECRET) may
+  // push to every subscriber; otherwise anyone could send fake alerts.
+  const denied = requireAdminOrInternal(req);
+  if (denied) return denied;
+
   try {
     const { title, body, url } = await req.json();
 

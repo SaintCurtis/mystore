@@ -1,5 +1,6 @@
 import { generateText, gateway } from "ai";
 import { client } from "@/sanity/lib/client";
+import { requireAdmin } from "@/lib/admin-auth";
 import {
   ORDERS_LAST_7_DAYS_QUERY,
   ORDER_STATUS_DISTRIBUTION_QUERY,
@@ -64,7 +65,10 @@ interface RevenuePeriod {
   previousOrderCount: number;
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const denied = requireAdmin(req);
+  if (denied) return denied;
+
   try {
     // Calculate date ranges
     const now = new Date();

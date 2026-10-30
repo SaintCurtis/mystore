@@ -5,6 +5,12 @@ import { SITE_URL } from "@/lib/constants/site";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// Same verified sender the rest of the app uses. "onboarding@resend.dev" is
+// Resend's sandbox address and can only deliver to the Resend account owner,
+// so customers never received their quotation.
+const RESEND_FROM =
+  process.env.RESEND_FROM_EMAIL || "The Saint's TechNet <notifications@buyfromsaint.com>";
+
 // Inline formatter — avoids any module resolution issues with @/lib/utils
 function fmt(amount: number): string {
   return new Intl.NumberFormat("en-NG", {
@@ -173,7 +179,7 @@ export async function POST(req: NextRequest) {
 </html>`;
 
     await resend.emails.send({
-      from: "The Saint's TechNet <onboarding@resend.dev>",
+      from: RESEND_FROM,
       to: email,
       subject: `Quotation ${quote.quoteNumber} — ${fmt(quote.grandTotal)} — The Saint's TechNet`,
       html,

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { RefreshCw, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { isAdminSession } from "@/lib/admin-auth";
 
 const serverClient = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
@@ -80,6 +81,9 @@ function statusBadge(status: string, alert: boolean) {
 export const revalidate = 0; // Always fresh
 
 export default async function NegotiationsPage() {
+  // Floor prices and customer emails: only after the PIN session is verified on the server.
+  if (!(await isAdminSession())) return null;
+
   const sessions = await getSessions();
 
   const needsAttention = sessions.filter((s) => s.closeBidAlert && s.status === "ai_active");
